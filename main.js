@@ -120,13 +120,47 @@ function updateConfirmButton() {
   confirmBtn.disabled = !(selectedDate && selectedTime);
 }
 
-demoForm.addEventListener('submit', (e) => {
+// ── Replace this URL with your Formspree endpoint ──
+// 1. Sign up free at formspree.io
+// 2. Create a new form → set email to demos@useverdevision.com
+// 3. Paste your endpoint here (e.g. https://formspree.io/f/xxxxxxxx)
+const FORMSPREE_URL = 'https://formspree.io/f/xnjlkzde';
+
+demoForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const name  = document.getElementById('form-name').value.trim();
+  const email = document.getElementById('form-email').value.trim();
+  const note  = document.getElementById('form-note').value.trim();
   const label = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  confirmDetails.textContent = `${name}, we've got you down for ${label} at ${selectedTime}.`;
-  bookingCard.style.display = 'none';
-  bookingConf.classList.add('visible');
+
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        requested_date: label,
+        requested_time: selectedTime,
+        note: note || '—',
+        _subject: `Demo request from ${name} — ${label} at ${selectedTime}`,
+      }),
+    });
+
+    if (!res.ok) throw new Error('submission failed');
+
+    confirmDetails.textContent = `${name}, we've got you down for ${label} at ${selectedTime}.`;
+    bookingCard.style.display = 'none';
+    bookingConf.classList.add('visible');
+  } catch {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Confirm Booking';
+    alert('Something went wrong — please try again or email us at demos@useverdevision.com');
+  }
 });
 
 calPrev.addEventListener('click', () => {
