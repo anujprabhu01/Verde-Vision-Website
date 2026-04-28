@@ -1,3 +1,41 @@
+// ── Before/After slider ──
+const baSlider = document.getElementById('ba-slider');
+const baBefore = document.getElementById('ba-before');
+const baHandle = document.getElementById('ba-handle');
+
+if (baSlider) {
+  let dragging = false;
+
+  function setPosition(clientX) {
+    const rect = baSlider.getBoundingClientRect();
+    let pct = ((clientX - rect.left) / rect.width) * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    baBefore.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+    baHandle.style.left = `${pct}%`;
+  }
+
+  const onDown = (e) => {
+    dragging = true;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    setPosition(x);
+    e.preventDefault();
+  };
+  const onMove = (e) => {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    setPosition(x);
+  };
+  const onUp = () => { dragging = false; };
+
+  baSlider.addEventListener('mousedown', onDown);
+  baSlider.addEventListener('touchstart', onDown, { passive: false });
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+}
+
+
 // ── Active nav link on scroll ──
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('nav a.nav-link');

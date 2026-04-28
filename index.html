@@ -25,24 +25,104 @@
 
   <!-- HERO -->
   <section class="hero">
-    <img src="verde_vision_logo.png" alt="VerdeVision" class="hero-logo-img" />
+    <div class="hero-grid">
+      <div class="hero-content">
+        <h1>See Your Yard<br /><em>Before You Build It.</em></h1>
 
-    <h1>Reimagine Your Outdoor Space — <em>Before You Plant a Thing</em></h1>
+        <p>
+          Design, visualize, and price outdoor spaces in real time with AR —
+          all before breaking ground.
+        </p>
 
-    <p>
-      Place virtual plants in your actual yard at full scale, walk around them in real time,
-      and design with total confidence — all before breaking ground.
-    </p>
+        <div class="hero-actions">
+          <a href="#booking" class="btn-primary">Book a Demo &rarr;</a>
+          <a href="#demo-video" class="btn-secondary">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            Watch It in Action
+          </a>
+        </div>
 
-    <div class="hero-actions">
-      <a href="#booking" class="btn-primary">Book a Demo</a>
-      <a href="#features" class="btn-secondary">See What It Does</a>
+        <div class="trusted-by">
+          <p class="trusted-label">Trusted by landscape professionals</p>
+          <div class="logo-row">
+            <span class="trust-logo">GREENSCAPE</span>
+            <span class="trust-logo">SUMMIT</span>
+            <span class="trust-logo">ELEVATE</span>
+            <span class="trust-logo">OUTDOOR</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <!-- SVG defs: lens-shaped clip (hard) + soft feathered mask -->
+        <svg class="lens-clip-defs" width="0" height="0" aria-hidden="true">
+          <defs>
+            <clipPath id="lens-clip" clipPathUnits="objectBoundingBox">
+              <path d="M 0.06,0.28
+                       C 0.08,0.14 0.18,0.06 0.32,0.07
+                       C 0.42,0.08 0.58,0.08 0.68,0.07
+                       C 0.82,0.06 0.92,0.14 0.94,0.28
+                       C 0.98,0.55 0.95,0.80 0.86,0.94
+                       C 0.78,1.00 0.66,0.98 0.59,0.88
+                       C 0.55,0.82 0.50,0.80 0.45,0.82
+                       C 0.41,0.84 0.41,0.86 0.41,0.88
+                       C 0.34,0.98 0.22,1.00 0.14,0.94
+                       C 0.05,0.80 0.02,0.55 0.06,0.28 Z" />
+            </clipPath>
+
+            <filter id="lens-feather" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation="0.025" />
+            </filter>
+
+            <mask id="lens-mask" maskContentUnits="objectBoundingBox">
+              <path d="M 0.10,0.32
+                       C 0.12,0.18 0.22,0.12 0.34,0.13
+                       C 0.42,0.14 0.58,0.14 0.66,0.13
+                       C 0.78,0.12 0.88,0.18 0.90,0.32
+                       C 0.94,0.55 0.91,0.74 0.84,0.86
+                       C 0.76,0.92 0.66,0.90 0.59,0.84
+                       C 0.55,0.80 0.50,0.78 0.45,0.80
+                       C 0.41,0.82 0.41,0.84 0.41,0.84
+                       C 0.34,0.90 0.24,0.92 0.16,0.86
+                       C 0.09,0.74 0.06,0.55 0.10,0.32 Z"
+                    fill="white" filter="url(#lens-feather)" />
+            </mask>
+          </defs>
+        </svg>
+
+        <div class="headset">
+          <div class="ba-slider" id="ba-slider">
+            <div class="ba-stage">
+              <div class="ba-img ba-after">
+                <span class="ba-label ba-label-after">AFTER</span>
+              </div>
+              <div class="ba-img ba-before" id="ba-before">
+                <span class="ba-label ba-label-before">BEFORE</span>
+              </div>
+            </div>
+            <div class="ba-handle" id="ba-handle">
+              <div class="ba-handle-knob">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/><polyline points="9 18 15 12 9 6" transform="translate(6 0)"/></svg>
+              </div>
+            </div>
+          </div>
+          <img class="headset-img" src="AppleVisionPro.png" alt="Apple Vision Pro" />
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="hero-visual">
-      <video autoplay muted loop playsinline>
-        <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
-      </video>
+  <!-- DEMO VIDEO -->
+  <section class="demo-video-section" id="demo-video">
+    <div class="container">
+      <div class="section-label">See It In Action</div>
+      <h2>Watch VerdeVision come to life</h2>
+      <p class="section-intro">A live walkthrough of designing a real yard in spatial 3D.</p>
+      <div class="demo-video-frame">
+        <video autoplay muted loop playsinline>
+          <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
+        </video>
+      </div>
     </div>
   </section>
 
@@ -58,37 +138,30 @@
 
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">🌿</div>
           <h3>See It Before You Build It</h3>
           <p>Drop virtual plants into your real yard through Apple Vision Pro. Walk around them. Look up at them. Judge exactly how that agave will fill the corner — before you buy it.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🎛️</div>
           <h3>Place, Customize, and Refine</h3>
           <p>Move, rotate, and resize plants with intuitive spatial controls. Choose from a curated desert plant catalog with multiple container sizes per species.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📍</div>
           <h3>Designs That Persist</h3>
           <p>Your placements are saved exactly where you left them using Apple's spatial anchoring. Close the app, come back tomorrow — your design is right there.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📂</div>
           <h3>Built-In Project Management</h3>
           <p>Save unlimited projects for different yards or clients. Undo freely, switch between designs, and compare options without losing any work.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📄</div>
           <h3>Professional PDF Estimates</h3>
           <p>Turn your design into a quote instantly. VerdeVision tracks every plant and generates a polished PDF estimate — ideal for landscapers and homeowners alike.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🌙</div>
           <h3>Day and Night Mode</h3>
           <p>See how your landscape looks at different times of day. Preview lighting changes and mood before committing to any design decision.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🤝</div>
           <h3>Client Presentation View</h3>
           <p>Let clients walk through their future landscape instead of squinting at a 2D rendering. An immersive walkthrough that closes the deal.</p>
         </div>
@@ -108,22 +181,18 @@
 
       <div class="audience-grid">
         <div class="audience-card">
-          <div class="icon">🏡</div>
           <h3>Homeowners</h3>
           <p>Plan a yard renovation and see exactly what you're getting — before spending a dollar on plants or labor.</p>
         </div>
         <div class="audience-card">
-          <div class="icon">✏️</div>
           <h3>Landscape Designers</h3>
           <p>A powerful presentation and quoting tool that makes your proposals impossible to say no to.</p>
         </div>
         <div class="audience-card">
-          <div class="icon">🌱</div>
           <h3>Nurseries & Garden Centers</h3>
           <p>Help customers visualize how plants will look at home — turning browsers into buyers.</p>
         </div>
         <div class="audience-card">
-          <div class="icon">🏗️</div>
           <h3>Property Developers</h3>
           <p>Mock up communal green spaces at true scale before any shovels hit the ground.</p>
         </div>
