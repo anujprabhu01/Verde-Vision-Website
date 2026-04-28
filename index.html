@@ -3,26 +3,245 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verde Vision</title>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #0d1f0d;
-      font-family: sans-serif;
-      color: #c8f0c8;
-    }
-    h1 { font-size: 2.5rem; letter-spacing: 0.05em; }
-    p  { color: #7ab87a; text-align: center; }
-  </style>
+  <title>VerdeVision — Reimagine Your Outdoor Space</title>
+  <link rel="icon" type="image/png" href="verde_vision_logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div>
-    <h1>Verde Vision</h1>
-    <p>Coming soon.</p>
-  </div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">VERDE<span>VISION</span></a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#who" class="nav-link">Who It's For</a>
+      <a href="#why" class="nav-link">Why Vision Pro</a>
+      <a href="#booking" class="nav-cta">Book a Demo</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <img src="verde_vision_logo.png" alt="VerdeVision" class="hero-logo-img" />
+
+    <h1>Reimagine Your Outdoor Space — <em>Before You Plant a Thing</em></h1>
+
+    <p>
+      Place virtual plants in your actual yard at full scale, walk around them in real time,
+      and design with total confidence — all before breaking ground.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#booking" class="btn-primary">Book a Demo</a>
+      <a href="#features" class="btn-secondary">See What It Does</a>
+    </div>
+
+    <div class="hero-visual">
+      <video autoplay muted loop playsinline>
+        <source src="DemoRecording.mov" type="video/mp4" />
+      </video>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-label">Features</div>
+      <h2>Everything you need to design with confidence</h2>
+      <p class="section-intro">
+        VerdeVision brings your landscape design to life in spatial 3D — not on a flat screen,
+        but standing right in your yard.
+      </p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌿</div>
+          <h3>See It Before You Build It</h3>
+          <p>Drop virtual plants into your real yard through Apple Vision Pro. Walk around them. Look up at them. Judge exactly how that agave will fill the corner — before you buy it.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎛️</div>
+          <h3>Place, Customize, and Refine</h3>
+          <p>Move, rotate, and resize plants with intuitive spatial controls. Choose from a curated desert plant catalog with multiple container sizes per species.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📍</div>
+          <h3>Designs That Persist</h3>
+          <p>Your placements are saved exactly where you left them using Apple's spatial anchoring. Close the app, come back tomorrow — your design is right there.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📂</div>
+          <h3>Built-In Project Management</h3>
+          <p>Save unlimited projects for different yards or clients. Undo freely, switch between designs, and compare options without losing any work.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📄</div>
+          <h3>Professional PDF Estimates</h3>
+          <p>Turn your design into a quote instantly. VerdeVision tracks every plant and generates a polished PDF estimate — ideal for landscapers and homeowners alike.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌙</div>
+          <h3>Day and Night Mode</h3>
+          <p>See how your landscape looks at different times of day. Preview lighting changes and mood before committing to any design decision.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤝</div>
+          <h3>Client Presentation View</h3>
+          <p>Let clients walk through their future landscape instead of squinting at a 2D rendering. An immersive walkthrough that closes the deal.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section id="who">
+    <div class="container">
+      <div class="section-label">Who It's For</div>
+      <h2>Built for everyone who works with outdoor space</h2>
+      <p class="section-intro">
+        Whether you're redesigning your own backyard or presenting a $50k project to a client,
+        VerdeVision changes how you see the work.
+      </p>
+
+      <div class="audience-grid">
+        <div class="audience-card">
+          <div class="icon">🏡</div>
+          <h3>Homeowners</h3>
+          <p>Plan a yard renovation and see exactly what you're getting — before spending a dollar on plants or labor.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">✏️</div>
+          <h3>Landscape Designers</h3>
+          <p>A powerful presentation and quoting tool that makes your proposals impossible to say no to.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">🌱</div>
+          <h3>Nurseries & Garden Centers</h3>
+          <p>Help customers visualize how plants will look at home — turning browsers into buyers.</p>
+        </div>
+        <div class="audience-card">
+          <div class="icon">🏗️</div>
+          <h3>Property Developers</h3>
+          <p>Mock up communal green spaces at true scale before any shovels hit the ground.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY VISION PRO -->
+  <section class="why" id="why">
+    <div class="why-content container" style="padding: 0;">
+      <div class="section-label">Why Apple Vision Pro</div>
+      <h2>Design spatially, judge spatially</h2>
+      <p>
+        Traditional landscape design software shows you a flat picture on a screen.
+        VerdeVision puts the design <strong style="color: var(--text);">in your space</strong>, at full scale.
+      </p>
+      <p>
+        Walk around a virtual Mexican Fence Post Cactus. Look up to judge its height. Step back and
+        see how it frames the patio. You'll make better decisions faster — because spatially, it almost is real.
+      </p>
+    </div>
+    <div class="why-visual">
+      <div class="why-visual-text">
+        <span>🥽</span>
+        Demo screenshot
+      </div>
+    </div>
+  </section>
+
+  <!-- COMING SOON -->
+  <section class="coming-soon">
+    <div class="container">
+      <div class="section-label">Coming Soon</div>
+      <h2>The roadmap</h2>
+      <ul>
+        <li>Expanded plant catalog with more species, varieties, and ornamental options</li>
+        <li>Multi-device collaboration — designers and clients in the same space, experiencing the same design together</li>
+        <li>Additional design tools for hardscaping, lighting, and seasonal planning</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- BOOK A DEMO -->
+  <section class="booking" id="booking">
+    <div class="container">
+      <div class="section-label">Book a Demo</div>
+      <h2>See VerdeVision in action</h2>
+      <p class="section-intro">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
+
+      <div class="booking-card" id="booking-card">
+
+        <!-- Calendar -->
+        <div class="booking-col">
+          <p class="booking-col-label">Select a date</p>
+          <div class="calendar">
+            <div class="cal-header">
+              <button class="cal-nav" id="cal-prev">&#8592;</button>
+              <span class="cal-month-label" id="cal-month-label"></span>
+              <button class="cal-nav" id="cal-next">&#8594;</button>
+            </div>
+            <div class="cal-weekdays">
+              <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+            </div>
+            <div class="cal-days" id="cal-days"></div>
+          </div>
+        </div>
+
+        <!-- Time slots -->
+        <div class="booking-col" id="times-col">
+          <p class="booking-col-label">Select a time <span id="selected-date-label"></span></p>
+          <div class="time-slots" id="time-slots">
+            <p class="booking-placeholder">Choose a date to see available times.</p>
+          </div>
+        </div>
+
+        <!-- Contact form -->
+        <div class="booking-col" id="form-col">
+          <p class="booking-col-label">Your details</p>
+          <form class="demo-form" id="demo-form">
+            <input type="text" id="form-name" placeholder="Full name" required />
+            <input type="email" id="form-email" placeholder="Email address" required />
+            <textarea id="form-note" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
+            <button type="submit" class="btn-primary" id="confirm-btn" disabled>Confirm Booking</button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Confirmation -->
+      <div class="booking-confirmation" id="booking-confirmation">
+        <div class="confirm-icon">&#10003;</div>
+        <h3>You're booked!</h3>
+        <p id="confirm-details"></p>
+        <p class="confirm-sub">We'll be in touch shortly with everything you need.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container">
+      <h2>Your yard won't design itself.</h2>
+      <p>Ready to see your landscape before you build it? Book a live demo and experience VerdeVision on Apple Vision Pro.</p>
+      <div class="cta-actions">
+        <a href="#booking" class="btn-primary">Book a Demo</a>
+        <a href="mailto:jasonjlee2004@gmail.com" class="btn-secondary">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Verde<span>Vision</span></div>
+    <div>Built for Apple Vision Pro</div>
+    <div>&copy; 2026 VerdeVision. All rights reserved.</div>
+  </footer>
+
+  <script src="main.js"></script>
 </body>
 </html>
