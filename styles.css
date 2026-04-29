@@ -64,7 +64,7 @@ nav a.nav-link:hover { color: var(--white); }
 .hero {
   min-height: 100vh;
   display: flex; align-items: center;
-  padding: 8rem 5vw 4rem;
+  padding: 8rem 0 4rem 5vw;
   position: relative;
   overflow: hidden;
 }
@@ -81,10 +81,10 @@ nav a.nav-link:hover { color: var(--white); }
 
 .hero-grid {
   width: 100%;
-  max-width: 1300px; margin: 0 auto;
+  max-width: none; margin: 0;
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: 4rem;
+  grid-template-columns: 1.2fr 1.8fr;
+  gap: 0;
   align-items: center;
   position: relative; z-index: 1;
 }
@@ -210,6 +210,7 @@ h1 em {
 .headset {
   position: relative;
   width: 100%;
+  transform: translateX(2rem);
   filter: drop-shadow(0 40px 60px rgba(0,0,0,0.55))
           drop-shadow(0 0 80px rgba(62,207,186,0.15));
 }
@@ -231,8 +232,8 @@ h1 em {
 /* ── Before/After slider — clipped to lens shape ── */
 .ba-slider {
   position: absolute;
-  top: 17%; bottom: 24%;
-  left: 12%; right: 12%;
+  top: 26%; bottom: 32%;
+  left: 21%; right: 21%;
   clip-path: url(#lens-clip);
   -webkit-clip-path: url(#lens-clip);
   cursor: ew-resize;
