@@ -142,3 +142,20 @@ calNext.addEventListener('click', () => {
 });
 
 init();
+
+// ── Demo video mute toggle ──
+const demoVideo = document.getElementById('demo-video');
+const demoMuteBtn = document.getElementById('demo-video-mute');
+
+if (demoVideo && demoMuteBtn) {
+  demoMuteBtn.addEventListener('click', () => {
+    demoVideo.muted = !demoVideo.muted;
+    const iconName = demoVideo.muted ? 'volume-x' : 'volume-2';
+    demoMuteBtn.setAttribute('aria-label', demoVideo.muted ? 'Unmute video' : 'Mute video');
+    demoMuteBtn.innerHTML = `<i data-lucide="${iconName}"></i>`;
+    if (window.lucide) lucide.createIcons();
+  });
+}
+
+// ── Lucide icons ──
+if (window.lucide) lucide.createIcons();

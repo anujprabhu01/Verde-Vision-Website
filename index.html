@@ -14,35 +14,81 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="nav-logo">VERDE<span>VISION</span></a>
+    <a href="#" class="nav-logo">
+      <img src="verde_vision_logo.png" alt="" class="nav-logo-img" />
+      <span class="nav-logo-text">VERDE VISION</span>
+    </a>
     <div class="nav-links">
+      <a href="#what-is" class="nav-link">What Is It</a>
       <a href="#features" class="nav-link">Features</a>
       <a href="#who" class="nav-link">Who It's For</a>
       <a href="#why" class="nav-link">Why Vision Pro</a>
+      <a href="#" class="nav-link">Pricing</a>
+      <a href="#" class="nav-link">Resources</a>
       <a href="#booking" class="nav-cta">Book a Demo</a>
     </div>
   </nav>
 
   <!-- HERO -->
   <section class="hero">
-    <img src="verde_vision_logo.png" alt="VerdeVision" class="hero-logo-img" />
+    <div class="hero-inner">
 
-    <h1>Reimagine Your Outdoor Space — <em>Before You Plant a Thing</em></h1>
+      <div class="hero-content">
+        <div class="section-label hero-eyebrow hero-anim hero-anim-1">Spatial landscape design</div>
 
-    <p>
-      Place virtual plants in your actual yard at full scale, walk around them in real time,
-      and design with total confidence — all before breaking ground.
-    </p>
+        <h1>
+          <span class="hero-line hero-anim hero-anim-2">See the yard</span><br/>
+          <span class="accent hero-line hero-anim hero-anim-3">before you build it.</span>
+        </h1>
 
-    <div class="hero-actions">
-      <a href="#booking" class="btn-primary">Book a Demo</a>
-      <a href="#features" class="btn-secondary">See What It Does</a>
+        <p class="hero-anim hero-anim-4">Design, visualize, and price outdoor spaces in real time with AR — all before breaking ground.</p>
+
+        <div class="hero-actions hero-anim hero-anim-5">
+          <a href="#booking" class="btn-primary">
+            Book a Demo
+            <i data-lucide="arrow-right"></i>
+          </a>
+          <a href="#what-is" class="btn-secondary">
+            <i data-lucide="play"></i>
+            Watch It In Action
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <img src="vision-pro-hero.png" alt="Apple Vision Pro showing a before-and-after view of a desert landscape design" />
+      </div>
+
     </div>
 
-    <div class="hero-visual">
-      <video autoplay muted loop playsinline>
-        <source src="DemoRecording.mov" type="video/mp4" />
-      </video>
+    <div class="hero-tagline">
+      <p>Designed for landscape pros — Built to help you win</p>
+      <a href="#features" class="hero-scroll" aria-label="Scroll to features">
+        <i data-lucide="chevron-down"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- WHAT IS VERDE VISION -->
+  <section class="what-is" id="what-is">
+    <div class="container">
+      <div class="section-label">What Is Verde Vision?</div>
+      <h2>Landscape design, in your actual yard, at real scale.</h2>
+      <p class="section-intro">
+        VerdeVision is a spatial design app for Apple Vision Pro. Drop life-size virtual plants
+        into your real yard, walk around them, and judge the design — all before you buy a
+        single thing. Here's a quick look:
+      </p>
+
+      <div class="demo-video-wrap">
+        <video class="demo-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
+          <source src="DemoRecording.mov" type="video/mp4" />
+          Your browser doesn't support embedded video.
+        </video>
+        <button class="demo-video-mute" id="demo-video-mute" aria-label="Unmute video">
+          <i data-lucide="volume-x"></i>
+        </button>
+      </div>
     </div>
   </section>
 
@@ -58,37 +104,37 @@
 
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">🌿</div>
+          <div class="feature-icon"><i data-lucide="leaf"></i></div>
           <h3>See It Before You Build It</h3>
           <p>Drop virtual plants into your real yard through Apple Vision Pro. Walk around them. Look up at them. Judge exactly how that agave will fill the corner — before you buy it.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🎛️</div>
+          <div class="feature-icon"><i data-lucide="sliders-horizontal"></i></div>
           <h3>Place, Customize, and Refine</h3>
           <p>Move, rotate, and resize plants with intuitive spatial controls. Choose from a curated desert plant catalog with multiple container sizes per species.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📍</div>
+          <div class="feature-icon"><i data-lucide="map-pin"></i></div>
           <h3>Designs That Persist</h3>
           <p>Your placements are saved exactly where you left them using Apple's spatial anchoring. Close the app, come back tomorrow — your design is right there.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📂</div>
+          <div class="feature-icon"><i data-lucide="folder-open"></i></div>
           <h3>Built-In Project Management</h3>
           <p>Save unlimited projects for different yards or clients. Undo freely, switch between designs, and compare options without losing any work.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">📄</div>
+          <div class="feature-icon"><i data-lucide="file-text"></i></div>
           <h3>Professional PDF Estimates</h3>
           <p>Turn your design into a quote instantly. VerdeVision tracks every plant and generates a polished PDF estimate — ideal for landscapers and homeowners alike.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🌙</div>
+          <div class="feature-icon"><i data-lucide="moon"></i></div>
           <h3>Day and Night Mode</h3>
           <p>See how your landscape looks at different times of day. Preview lighting changes and mood before committing to any design decision.</p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">🤝</div>
+          <div class="feature-icon"><i data-lucide="handshake"></i></div>
           <h3>Client Presentation View</h3>
           <p>Let clients walk through their future landscape instead of squinting at a 2D rendering. An immersive walkthrough that closes the deal.</p>
         </div>
@@ -108,22 +154,22 @@
 
       <div class="audience-grid">
         <div class="audience-card">
-          <div class="icon">🏡</div>
+          <div class="icon"><i data-lucide="home"></i></div>
           <h3>Homeowners</h3>
           <p>Plan a yard renovation and see exactly what you're getting — before spending a dollar on plants or labor.</p>
         </div>
         <div class="audience-card">
-          <div class="icon">✏️</div>
+          <div class="icon"><i data-lucide="pencil-ruler"></i></div>
           <h3>Landscape Designers</h3>
           <p>A powerful presentation and quoting tool that makes your proposals impossible to say no to.</p>
         </div>
         <div class="audience-card">
-          <div class="icon">🌱</div>
+          <div class="icon"><i data-lucide="sprout"></i></div>
           <h3>Nurseries & Garden Centers</h3>
           <p>Help customers visualize how plants will look at home — turning browsers into buyers.</p>
         </div>
         <div class="audience-card">
-          <div class="icon">🏗️</div>
+          <div class="icon"><i data-lucide="building-2"></i></div>
           <h3>Property Developers</h3>
           <p>Mock up communal green spaces at true scale before any shovels hit the ground.</p>
         </div>
@@ -133,12 +179,12 @@
 
   <!-- WHY VISION PRO -->
   <section class="why" id="why">
-    <div class="why-content container" style="padding: 0;">
+    <div class="why-content">
       <div class="section-label">Why Apple Vision Pro</div>
       <h2>Design spatially, judge spatially</h2>
       <p>
         Traditional landscape design software shows you a flat picture on a screen.
-        VerdeVision puts the design <strong style="color: var(--text);">in your space</strong>, at full scale.
+        VerdeVision puts the design <strong>in your space</strong>, at full scale.
       </p>
       <p>
         Walk around a virtual Mexican Fence Post Cactus. Look up to judge its height. Step back and
@@ -147,7 +193,7 @@
     </div>
     <div class="why-visual">
       <div class="why-visual-text">
-        <span>🥽</span>
+        <i data-lucide="glasses"></i>
         Demo screenshot
       </div>
     </div>
@@ -214,7 +260,7 @@
 
       <!-- Confirmation -->
       <div class="booking-confirmation" id="booking-confirmation">
-        <div class="confirm-icon">&#10003;</div>
+        <div class="confirm-icon"><i data-lucide="check"></i></div>
         <h3>You're booked!</h3>
         <p id="confirm-details"></p>
         <p class="confirm-sub">We'll be in touch shortly with everything you need.</p>
@@ -242,6 +288,7 @@
     <div>&copy; 2026 VerdeVision. All rights reserved.</div>
   </footer>
 
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
