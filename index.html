@@ -27,22 +27,25 @@
   <section class="hero">
     <div class="hero-grid">
       <div class="hero-content">
-        <h1>See Your Yard<br /><em>Before You Build It.</em></h1>
+        <h1>
+          <span class="hero-anim hero-anim-2">See Your Yard</span><br />
+          <em class="hero-anim hero-anim-3">Before You Build It.</em>
+        </h1>
 
-        <p>
+        <p class="hero-anim hero-anim-4">
           Design, visualize, and price outdoor spaces in real time with AR —
           all before breaking ground.
         </p>
 
-        <div class="hero-actions">
+        <div class="hero-actions hero-anim hero-anim-5">
           <a href="#booking" class="btn-primary">Book a Demo &rarr;</a>
-          <a href="#demo-video" class="btn-secondary">
+          <a href="#what-is" class="btn-secondary">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
             Watch It in Action
           </a>
         </div>
 
-        <div class="trusted-by">
+        <div class="trusted-by hero-anim hero-anim-5">
           <p class="trusted-label">Trusted by landscape professionals</p>
           <div class="logo-row">
             <span class="trust-logo">GREENSCAPE</span>
@@ -112,16 +115,35 @@
     </div>
   </section>
 
-  <!-- DEMO VIDEO -->
-  <section class="demo-video-section" id="demo-video">
+  <!-- WHAT IS VERDE VISION -->
+  <section class="what-is" id="what-is">
     <div class="container">
-      <div class="section-label">See It In Action</div>
-      <h2>Watch VerdeVision come to life</h2>
-      <p class="section-intro">A live walkthrough of designing a real yard in spatial 3D.</p>
-      <div class="demo-video-frame">
-        <video autoplay muted loop playsinline>
+      <div class="section-label">What Is Verde Vision?</div>
+      <h2>Landscape design, in your actual yard, at real scale.</h2>
+      <p class="section-intro">
+        VerdeVision is a spatial design app for Apple Vision Pro. Drop life-size virtual plants
+        into your real yard, walk around them, and judge the design — all before you buy a single thing.
+        Here's a quick look:
+      </p>
+
+      <div class="demo-video-wrap">
+        <video class="demo-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
           <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
+          Your browser doesn't support embedded video.
         </video>
+        <button class="demo-video-mute" id="demo-video-mute" aria-label="Unmute video">
+          <!-- muted icon (default) -->
+          <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+          <!-- unmuted icon -->
+          <svg class="icon-unmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </button>
       </div>
     </div>
   </section>

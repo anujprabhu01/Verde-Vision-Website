@@ -36,6 +36,18 @@ if (baSlider) {
 }
 
 
+// ── Demo video mute toggle ──
+const muteBtn = document.getElementById('demo-video-mute');
+const demoVideo = document.getElementById('demo-video');
+if (muteBtn && demoVideo) {
+  muteBtn.addEventListener('click', () => {
+    demoVideo.muted = !demoVideo.muted;
+    muteBtn.classList.toggle('is-unmuted', !demoVideo.muted);
+    muteBtn.setAttribute('aria-label', demoVideo.muted ? 'Unmute video' : 'Mute video');
+  });
+}
+
+
 // ── Active nav link on scroll ──
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('nav a.nav-link');
