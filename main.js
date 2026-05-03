@@ -36,6 +36,18 @@ if (baSlider) {
 }
 
 
+// ── Cursor-tracking glow for feature & audience cards ──
+document.querySelectorAll('.feature-card, .audience-card').forEach((card) => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    card.style.setProperty('--mx', `${x}%`);
+    card.style.setProperty('--my', `${y}%`);
+  });
+});
+
+
 // ── Demo video mute toggle ──
 const muteBtn = document.getElementById('demo-video-mute');
 const demoVideo = document.getElementById('demo-video');
