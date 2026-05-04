@@ -5,17 +5,26 @@ const baHandle = document.getElementById('ba-handle');
 
 if (baSlider) {
   let dragging = false;
+  let autoplayRaf = null;
+  let userInteracted = false;
 
-  function setPosition(clientX) {
-    const rect = baSlider.getBoundingClientRect();
-    let pct = ((clientX - rect.left) / rect.width) * 100;
+  function setPct(pct) {
     pct = Math.max(0, Math.min(100, pct));
     baBefore.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
     baHandle.style.left = `${pct}%`;
   }
 
+  function setPosition(clientX) {
+    const rect = baSlider.getBoundingClientRect();
+    setPct(((clientX - rect.left) / rect.width) * 100);
+  }
+
+  // Initial state: full BEFORE visible, handle on the right — animation starts here.
+  setPct(100);
+
   const onDown = (e) => {
     dragging = true;
+    cancelAutoplay();
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     setPosition(x);
     e.preventDefault();
@@ -33,6 +42,70 @@ if (baSlider) {
   window.addEventListener('touchmove', onMove, { passive: false });
   window.addEventListener('mouseup', onUp);
   window.addEventListener('touchend', onUp);
+
+  // ── First-visit autoplay sweep: 100 → 0 → 50 ──
+  function cancelAutoplay() {
+    userInteracted = true;
+    if (autoplayRaf) {
+      cancelAnimationFrame(autoplayRaf);
+      autoplayRaf = null;
+    }
+  }
+
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function animatePhase(from, to, duration, ease) {
+    return new Promise((resolve) => {
+      const start = performance.now();
+      const step = (now) => {
+        if (userInteracted) return resolve();
+        const t = Math.min(1, (now - start) / duration);
+        setPct(from + (to - from) * ease(t));
+        if (t < 1) {
+          autoplayRaf = requestAnimationFrame(step);
+        } else {
+          resolve();
+        }
+      };
+      autoplayRaf = requestAnimationFrame(step);
+    });
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function runAutoplay() {
+    // Sweep left to reveal AFTER, brief hold, then settle to the middle.
+    await animatePhase(100, 0, 1100, easeInOutCubic);
+    if (userInteracted) return;
+    await delay(200);
+    if (userInteracted) return;
+    await animatePhase(0, 50, 600, easeOutCubic);
+    if (!userInteracted) setPct(50);
+  }
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reducedMotion) {
+    setPct(50);
+  } else {
+    const autoplayObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !userInteracted) {
+          obs.disconnect();
+          // Small delay so the section is comfortably in view before the sweep.
+          setTimeout(() => { if (!userInteracted) runAutoplay(); }, 250);
+        }
+      });
+    }, { threshold: 0.4 });
+    autoplayObserver.observe(baSlider);
+  }
 }
 
 
