@@ -2,16 +2,24 @@
 const baSlider = document.getElementById('ba-slider');
 const baBefore = document.getElementById('ba-before');
 const baHandle = document.getElementById('ba-handle');
+const baBtnBefore = document.getElementById('ba-btn-before');
+const baBtnAfter = document.getElementById('ba-btn-after');
 
 if (baSlider) {
   let dragging = false;
   let autoplayRaf = null;
   let userInteracted = false;
+  let autoplaying = true;
 
   function setPct(pct) {
     pct = Math.max(0, Math.min(100, pct));
-    baBefore.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
-    baHandle.style.left = `${pct}%`;
+    // Drive both the live slider and the mirrored reflection through one var
+    // (handles position via `left: calc(var(--ba-pct) * 1%)` in CSS).
+    document.documentElement.style.setProperty('--ba-pct', pct);
+    if (!autoplaying) {
+      document.querySelectorAll('.ba-label-before').forEach(el => el.classList.toggle('is-active', pct >= 99));
+      document.querySelectorAll('.ba-label-after').forEach(el => el.classList.toggle('is-active', pct <= 1));
+    }
   }
 
   function setPosition(clientX) {
@@ -24,17 +32,25 @@ if (baSlider) {
 
   const onDown = (e) => {
     dragging = true;
+    baSlider.classList.add('is-grabbing');
     cancelAutoplay();
     const x = e.touches ? e.touches[0].clientX : e.clientX;
-    setPosition(x);
+    const rect = baSlider.getBoundingClientRect();
+    const targetPct = ((x - rect.left) / rect.width) * 100;
+    // Smoothly glide to where they pressed; if they actually drag, onMove cancels this.
+    snapTo(targetPct);
     e.preventDefault();
   };
   const onMove = (e) => {
     if (!dragging) return;
+    cancelSnap();
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     setPosition(x);
   };
-  const onUp = () => { dragging = false; };
+  const onUp = () => {
+    dragging = false;
+    baSlider.classList.remove('is-grabbing');
+  };
 
   baSlider.addEventListener('mousedown', onDown);
   baSlider.addEventListener('touchstart', onDown, { passive: false });
@@ -42,6 +58,37 @@ if (baSlider) {
   window.addEventListener('touchmove', onMove, { passive: false });
   window.addEventListener('mouseup', onUp);
   window.addEventListener('touchend', onUp);
+
+  // Smooth animated transition to a target percentage. Duration scales with distance
+  // so short hops feel snappy and long sweeps feel deliberate.
+  let snapRaf = null;
+  function cancelSnap() {
+    if (snapRaf) { cancelAnimationFrame(snapRaf); snapRaf = null; }
+  }
+  function snapTo(targetPct, duration) {
+    cancelAutoplay();
+    cancelSnap();
+    const from = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ba-pct')) || 50;
+    if (duration === undefined) {
+      duration = Math.max(180, Math.min(500, Math.abs(targetPct - from) * 5));
+    }
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      setPct(from + (targetPct - from) * easeInOutCubic(t));
+      if (t < 1) snapRaf = requestAnimationFrame(step);
+      else snapRaf = null;
+    };
+    snapRaf = requestAnimationFrame(step);
+  }
+  const stop = (e) => e.stopPropagation();
+  [baBtnBefore, baBtnAfter].forEach((btn) => {
+    if (!btn) return;
+    btn.addEventListener('mousedown', stop);
+    btn.addEventListener('touchstart', stop);
+  });
+  baBtnBefore?.addEventListener('click', (e) => { stop(e); snapTo(100); });
+  baBtnAfter?.addEventListener('click', (e) => { stop(e); snapTo(0); });
 
   // ── First-visit autoplay sweep: 100 → 0 → 50 ──
   function cancelAutoplay() {
@@ -82,17 +129,25 @@ if (baSlider) {
 
   async function runAutoplay() {
     // Sweep left to reveal AFTER, brief hold, then settle to the middle.
-    await animatePhase(100, 0, 1100, easeInOutCubic);
-    if (userInteracted) return;
-    await delay(200);
-    if (userInteracted) return;
-    await animatePhase(0, 50, 600, easeOutCubic);
-    if (!userInteracted) setPct(50);
+    autoplaying = true;
+    baBtnBefore?.classList.remove('is-active');
+    baBtnAfter?.classList.remove('is-active');
+    try {
+      await animatePhase(100, 0, 1100, easeInOutCubic);
+      if (userInteracted) return;
+      await delay(200);
+      if (userInteracted) return;
+      await animatePhase(0, 50, 600, easeOutCubic);
+    } finally {
+      autoplaying = false;
+      if (!userInteracted) setPct(50);
+    }
   }
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (reducedMotion) {
+    autoplaying = false;
     setPct(50);
   } else {
     const autoplayObserver = new IntersectionObserver((entries, obs) => {

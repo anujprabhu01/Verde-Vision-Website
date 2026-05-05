@@ -74,19 +74,53 @@ nav a.nav-link:hover { color: var(--white); }
 
 /* ── HERO ── */
 .hero {
-  min-height: 100vh;
+  min-height: calc(100vh + 8rem);
   display: flex; align-items: center;
-  padding: 8rem 0 6rem 5vw;
+  padding: 7rem 0 15rem 5vw;
   position: relative;
   overflow: hidden;
 }
 
 .hero::before {
   content: "";
-  position: absolute; inset: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100vh;
+  /* Layered green glow under the headset. A broad ambient pool lights
+     the reflection area like a glowing floor, a mid halo lifts the
+     contact zone, and a tight bright line sells the contact point. */
   background:
-    radial-gradient(ellipse 65% 70% at 72% 60%, rgba(31,196,122,0.20) 0%, transparent 70%),
-    radial-gradient(ellipse 38% 45% at 88% 88%, rgba(31,196,122,0.12) 0%, transparent 70%);
+    /* Outer wash — very soft, very wide ambient that dissolves to black */
+    radial-gradient(ellipse 55% 30% at 72% 80%,
+      rgba(31,196,144,0.14) 0%,
+      rgba(31,196,144,0.10) 22%,
+      rgba(31,196,144,0.06) 48%,
+      rgba(31,196,144,0.025) 72%,
+      rgba(31,196,144,0.008) 88%,
+      transparent 100%),
+    /* Broad ambient pool — fills the reflection area with green light */
+    radial-gradient(ellipse 42% 22% at 72% 78%,
+      rgba(31,196,144,0.30) 0%,
+      rgba(31,196,144,0.22) 22%,
+      rgba(31,196,144,0.14) 44%,
+      rgba(31,196,144,0.07) 66%,
+      rgba(31,196,144,0.025) 84%,
+      transparent 100%),
+    /* Mid halo — tighter, brighter bloom hugging the goggles' base */
+    radial-gradient(ellipse 30% 9% at 72% 71%,
+      rgba(31,196,144,0.52) 0%,
+      rgba(31,196,144,0.34) 32%,
+      rgba(31,196,144,0.18) 58%,
+      rgba(31,196,144,0.07) 80%,
+      rgba(31,196,144,0.02) 92%,
+      transparent 100%),
+    /* Hot contact line — tight bright kiss where headset meets surface */
+    radial-gradient(ellipse 26% 2.2% at 72% 70.5%,
+      rgba(120,255,200,0.65) 0%,
+      rgba(31,196,144,0.45) 30%,
+      rgba(31,196,144,0.20) 60%,
+      rgba(31,196,144,0.06) 85%,
+      transparent 100%);
   pointer-events: none;
 }
 
@@ -124,7 +158,7 @@ nav a.nav-link:hover { color: var(--white); }
 /* Bottom-centered tagline + scroll cue */
 .hero-tagline {
   position: absolute;
-  bottom: 2.5rem;
+  bottom: 10.5rem;
   left: 0; right: 0;
   z-index: 2;
   display: flex;
@@ -294,15 +328,127 @@ h1 .accent { color: var(--accent); }
   display: flex; align-items: center; justify-content: center;
 }
 
+/* Multi-layer ambient halo behind the headset. Three stacked ellipses at
+   progressively larger sizes / lower alphas give a very gradual fade to
+   black and let the green wrap up around the lower goggle edges instead
+   of stopping abruptly underneath. */
+/* Background halo behind the headset removed per request. The green
+   contact-line glow on .hero::before and the headset rim drop-shadow
+   provide the only remaining green accents. */
+
 /* ── Vision Pro headset with embedded slider ── */
 .headset {
   position: relative;
+  z-index: 1;
   width: 100%;
   transform: translateX(2rem) scale(1.25);
   transform-origin: center center;
-  filter: drop-shadow(0 40px 60px rgba(0,0,0,0.55))
-          drop-shadow(0 0 18px rgba(31,196,144,0.55))
-          drop-shadow(0 0 60px rgba(31,196,144,0.25));
+}
+
+/* (Removed: the green line beam used to live here at z-index: 2 and was
+   rendering OVER the headset image. Glow now comes purely from the halo
+   behind the headset on .hero-visual::before plus the rim drop-shadow.) */
+
+/* Two small contact shadows — one under each goggle where the headset
+   meets the reflective surface. Tight and soft so they ground the
+   headset without breaking the green halo. */
+.headset::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 73.6%;
+  transform: translate(-50%, -50%);
+  width: 72%;
+  height: 14px;
+  pointer-events: none;
+  z-index: 3;
+  /* Multiply so the shadow only darkens whatever's behind it (the
+     green halo, the dark backdrop). Pure black at any alpha never
+     adds its own color — no green ring around the shadow. */
+  mix-blend-mode: multiply;
+  background:
+    /* Left contact shadow — horizontally elongated ellipse so the
+       natural radial falloff produces a teardrop: full-height under
+       the goggle, tapering to ~zero height as it approaches the
+       middle. Softer peak + extra mid stops so it dissolves smoothly
+       into the surrounding green glow rather than cutting against it. */
+    radial-gradient(ellipse 30% 100% at 24% 50%,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,0.96) 4%,
+      rgba(0,0,0,0.82) 8%,
+      rgba(0,0,0,0.58) 14%,
+      rgba(0,0,0,0.42) 26%,
+      rgba(0,0,0,0.28) 42%,
+      rgba(0,0,0,0.16) 58%,
+      rgba(0,0,0,0.08) 74%,
+      rgba(0,0,0,0.03) 88%,
+      rgba(0,0,0,0.008) 96%,
+      transparent 100%),
+    /* Right contact shadow — mirror */
+    radial-gradient(ellipse 30% 100% at 76% 50%,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,0.96) 4%,
+      rgba(0,0,0,0.82) 8%,
+      rgba(0,0,0,0.58) 14%,
+      rgba(0,0,0,0.42) 26%,
+      rgba(0,0,0,0.28) 42%,
+      rgba(0,0,0,0.16) 58%,
+      rgba(0,0,0,0.08) 74%,
+      rgba(0,0,0,0.03) 88%,
+      rgba(0,0,0,0.008) 96%,
+      transparent 100%);
+}
+
+/* Tight green rim glow that hugs the headset silhouette, plus a
+   stronger diffuse halo so the headset reads as backlit by the green
+   bloom on .hero-visual::before. */
+.headset-core {
+  position: relative;
+  width: 100%;
+  filter:
+    drop-shadow(0 0 4px  rgba(31,196,144,0.10))
+    drop-shadow(0 0 10px rgba(31,196,144,0.06));
+}
+
+/* Mirrored reflection — a visual clone of .headset-core (slider + image),
+   flipped, blurred, and mask-faded so it looks like a real reflection on
+   a glossy floor. */
+.headset-reflection-core {
+  position: absolute;
+  left: 0;
+  top: 48%;
+  width: 100%;
+  display: block;
+  pointer-events: none;
+  transform: scaleY(-1);
+  opacity: 0.46;
+  filter:
+    blur(2px) brightness(1) contrast(1.2) saturate(0.95)
+    drop-shadow(0 0 18px rgba(31,196,144,0.28))
+    drop-shadow(0 0 42px rgba(31,196,144,0.18));
+  -webkit-mask-image: linear-gradient(to top,
+    rgba(0,0,0,0.58) 0%,
+    rgba(0,0,0,0.51) 22%,
+    rgba(0,0,0,0.32) 58%,
+    rgba(0,0,0,0.09) 84%,
+    transparent 100%);
+          mask-image: linear-gradient(to top,
+    rgba(0,0,0,0.58) 0%,
+    rgba(0,0,0,0.51) 22%,
+    rgba(0,0,0,0.32) 58%,
+    rgba(0,0,0,0.09) 84%,
+    transparent 100%);
+}
+
+/* The mirrored slider should never be interactive. */
+.ba-slider-mirror {
+  cursor: default;
+  pointer-events: none;
+}
+.ba-slider-mirror .ba-label,
+.ba-slider-mirror .ba-handle-knob {
+  pointer-events: none;
+  cursor: default;
 }
 
 .headset-img {
@@ -352,40 +498,89 @@ h1 .accent { color: var(--accent); }
 .ba-after {
   background-image: url('After.png');
   background-size: cover;
-  background-position: center;
+  background-position: center 75%;
 }
 
+/* Driven by --ba-pct (set on :root by main.js). Both the live slider's
+   .ba-before AND the mirror reflection's .ba-before track the same var,
+   so dragging the slider also moves the reflection in lockstep. */
 .ba-before {
   background-image: url('Before.png');
   background-size: cover;
-  background-position: center;
-  clip-path: inset(0 50% 0 0);
+  background-position: center 75%;
+  clip-path: inset(0 calc(100% - var(--ba-pct, 50) * 1%) 0 0);
   justify-content: flex-end;
 }
 
 .ba-label {
+  position: absolute;
+  top: 18%;
+  z-index: 4;
   font-family: 'Inter', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
-  color: rgba(255,255,255,0.85);
-  background: rgba(0,0,0,0.55);
-  padding: 0.35rem 0.75rem;
+  letter-spacing: 0.16em;
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.10);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(255,255,255,0.22);
   border-radius: 999px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.28),
+              inset 0 1px 0 rgba(255,255,255,0.35),
+              inset 0 -1px 0 rgba(0,0,0,0.18);
+  transition: background 0.22s ease-out,
+              color 0.22s ease-out,
+              border-color 0.22s ease-out,
+              box-shadow 0.22s ease-out,
+              transform 0.22s ease-out;
+}
+.ba-label-before { left: 15%; }
+.ba-label-after  { right: 15%; }
+.ba-label:hover {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.38),
+              0 0 0 4px rgba(255,255,255,0.06),
+              inset 0 1px 0 rgba(255,255,255,0.55),
+              inset 0 -1px 0 rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+}
+.ba-label.is-active {
+  background: rgba(255,255,255,0.85);
+  color: #0a0a0a;
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.32),
+              inset 0 1px 0 rgba(255,255,255,0.9),
+              inset 0 -1px 0 rgba(0,0,0,0.08);
+}
+.ba-label.is-active:hover {
+  background: rgba(255,255,255,0.95);
+  color: #0a0a0a;
+  transform: translateY(-1px);
 }
 
 .ba-handle {
   position: absolute;
   top: 0; bottom: 0;
-  left: 50%;
-  width: 2px;
-  background: rgba(255,255,255,0.85);
+  left: calc(var(--ba-pct, 50) * 1%);
+  width: 1.5px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.55) 14%,
+    rgba(255,255,255,1) 50%,
+    rgba(255,255,255,0.55) 86%,
+    rgba(255,255,255,0) 100%
+  );
   transform: translateX(-50%);
   z-index: 2;
   pointer-events: none;
-  box-shadow: 0 0 10px rgba(255,255,255,0.4);
+  box-shadow: 0 0 12px rgba(255,255,255,0.5);
 }
 
 .ba-handle-line {
@@ -395,15 +590,66 @@ h1 .accent { color: var(--accent); }
 .ba-handle-knob {
   position: absolute;
   top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 36px; height: 36px;
+  transform: translate(-50%, -50%) scale(1);
+  width: 38px; height: 38px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   display: flex; align-items: center; justify-content: center;
-  color: #0a0a0a;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  color: rgba(255,255,255,0.95);
+  pointer-events: auto;
+  cursor: grab;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45),
+              0 1px 2px rgba(0,0,0,0.25),
+              inset 0 1px 0 rgba(255,255,255,0.55),
+              inset 0 -1px 0 rgba(0,0,0,0.18),
+              inset 0 0 0 1px rgba(255,255,255,0.06),
+              0 0 0 0 rgba(255,255,255,0);
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+              background 0.2s ease-out,
+              border-color 0.2s ease-out,
+              box-shadow 0.2s ease-out;
 }
-.ba-handle-knob svg { width: 18px; height: 18px; }
+.ba-handle-knob svg {
+  width: 18px; height: 18px;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ba-handle-knob:hover {
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.55);
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.5),
+              0 1px 2px rgba(0,0,0,0.25),
+              inset 0 1px 0 rgba(255,255,255,0.7),
+              inset 0 -1px 0 rgba(0,0,0,0.18),
+              inset 0 0 0 1px rgba(255,255,255,0.1),
+              0 0 0 6px rgba(255,255,255,0.05);
+}
+.ba-handle-knob:hover svg {
+  transform: scale(1.08);
+}
+
+.ba-slider.is-grabbing { cursor: grabbing; }
+.ba-slider.is-grabbing .ba-handle-knob,
+.ba-handle-knob:active {
+  cursor: grabbing;
+  background: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.7);
+  transform: translate(-50%, -50%) scale(0.9);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5),
+              0 1px 2px rgba(0,0,0,0.3),
+              inset 0 1px 0 rgba(255,255,255,0.85),
+              inset 0 -1px 0 rgba(0,0,0,0.2),
+              inset 0 0 0 1px rgba(255,255,255,0.2),
+              0 0 0 8px rgba(255,255,255,0.07);
+}
+.ba-slider.is-grabbing .ba-handle-knob svg,
+.ba-handle-knob:active svg {
+  transform: scale(0.92);
+}
 
 /* ── What Is It / demo video section ── */
 .what-is {

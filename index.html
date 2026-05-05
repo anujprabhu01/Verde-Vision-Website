@@ -89,22 +89,40 @@
         </svg>
 
         <div class="headset">
-          <div class="ba-slider" id="ba-slider">
-            <div class="ba-stage">
-              <div class="ba-img ba-after">
-                <span class="ba-label ba-label-after">AFTER</span>
+          <div class="headset-core">
+            <div class="ba-slider" id="ba-slider">
+              <div class="ba-stage">
+                <div class="ba-img ba-after"></div>
+                <div class="ba-img ba-before" id="ba-before"></div>
               </div>
-              <div class="ba-img ba-before" id="ba-before">
-                <span class="ba-label ba-label-before">BEFORE</span>
+              <button type="button" class="ba-label ba-label-before" id="ba-btn-before">BEFORE</button>
+              <button type="button" class="ba-label ba-label-after" id="ba-btn-after">AFTER</button>
+              <div class="ba-handle" id="ba-handle">
+                <div class="ba-handle-knob">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 3 12 9 6"/><polyline points="15 18 21 12 15 6"/></svg>
+                </div>
               </div>
             </div>
-            <div class="ba-handle" id="ba-handle">
-              <div class="ba-handle-knob">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/><polyline points="9 18 15 12 9 6" transform="translate(6 0)"/></svg>
-              </div>
-            </div>
+            <img class="headset-img" src="HeadsetTransparent.png" alt="Apple Vision Pro" />
           </div>
-          <img class="headset-img" src="HeadsetTransparent.png" alt="Apple Vision Pro" />
+
+          <!-- Mirrored reflection: shows the same scene + headset, flipped + blurred -->
+          <div class="headset-reflection-core" aria-hidden="true">
+            <div class="ba-slider ba-slider-mirror">
+              <div class="ba-stage">
+                <div class="ba-img ba-after"></div>
+                <div class="ba-img ba-before"></div>
+              </div>
+              <span class="ba-label ba-label-before" aria-hidden="true">BEFORE</span>
+              <span class="ba-label ba-label-after" aria-hidden="true">AFTER</span>
+              <div class="ba-handle">
+                <div class="ba-handle-knob">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 3 12 9 6"/><polyline points="15 18 21 12 15 6"/></svg>
+                </div>
+              </div>
+            </div>
+            <img class="headset-img" src="HeadsetTransparent.png" alt="" />
+          </div>
         </div>
       </div>
     </div>
