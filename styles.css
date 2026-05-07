@@ -700,8 +700,8 @@ h1 .accent {
   position: relative;
   margin: 3rem auto 0;
   width: 100%;
-  max-width: 960px;
-  aspect-ratio: 5 / 4;
+  max-width: 1100px;
+  aspect-ratio: 16 / 9;
   border: 1px solid var(--rule);
   padding: 14px;
   background: transparent;
@@ -754,19 +754,6 @@ section { padding: 7rem 5vw; position: relative; }
   background: var(--rule-strong);
   pointer-events: none;
 }
-[data-reveal-section]::after {
-  /* Larger crosshair reticle straddling the divider */
-  content: "";
-  position: absolute;
-  top: -7px; left: 50%;
-  transform: translateX(-50%);
-  width: 15px; height: 15px;
-  background:
-    linear-gradient(var(--accent), var(--accent)) center / 100% 1px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) center / 1px 100% no-repeat,
-    var(--green-dark);
-  pointer-events: none;
-}
 
 .section-label {
   display: inline-flex;
@@ -802,28 +789,6 @@ section { padding: 7rem 5vw; position: relative; }
 [data-reveal-section] .section-label[data-chapter] { position: relative; z-index: 2; }
 [data-reveal-section] h2 { position: relative; z-index: 2; }
 [data-reveal-section] .section-intro { position: relative; z-index: 2; }
-
-.section-numeral {
-  position: absolute;
-  top: -2.5rem;
-  right: 0;
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: clamp(7rem, 18vw, 16rem);
-  line-height: 0.85;
-  letter-spacing: -0.04em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
-          text-stroke: 1px rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-  white-space: nowrap;
-}
-
-@media (max-width: 720px) {
-  .section-numeral { display: none; }
-}
 
 h2 {
   font-family: var(--font-display);
@@ -1261,21 +1226,6 @@ h2 {
   border-bottom: 1px solid var(--rule);
   padding-top: 9rem; padding-bottom: 9rem;
   overflow: hidden;
-}
-.cta::before {
-  /* Geometric crosshair behind the headline */
-  content: "+";
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: var(--font-mono);
-  font-weight: 300;
-  font-size: clamp(18rem, 38vw, 32rem);
-  line-height: 0.9;
-  color: rgba(31,196,144,0.05);
-  pointer-events: none;
-  z-index: -1;
-  letter-spacing: 0;
 }
 .cta::after {
   content: "";
