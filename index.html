@@ -3,14 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VerdeVision — Reimagine Your Outdoor Space</title>
+  <title>VerdeVision — See the yard before you build it</title>
+  <meta name="description" content="VerdeVision is a spatial landscape design app for Apple Vision Pro. Drop life-size virtual plants into your real yard, walk around them, and price the design — all before breaking ground." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="VerdeVision — See the yard before you build it" />
+  <meta property="og:description" content="Design, visualize, and price outdoor spaces in real time with AR — all before breaking ground." />
+  <meta property="og:image" content="After.png" />
+  <meta property="og:image:alt" content="A landscape designed in VerdeVision, shown at full scale in a real yard." />
+  <meta property="og:site_name" content="VerdeVision" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="VerdeVision — See the yard before you build it" />
+  <meta name="twitter:description" content="Spatial landscape design for Apple Vision Pro. Design, visualize, and price outdoor spaces in real time — before breaking ground." />
+  <meta name="twitter:image" content="After.png" />
+
   <link rel="icon" type="image/png" href="verde_vision_logo.png" />
+  <link rel="apple-touch-icon" href="verde_vision_logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+
+  <!-- SCROLL PROGRESS -->
+  <div class="scroll-progress" aria-hidden="true"></div>
 
   <!-- NAV -->
   <nav>
@@ -30,7 +51,7 @@
   <section class="hero">
     <div class="hero-grid">
       <div class="hero-content">
-        <div class="section-label hero-eyebrow hero-anim hero-anim-1">Spatial landscape design</div>
+        <div class="hero-eyebrow hero-anim hero-anim-1">Spatial Landscape Design</div>
 
         <h1>
           <span class="hero-line hero-anim hero-anim-2">See the yard</span><br/>
@@ -49,6 +70,7 @@
             Watch It in Action
           </a>
         </div>
+
       </div>
 
       <div class="hero-visual">
@@ -128,7 +150,7 @@
     </div>
 
     <div class="hero-tagline">
-      <p>Designed for landscape pros — Built to help you win</p>
+      <p class="hero-tagline-text hero-anim hero-anim-5">Designed for landscape pros &mdash; Built to help you win</p>
       <a href="#what-is" class="hero-scroll" aria-label="Scroll to next section">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </a>
@@ -136,17 +158,22 @@
   </section>
 
   <!-- WHAT IS VERDE VISION -->
-  <section class="what-is" id="what-is">
+  <section class="what-is" id="what-is" data-reveal-section>
     <div class="container">
-      <div class="section-label">What Is Verde Vision?</div>
-      <h2>Landscape design, in your actual yard, at real scale.</h2>
-      <p class="section-intro">
+      <span class="section-numeral" aria-hidden="true">01</span>
+      <div class="section-label reveal" data-chapter="01">What Is Verde Vision?</div>
+      <h2 class="reveal reveal-2">Landscape design, in your actual yard, at real scale.</h2>
+      <p class="section-intro reveal reveal-3">
         VerdeVision is a spatial design app for Apple Vision Pro. Drop life-size virtual plants
         into your real yard, walk around them, and judge the design — all before you buy a single thing.
         Here's a quick look:
       </p>
 
-      <div class="demo-video-wrap">
+      <div class="demo-video-wrap reveal reveal-4">
+        <span class="corner corner-tl" aria-hidden="true"></span>
+        <span class="corner corner-tr" aria-hidden="true"></span>
+        <span class="corner corner-bl" aria-hidden="true"></span>
+        <span class="corner corner-br" aria-hidden="true"></span>
         <video class="demo-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
           <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
           Your browser doesn't support embedded video.
@@ -169,16 +196,17 @@
   </section>
 
   <!-- FEATURES -->
-  <section class="features" id="features">
+  <section class="features" id="features" data-reveal-section>
     <div class="container">
-      <div class="section-label">Features</div>
-      <h2>Everything you need to design with confidence</h2>
-      <p class="section-intro">
+      <span class="section-numeral" aria-hidden="true">02</span>
+      <div class="section-label reveal" data-chapter="02">Features</div>
+      <h2 class="reveal reveal-2">Everything you need to design with confidence</h2>
+      <p class="section-intro reveal reveal-3">
         VerdeVision brings your landscape design to life in spatial 3D — not on a flat screen,
         but standing right in your yard.
       </p>
 
-      <div class="features-grid">
+      <div class="features-grid reveal reveal-4">
         <div class="feature-card">
           <h3>See It Before You Build It</h3>
           <p>Drop virtual plants into your real yard through Apple Vision Pro. Walk around them. Look up at them. Judge exactly how that agave will fill the corner — before you buy it.</p>
@@ -200,10 +228,6 @@
           <p>Turn your design into a quote instantly. VerdeVision tracks every plant and generates a polished PDF estimate — ideal for landscapers and homeowners alike.</p>
         </div>
         <div class="feature-card">
-          <h3>Day and Night Mode</h3>
-          <p>See how your landscape looks at different times of day. Preview lighting changes and mood before committing to any design decision.</p>
-        </div>
-        <div class="feature-card">
           <h3>Client Presentation View</h3>
           <p>Let clients walk through their future landscape instead of squinting at a 2D rendering. An immersive walkthrough that closes the deal.</p>
         </div>
@@ -212,16 +236,17 @@
   </section>
 
   <!-- WHO IT'S FOR -->
-  <section id="who">
+  <section id="who" data-reveal-section>
     <div class="container">
-      <div class="section-label">Who It's For</div>
-      <h2>Built for everyone who works with outdoor space</h2>
-      <p class="section-intro">
+      <span class="section-numeral" aria-hidden="true">03</span>
+      <div class="section-label reveal" data-chapter="03">Who It's For</div>
+      <h2 class="reveal reveal-2">Built for everyone who works with outdoor space</h2>
+      <p class="section-intro reveal reveal-3">
         Whether you're redesigning your own backyard or presenting a $50k project to a client,
         VerdeVision changes how you see the work.
       </p>
 
-      <div class="audience-grid">
+      <div class="audience-grid reveal reveal-4">
         <div class="audience-card">
           <h3>Homeowners</h3>
           <p>Plan a yard renovation and see exactly what you're getting — before spending a dollar on plants or labor.</p>
@@ -243,35 +268,40 @@
   </section>
 
   <!-- WHY VISION PRO -->
-  <section class="why" id="why">
+  <section class="why" id="why" data-reveal-section>
     <div class="why-content container" style="padding: 0;">
-      <div class="section-label">Why Apple Vision Pro</div>
-      <h2>Design spatially, judge spatially</h2>
-      <p>
+      <span class="section-numeral" aria-hidden="true">04</span>
+      <div class="section-label reveal" data-chapter="04">Why Apple Vision Pro</div>
+      <h2 class="reveal reveal-2">Design spatially, judge spatially</h2>
+      <p class="reveal reveal-3">
         Traditional landscape design software shows you a flat picture on a screen.
         VerdeVision puts the design <strong style="color: var(--text);">in your space</strong>, at full scale.
       </p>
-      <p>
+      <p class="reveal reveal-4">
         Walk around a virtual Mexican Fence Post Cactus. Look up to judge its height. Step back and
         see how it frames the patio. You'll make better decisions faster — because spatially, it almost is real.
       </p>
     </div>
-    <div class="why-visual">
-      <div class="why-visual-text">
-        <span>🥽</span>
-        Demo screenshot
+    <div class="why-visual reveal reveal-3">
+      <div class="why-frame">
+        <span class="corner corner-tl" aria-hidden="true"></span>
+        <span class="corner corner-tr" aria-hidden="true"></span>
+        <span class="corner corner-bl" aria-hidden="true"></span>
+        <span class="corner corner-br" aria-hidden="true"></span>
+        <img class="why-image" src="After.png" alt="A designed landscape rendered through Verde Vision" />
       </div>
     </div>
   </section>
 
   <!-- BOOK A DEMO -->
-  <section class="booking" id="booking">
+  <section class="booking" id="booking" data-reveal-section>
     <div class="container">
-      <div class="section-label">Book a Demo</div>
-      <h2>See VerdeVision in action</h2>
-      <p class="section-intro">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
+      <span class="section-numeral" aria-hidden="true">05</span>
+      <div class="section-label reveal" data-chapter="05">Book a Demo</div>
+      <h2 class="reveal reveal-2">See VerdeVision in action</h2>
+      <p class="section-intro reveal reveal-3">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
 
-      <div class="booking-card" id="booking-card">
+      <div class="booking-card reveal reveal-4" id="booking-card">
 
         <!-- Calendar -->
         <div class="booking-col">
@@ -322,11 +352,15 @@
   </section>
 
   <!-- CTA -->
-  <section class="cta">
+  <section class="cta" data-reveal-section>
+    <span class="cta-corner cta-corner-tl" aria-hidden="true"></span>
+    <span class="cta-corner cta-corner-tr" aria-hidden="true"></span>
+    <span class="cta-corner cta-corner-bl" aria-hidden="true"></span>
+    <span class="cta-corner cta-corner-br" aria-hidden="true"></span>
     <div class="container">
-      <h2>Your yard won't design itself.</h2>
-      <p>Ready to see your landscape before you build it? Book a live demo and experience VerdeVision on Apple Vision Pro.</p>
-      <div class="cta-actions">
+      <h2 class="reveal">Your yard won't <em>design</em> itself.</h2>
+      <p class="reveal reveal-2">Ready to see your landscape before you build it? Book a live demo and experience VerdeVision on Apple Vision Pro.</p>
+      <div class="cta-actions reveal reveal-3">
         <a href="#booking" class="btn-primary">Book a Demo</a>
         <a href="mailto:jasonjlee2004@gmail.com" class="btn-secondary">Contact Us</a>
       </div>
@@ -335,9 +369,41 @@
 
   <!-- FOOTER -->
   <footer>
-    <div class="footer-logo">Verde<span>Vision</span></div>
-    <div>Built for Apple Vision Pro</div>
-    <div>&copy; 2026 VerdeVision. All rights reserved.</div>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">Verde<span>Vision</span></div>
+        <p class="footer-tagline">Spatial landscape design for Apple Vision Pro. Designed in California.</p>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Product</p>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#what-is">What it is</a></li>
+          <li><a href="#why">Why Vision Pro</a></li>
+          <li><a href="#booking">Book a demo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">For</p>
+        <ul>
+          <li><a href="#who">Homeowners</a></li>
+          <li><a href="#who">Designers</a></li>
+          <li><a href="#who">Nurseries</a></li>
+          <li><a href="#who">Developers</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Contact</p>
+        <ul>
+          <li><a href="mailto:jasonjlee2004@gmail.com">Email us</a></li>
+          <li><a href="#booking">Schedule a call</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-meta">Built for Apple Vision Pro</span>
+      <span>&copy; 2026 VerdeVision. All rights reserved.</span>
+    </div>
   </footer>
 
   <script src="main.js"></script>
