@@ -25,13 +25,16 @@
   <link rel="apple-touch-icon" href="verde_vision_logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=38" />
 </head>
 <body>
 
   <!-- SCROLL PROGRESS -->
   <div class="scroll-progress" aria-hidden="true"></div>
+
+  <!-- BLUEPRINT GRID LINES — subtle accent lines flickering between dots -->
+  <canvas class="grid-lines" aria-hidden="true"></canvas>
 
   <!-- NAV -->
   <nav>
@@ -65,7 +68,7 @@
 
         <div class="hero-actions hero-anim hero-anim-5">
           <a href="#booking" class="btn-primary">Book a Demo &rarr;</a>
-          <a href="#what-is" class="btn-secondary">
+          <a href="#in-action" class="btn-secondary">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
             Watch It in Action
           </a>
@@ -151,83 +154,157 @@
 
     <div class="hero-tagline">
       <p class="hero-tagline-text hero-anim hero-anim-5">Designed for landscape pros &mdash; Built to help you win</p>
-      <a href="#what-is" class="hero-scroll" aria-label="Scroll to next section">
+      <a href="#features" class="hero-scroll" aria-label="Scroll to next section">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </a>
     </div>
   </section>
 
-  <!-- WHAT IS VERDE VISION -->
-  <section class="what-is" id="what-is" data-reveal-section>
+  <!-- FEATURES — merged "what it is" + capability showcase -->
+  <section class="features" id="features" data-reveal-section>
     <div class="container">
-      <div class="section-label reveal" data-chapter="01">What Is Verde Vision?</div>
-      <h2 class="reveal reveal-2">Landscape design, in your actual yard, at real scale.</h2>
-      <p class="section-intro reveal reveal-3">
-        VerdeVision is a spatial design app for Apple Vision Pro. Drop life-size virtual plants
-        into your real yard, walk around them, and judge the design — all before you buy a single thing.
-        Here's a quick look:
-      </p>
+      <div class="features-header">
+        <div class="features-header-lede">
+          <div class="section-label reveal" data-chapter="01">What VerdeVision Does</div>
+          <h2 class="reveal reveal-2">Everything you need to<br class="head-break" /> design with <em>confidence</em>.</h2>
+        </div>
+        <div class="features-header-desc reveal reveal-3">
+          <p class="section-intro">
+            A spatial landscape design app for Apple Vision Pro. Walk the property, drop life-size plants,
+            and hand off install-ready plans — all before you break ground.
+          </p>
+        </div>
+      </div>
 
-      <div class="demo-video-wrap reveal reveal-4">
-        <span class="corner corner-tl" aria-hidden="true"></span>
-        <span class="corner corner-tr" aria-hidden="true"></span>
-        <span class="corner corner-bl" aria-hidden="true"></span>
-        <span class="corner corner-br" aria-hidden="true"></span>
-        <video class="demo-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
-          <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
-          Your browser doesn't support embedded video.
-        </video>
-        <button class="demo-video-mute" id="demo-video-mute" aria-label="Unmute video">
-          <!-- muted icon (default) -->
-          <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <line x1="23" y1="9" x2="17" y2="15"/>
-            <line x1="17" y1="9" x2="23" y2="15"/>
-          </svg>
-          <!-- unmuted icon -->
-          <svg class="icon-unmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
-        </button>
+      <div class="features-grid reveal reveal-4">
+
+        <article class="feature-card feature-card-hero" data-feature="01">
+          <div class="feature-image is-loaded" style="background-image: url('feature-01-design.png');"></div>
+          <div class="feature-image-placeholder" aria-hidden="true">feature-01-design.png</div>
+          <div class="feature-overlay" aria-hidden="true"></div>
+          <div class="feature-body">
+            <span class="feature-index">01 / 05</span>
+            <h3>Design in <em>Real</em> Space</h3>
+            <p>Drop life-size 3D plants into the real yard. Walk around them at true mature scale — before you buy a thing.</p>
+          </div>
+          <span class="feature-rule" aria-hidden="true"></span>
+        </article>
+
+        <article class="feature-card" data-feature="02">
+          <div class="feature-image is-loaded" style="background-image: url('feature-02-blueprint.png');"></div>
+          <div class="feature-image-placeholder" aria-hidden="true">feature-02-blueprint.png</div>
+          <div class="feature-overlay" aria-hidden="true"></div>
+          <div class="feature-body">
+            <span class="feature-index">02 / 05</span>
+            <h3>Permit-Ready Blueprints</h3>
+            <p>One tap, one scaled PDF — plant symbols, dimensions, and a full plant schedule. No CAD required.</p>
+          </div>
+          <span class="feature-rule" aria-hidden="true"></span>
+        </article>
+
+        <article class="feature-card" data-feature="03">
+          <div class="feature-image is-loaded" style="background-image: url('feature-03-estimate.png');"></div>
+          <div class="feature-image-placeholder" aria-hidden="true">feature-03-estimate.png</div>
+          <div class="feature-overlay" aria-hidden="true"></div>
+          <div class="feature-body">
+            <span class="feature-index">03 / 05</span>
+            <h3>Quote on the Spot</h3>
+            <p>Itemized PDF estimates with plant pricing and labor — generated while you're still in the yard.</p>
+          </div>
+          <span class="feature-rule" aria-hidden="true"></span>
+        </article>
+
+        <article class="feature-card" data-feature="04">
+          <div class="feature-image is-loaded" style="background-image: url('feature-04-persist.png');"></div>
+          <div class="feature-image-placeholder" aria-hidden="true">feature-04-persist.png</div>
+          <div class="feature-overlay" aria-hidden="true"></div>
+          <div class="feature-body">
+            <span class="feature-index">04 / 05</span>
+            <h3>Pick Up On Any Visit</h3>
+            <p>Real-world anchors lock the design to the property. Return weeks later — everything snaps back into place.</p>
+          </div>
+          <span class="feature-rule" aria-hidden="true"></span>
+        </article>
+
+        <article class="feature-card" data-feature="05">
+          <div class="feature-image is-loaded" style="background-image: url('feature-05-crew.png');"></div>
+          <div class="feature-image-placeholder" aria-hidden="true">feature-05-crew.png</div>
+          <div class="feature-overlay" aria-hidden="true"></div>
+          <div class="feature-body">
+            <span class="feature-index">05 / 05</span>
+            <h3>Guide Your Crew</h3>
+            <p>Hand off the headset. Your install crew sees exactly where every plant goes.</p>
+          </div>
+          <span class="feature-rule" aria-hidden="true"></span>
+        </article>
+
       </div>
     </div>
   </section>
 
-  <!-- FEATURES -->
-  <section class="features" id="features" data-reveal-section>
+  <!-- SEE IT IN ACTION — through the lens of a Vision Pro -->
+  <section class="in-action" id="in-action" data-reveal-section>
     <div class="container">
-      <div class="section-label reveal" data-chapter="02">Features</div>
-      <h2 class="reveal reveal-2">Everything you need to design with confidence</h2>
-      <p class="section-intro reveal reveal-3">
-        VerdeVision brings your landscape design to life in spatial 3D — not on a flat screen,
-        but standing right in your yard.
-      </p>
+      <div class="action-header">
+        <div class="section-label reveal" data-chapter="02">See It In Action</div>
+        <h2 class="reveal reveal-2 action-headline">A real session, in a real <em>yard</em>.</h2>
+      </div>
+    </div>
 
-      <div class="features-grid reveal reveal-4">
-        <div class="feature-card">
-          <h3>See It Before You Build It</h3>
-          <p>Drop virtual plants into your real yard through Apple Vision Pro. Walk around them. Look up at them. Judge exactly how that agave will fill the corner — before you buy it.</p>
+    <div class="ia-stage reveal reveal-4">
+      <div class="ia-stage-glow" aria-hidden="true"></div>
+      <div class="ia-headset">
+        <div class="ia-headset-core">
+          <img class="ia-headset-img" src="HeadsetTransparent.png" alt="Apple Vision Pro" />
+          <div class="ia-lens-stage">
+            <div class="ia-lens-feather">
+              <video class="ia-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
+                <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
+                Your browser doesn't support embedded video.
+              </video>
+            </div>
+            <span class="ia-lens-glare" aria-hidden="true"></span>
+          </div>
         </div>
-        <div class="feature-card">
-          <h3>Place, Customize, and Refine</h3>
-          <p>Move, rotate, and resize plants with intuitive spatial controls. Choose from a curated desert plant catalog with multiple container sizes per species.</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="ia-bar">
+        <div class="ia-meta-l">
+          <span class="ia-fig">Fig.&nbsp;02</span>
+          <span class="ia-place">Backyard study · Tucson, AZ</span>
         </div>
-        <div class="feature-card">
-          <h3>Designs That Persist</h3>
-          <p>Your placements are saved exactly where you left them using Apple's spatial anchoring. Close the app, come back tomorrow — your design is right there.</p>
+
+        <div class="action-progress" id="action-progress" role="slider" aria-label="Seek video" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="action-progress-track" aria-hidden="true"></div>
+          <div class="action-progress-bar" id="action-progress-bar"></div>
+          <div class="action-progress-knob" id="action-progress-knob" aria-hidden="true"></div>
         </div>
-        <div class="feature-card">
-          <h3>Built-In Project Management</h3>
-          <p>Save unlimited projects for different yards or clients. Undo freely, switch between designs, and compare options without losing any work.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Professional PDF Estimates</h3>
-          <p>Turn your design into a quote instantly. VerdeVision tracks every plant and generates a polished PDF estimate — ideal for landscapers and homeowners alike.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Client Presentation View</h3>
-          <p>Let clients walk through their future landscape instead of squinting at a 2D rendering. An immersive walkthrough that closes the deal.</p>
+
+        <div class="ia-meta-r">
+          <span class="ia-time">
+            <span id="action-runtime">00:00</span><span class="caption-time-sep">/</span><span id="action-duration">--:--</span>
+          </span>
+          <div class="action-controls-cluster">
+            <button class="action-ctl" id="demo-video-restart" aria-label="Restart video" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+            </button>
+            <button class="action-ctl demo-video-mute" id="demo-video-mute" aria-label="Unmute video" type="button">
+              <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+              <svg class="icon-unmuted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -237,7 +314,7 @@
   <section id="who" data-reveal-section>
     <div class="container">
       <div class="section-label reveal" data-chapter="03">Who It's For</div>
-      <h2 class="reveal reveal-2">Built for everyone who works with outdoor space</h2>
+      <h2 class="reveal reveal-2">Built for <em>everyone</em> who works with outdoor space</h2>
       <p class="section-intro reveal reveal-3">
         Whether you're redesigning your own backyard or presenting a $50k project to a client,
         VerdeVision changes how you see the work.
@@ -268,7 +345,7 @@
   <section class="why" id="why" data-reveal-section>
     <div class="why-content container" style="padding: 0;">
       <div class="section-label reveal" data-chapter="04">Why Apple Vision Pro</div>
-      <h2 class="reveal reveal-2">Design spatially, judge spatially</h2>
+      <h2 class="reveal reveal-2">Design <em>spatially</em>, judge <em>spatially</em></h2>
       <p class="reveal reveal-3">
         Traditional landscape design software shows you a flat picture on a screen.
         VerdeVision puts the design <strong style="color: var(--text);">in your space</strong>, at full scale.
@@ -293,7 +370,7 @@
   <section class="booking" id="booking" data-reveal-section>
     <div class="container">
       <div class="section-label reveal" data-chapter="05">Book a Demo</div>
-      <h2 class="reveal reveal-2">See VerdeVision in action</h2>
+      <h2 class="reveal reveal-2">See VerdeVision in <em>action</em></h2>
       <p class="section-intro reveal reveal-3">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
 
       <div class="booking-card reveal reveal-4" id="booking-card">
@@ -352,6 +429,17 @@
     <span class="cta-corner cta-corner-tr" aria-hidden="true"></span>
     <span class="cta-corner cta-corner-bl" aria-hidden="true"></span>
     <span class="cta-corner cta-corner-br" aria-hidden="true"></span>
+    <svg class="cta-tree" id="cta-tree" aria-hidden="true" preserveAspectRatio="none">
+      <defs>
+        <filter id="oakGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g class="cta-tree-dots"></g>
+      <g class="cta-tree-branches" filter="url(#oakGlow)"></g>
+      <g class="cta-tree-leaves" filter="url(#oakGlow)"></g>
+    </svg>
     <div class="container">
       <h2 class="reveal">Your yard won't <em>design</em> itself.</h2>
       <p class="reveal reveal-2">Ready to see your landscape before you build it? Book a live demo and experience VerdeVision on Apple Vision Pro.</p>
@@ -373,7 +461,7 @@
         <p class="footer-col-title">Product</p>
         <ul>
           <li><a href="#features">Features</a></li>
-          <li><a href="#what-is">What it is</a></li>
+          <li><a href="#in-action">See it in action</a></li>
           <li><a href="#why">Why Vision Pro</a></li>
           <li><a href="#booking">Book a demo</a></li>
         </ul>
@@ -401,6 +489,6 @@
     </div>
   </footer>
 
-  <script src="main.js"></script>
+  <script src="main.js?v=24"></script>
 </body>
 </html>
