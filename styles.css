@@ -234,6 +234,20 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   }
 }
 
+/* Windows-laptop short viewports (typically 1366×768): the desktop
+   hero is min-height calc(100vh + 8rem), and Chrome's URL/tab bars eat
+   ~120px of vertical space — together those push the absolute-positioned
+   tagline below the fold. Drop the +8rem cushion and trim the bottom
+   padding so the tagline lands inside the visible viewport. Scoped to
+   max-height: 820px so any common Mac (≥900) is untouched. */
+@media (max-height: 820px) and (min-width: 901px) {
+  .hero {
+    min-height: 100vh;
+    padding-bottom: clamp(2.5rem, 7vw, 5rem);
+  }
+  .hero-tagline { bottom: 6.5rem; }
+}
+
 /* Hero glow now lives on .hero-visual::before so it tracks the headset's
    container across viewport widths. See that rule below. */
 
@@ -273,6 +287,14 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   }
   .hero-content .hero-actions { justify-content: center; }
   .hero p { margin-left: auto; margin-right: auto; }
+  /* Shrink the headline on phones so "before you build it." fits on a
+     single line — keeps the H1 to a clean two-line layout instead of
+     orphaning "it." onto a third line. */
+  /* Clamp so the H1 holds two lines across every mobile width:
+     - 2.4rem at ≤360px (narrow Android) so "before you build it." fits
+     - 2.7rem at ≥375px (iPhone) for proper visual weight
+     The calc() linearly crosses 38.4px at 360px and 43.2px at 375px. */
+  .hero h1 { font-size: clamp(2.4rem, calc(-4.8rem + 32vw), 2.7rem); }
 }
 
 .hero-eyebrow {
@@ -504,23 +526,26 @@ h1 .accent {
 @media (max-width: 900px) {
   /* Bigger on mobile so the headset reads as the dominant hero element,
      and nudge it up into the viewport so the goggles sit closer to the
-     hero copy above. */
+     hero copy above. will-change promotes .headset to its own composited
+     layer — stabilizes iOS Safari rasterization of the masked slider
+     contents inside this transformed parent (fixes black-flash on drag). */
   .headset {
-    transform: translateY(-4rem) scale(1.22);
+    transform: translateY(-5rem) scale(1.32);
     transform-origin: center 40%;
+    will-change: transform;
   }
 
   /* The visual block is taller than its image due to the upward translate
      above — pull its bottom margin back so the tagline below doesn't pick
      up extra whitespace. */
-  .hero-visual { margin-bottom: -4rem; }
+  .hero-visual { margin-bottom: -5rem; }
 
   /* Glow needs to track up so contact shadows sit directly under the
      goggles on the narrower viewport. Re-anchor each gradient's y% AND
-     translate the whole pseudo by the same -4rem the headset moved, so
+     translate the whole pseudo by the same -5rem the headset moved, so
      the contact line stays glued to the bottom of the goggles. */
   .hero-visual::before {
-    transform: translateY(-4rem);
+    transform: translateY(-5rem);
     background:
       radial-gradient(ellipse 60% 36% at 53% 64%,
         rgba(31,196,144,0.14) 0%,
@@ -866,10 +891,24 @@ h1 .accent {
 }
 
 /* Shrink the BEFORE/AFTER drag knob on mobile. Placed AFTER the base
-   .ba-handle-knob rule so the cascade resolves to the smaller size. */
+   .ba-handle-knob rule so the cascade resolves to the smaller size.
+   Also drop backdrop-filter on mobile — on iOS Safari, a backdrop-filter
+   sampling through a mask/clip inside a transformed parent intermittently
+   returns black mid-drag. Solid translucent background looks the same at
+   phone scale and avoids the bug. */
 @media (max-width: 900px) {
-  .ba-handle-knob { width: 26px; height: 26px; }
+  .ba-handle-knob {
+    width: 26px; height: 26px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255,255,255,0.22);
+  }
   .ba-handle-knob svg { width: 12px; height: 12px; }
+  /* Promote the slider image layers to their own composited layers so
+     iOS doesn't re-rasterize them through the parent's transform/clip on
+     every drag frame — eliminates the intermittent black flash. */
+  .ba-stage,
+  .ba-img { transform: translateZ(0); }
 }
 
 /* ── Demo video shared base — used by the in-action stage below.
@@ -1323,8 +1362,10 @@ h2 em {
 @media (max-width: 900px) {
   .feature-card {
     opacity: 0.55;
+    transform: translateY(0);
     transition:
       opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
       border-color 0.45s ease-out,
       box-shadow 0.55s ease-out;
   }
@@ -1337,6 +1378,11 @@ h2 em {
   }
   .feature-card.is-active-mobile {
     opacity: 1;
+    /* On phones the page is constantly moving as the user scrolls, which
+       dwarfs the 4px lift the Mac uses on hover. 10px gives the active
+       card a perceptible "pop" against the scroll motion without feeling
+       jumpy. */
+    transform: translateY(-10px);
     border-color: rgba(31,196,144,0.34);
     box-shadow:
       0 18px 40px -10px rgba(0,0,0,0.5),
@@ -1346,6 +1392,13 @@ h2 em {
   .feature-card.is-active-mobile .feature-rule {
     width: 100%;
     transition: width 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+  }
+  /* Mirror the Mac hover image-zoom on the active mobile card — the
+     subtle scale + saturation bump is what gives Mac's hover its visible
+     "grows" feel; without it, the 10px lift alone reads as flat. */
+  .feature-card.is-active-mobile .feature-image {
+    transform: scale(1.07);
+    filter: saturate(1.05) contrast(1.05);
   }
   .feature-card.is-active-mobile::after {
     opacity: 1;
@@ -1443,10 +1496,9 @@ h2 em {
 .ia-headset-core {
   position: relative;
   width: 100%;
-  filter:
-    drop-shadow(0 0 10px rgba(31,196,144,0.14))
-    drop-shadow(0 0 36px rgba(31,196,144,0.08))
-    drop-shadow(0 56px 100px rgba(0,0,0,0.65));
+  /* No external halos or floor shadow — the device sits cleanly on
+     black. The inner lens fade (lens-mask on .ia-lens-feather + rim
+     vignette on .ia-lens-glare) does all the edge-softening work. */
 }
 .ia-headset-img {
   position: relative;
