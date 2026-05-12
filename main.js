@@ -1,3 +1,23 @@
+// ── Mobile nav toggle ──
+(() => {
+  const nav = document.querySelector('nav');
+  const toggle = document.querySelector('.nav-toggle');
+  if (!nav || !toggle) return;
+  const links = nav.querySelectorAll('.nav-links a');
+  const close = () => {
+    nav.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  };
+  toggle.addEventListener('click', () => {
+    const open = nav.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  links.forEach(link => link.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
+
 // ── Before/After slider ──
 const baSlider = document.getElementById('ba-slider');
 const baBefore = document.getElementById('ba-before');
@@ -217,6 +237,82 @@ document.querySelectorAll('.feature-card, .audience-card').forEach((card) => {
     card.style.setProperty('--my', `${y}%`);
   });
 });
+
+
+// ── Mobile scroll spotlight for feature cards ──
+// Only ONE card is "active" at a time: whichever's center is closest
+// to viewport center while at least partially on screen. As the user
+// scrolls down, the active class hops from card to card; scrolling
+// past the last card drops all of them back to the dim baseline.
+// Gated to ≤900px so pointer-device users keep the desktop hover UX.
+(() => {
+  const mq = window.matchMedia('(max-width: 900px)');
+  const cards = document.querySelectorAll('.feature-card');
+  if (!cards.length) return;
+
+  let rafId = null;
+  let attached = false;
+
+  const setActive = (card) => {
+    cards.forEach((c) => {
+      if (c === card) c.classList.add('is-active-mobile');
+      else c.classList.remove('is-active-mobile');
+    });
+  };
+
+  const pick = () => {
+    const vh = window.innerHeight;
+    const viewportCenter = vh / 2;
+    // A card must overlap the viewport's middle band to be eligible —
+    // outside of that band the section gets no spotlight (so scrolling
+    // past the last card lets it fade back to baseline).
+    const bandTop = vh * 0.15;
+    const bandBot = vh * 0.85;
+    let best = null;
+    let bestDist = Infinity;
+    cards.forEach((c) => {
+      const r = c.getBoundingClientRect();
+      if (r.bottom < bandTop || r.top > bandBot) return;
+      const center = r.top + r.height / 2;
+      const dist = Math.abs(center - viewportCenter);
+      if (dist < bestDist) { bestDist = dist; best = c; }
+    });
+    setActive(best);
+    rafId = null;
+  };
+
+  const onScroll = () => {
+    if (rafId == null) rafId = requestAnimationFrame(pick);
+  };
+
+  const enable = () => {
+    if (attached) return;
+    if (reduceMotion) {
+      // Without motion preference, just spotlight the first card so
+      // descriptions remain readable.
+      setActive(cards[0]);
+      return;
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    attached = true;
+    pick();
+  };
+
+  const disable = () => {
+    if (attached) {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      attached = false;
+    }
+    if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
+    cards.forEach((c) => c.classList.remove('is-active-mobile'));
+  };
+
+  const sync = () => (mq.matches ? enable() : disable());
+  sync();
+  mq.addEventListener('change', sync);
+})();
 
 
 // ── Demo video: mute / restart / timecode / scrubber ──
