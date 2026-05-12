@@ -33,7 +33,12 @@
   --font-mono:    'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Reserve space for the scrollbar so the centered grid doesn't shift
+     left when the scrollbar appears (Windows / non-overlay scrollbars). */
+  scrollbar-gutter: stable;
+}
 
 body {
   background-color: var(--green-dark);
@@ -44,20 +49,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-/* ── BLUEPRINT EDGE LINES
-   Two vertical hairlines bracketing the page — fixed, decorative,
-   non-interactive. Reinforces the architectural drawing aesthetic. */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; bottom: 0;
-  left: 16px; right: 16px;
-  border-left: 1px solid var(--rule);
-  border-right: 1px solid var(--rule);
-  pointer-events: none;
-  z-index: 90;
 }
 
 /* ── FILM GRAIN
@@ -150,57 +141,101 @@ nav a.nav-link:hover { color: var(--white); }
 }
 .nav-cta:hover { background: #2ee08a; transform: translateY(-1px); }
 
+/* Hamburger — hidden on desktop, shown ≤900px */
+.nav-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--green-border);
+  border-radius: 8px;
+  width: 40px; height: 40px;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 5px;
+  padding: 0;
+  z-index: 110;
+  transition: background 0.2s, border-color 0.2s;
+}
+.nav-toggle:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.2); }
+.nav-toggle-bar {
+  display: block;
+  width: 18px; height: 1.5px;
+  background: var(--text);
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+nav.is-open .nav-toggle-bar:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+nav.is-open .nav-toggle-bar:nth-child(2) { opacity: 0; }
+nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+@media (max-width: 900px) {
+  nav {
+    padding: 0.9rem 5vw;
+    /* backdrop-filter creates a containing block that traps the fullscreen
+       nav-links overlay inside the navbar's height. Use a solid bg instead
+       so the overlay can escape to the viewport edges. */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(10,10,10,0.92);
+  }
+  .nav-toggle { display: flex; }
+  .nav-logo-text { font-size: 0.9rem; }
+  .nav-links {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 105;
+  }
+  nav.is-open .nav-links {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .nav-links .nav-link {
+    margin-left: 0;
+    font-size: 1.4rem;
+    color: var(--text);
+  }
+  .nav-links .nav-cta {
+    margin-left: 0;
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.7rem 1.6rem;
+  }
+}
+
 /* ── HERO ── */
 .hero {
   min-height: calc(100vh + 8rem);
   display: flex; align-items: center;
-  padding: 7rem 0 15rem 5vw;
+  padding: 7rem 0 clamp(4rem, 12vw, 15rem) 5vw;
   position: relative;
   overflow: hidden;
 }
 
-.hero::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 100vh;
-  /* Layered green glow under the headset. A broad ambient pool lights
-     the reflection area like a glowing floor, a mid halo lifts the
-     contact zone, and a tight bright line sells the contact point. */
-  background:
-    /* Outer wash — very soft, very wide ambient that dissolves to black */
-    radial-gradient(ellipse 55% 30% at 72% 80%,
-      rgba(31,196,144,0.14) 0%,
-      rgba(31,196,144,0.10) 22%,
-      rgba(31,196,144,0.06) 48%,
-      rgba(31,196,144,0.025) 72%,
-      rgba(31,196,144,0.008) 88%,
-      transparent 100%),
-    /* Broad ambient pool — fills the reflection area with green light */
-    radial-gradient(ellipse 42% 22% at 72% 78%,
-      rgba(31,196,144,0.30) 0%,
-      rgba(31,196,144,0.22) 22%,
-      rgba(31,196,144,0.14) 44%,
-      rgba(31,196,144,0.07) 66%,
-      rgba(31,196,144,0.025) 84%,
-      transparent 100%),
-    /* Mid halo — tighter, brighter bloom hugging the goggles' base */
-    radial-gradient(ellipse 30% 9% at 72% 71%,
-      rgba(31,196,144,0.52) 0%,
-      rgba(31,196,144,0.34) 32%,
-      rgba(31,196,144,0.18) 58%,
-      rgba(31,196,144,0.07) 80%,
-      rgba(31,196,144,0.02) 92%,
-      transparent 100%),
-    /* Hot contact line — tight bright kiss where headset meets surface */
-    radial-gradient(ellipse 26% 2.2% at 72% 70.5%,
-      rgba(120,255,200,0.65) 0%,
-      rgba(31,196,144,0.45) 30%,
-      rgba(31,196,144,0.20) 60%,
-      rgba(31,196,144,0.06) 85%,
-      transparent 100%);
-  pointer-events: none;
+@media (max-width: 900px) {
+  .hero {
+    min-height: auto;
+    padding: 6rem 5vw 3rem;
+    /* Stack hero-grid above hero-tagline (was absolute on desktop). */
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
+
+/* Hero glow now lives on .hero-visual::before so it tracks the headset's
+   container across viewport widths. See that rule below. */
 
 .hero-grid {
   width: 100%;
@@ -210,6 +245,12 @@ nav a.nav-link:hover { color: var(--white); }
   gap: 2.5rem;
   align-items: center;
   position: relative; z-index: 1;
+}
+
+/* At Windows-laptop widths the text column needs a touch more room so
+   "See the yard" doesn't wrap. Slight redistribution toward the text. */
+@media (min-width: 901px) and (max-width: 1300px) {
+  .hero-grid { grid-template-columns: 6fr 9fr; }
 }
 
 @media (max-width: 900px) {
@@ -225,7 +266,13 @@ nav a.nav-link:hover { color: var(--white); }
 }
 
 @media (max-width: 900px) {
-  .hero-content { margin-top: 0; }
+  .hero-content {
+    margin-top: 0;
+    align-items: center;
+    text-align: center;
+  }
+  .hero-content .hero-actions { justify-content: center; }
+  .hero p { margin-left: auto; margin-right: auto; }
 }
 
 .hero-eyebrow {
@@ -239,6 +286,10 @@ nav a.nav-link:hover { color: var(--white); }
 }
 
 .hero-line { display: inline-block; }
+/* "See the yard" should always sit on a single line — it's always short
+   enough that this never forces grid column growth. The second line is
+   allowed to wrap naturally (matches the Mac layout). */
+.hero-line:first-child { white-space: nowrap; }
 
 /* Bottom-centered tagline + scroll cue */
 .hero-tagline {
@@ -252,6 +303,7 @@ nav a.nav-link:hover { color: var(--white); }
   text-align: center;
   pointer-events: none;
 }
+
 /* Higher specificity so this beats the later .hero p rule. */
 .hero .hero-tagline p {
   color: var(--accent);
@@ -262,6 +314,20 @@ nav a.nav-link:hover { color: var(--white); }
   margin: 0 0 0.75rem;
   white-space: nowrap;
   max-width: none;
+}
+
+@media (max-width: 900px) {
+  .hero-tagline {
+    position: static;
+    margin-top: 2.5rem;
+    bottom: auto;
+  }
+  .hero .hero-tagline p {
+    white-space: normal;
+    font-size: 0.85rem;
+    letter-spacing: 0.10em;
+    padding: 0 1rem;
+  }
 }
 .hero-scroll {
   pointer-events: auto;
@@ -375,6 +441,45 @@ h1 .accent {
   display: flex; align-items: center; justify-content: center;
 }
 
+/* Layered green glow anchored to the headset's container so it follows
+   the headset on every viewport. Pseudo is oversized via negative insets
+   so the wide outer wash has room to bleed beyond .hero-visual's box. */
+.hero-visual::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -25%; right: -25%; bottom: -30%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 36% at 53% 74%,
+      rgba(31,196,144,0.14) 0%,
+      rgba(31,196,144,0.10) 22%,
+      rgba(31,196,144,0.06) 48%,
+      rgba(31,196,144,0.025) 72%,
+      rgba(31,196,144,0.008) 88%,
+      transparent 100%),
+    radial-gradient(ellipse 46% 26% at 53% 72%,
+      rgba(31,196,144,0.30) 0%,
+      rgba(31,196,144,0.22) 22%,
+      rgba(31,196,144,0.14) 44%,
+      rgba(31,196,144,0.07) 66%,
+      rgba(31,196,144,0.025) 84%,
+      transparent 100%),
+    radial-gradient(ellipse 33% 11% at 53% 63%,
+      rgba(31,196,144,0.52) 0%,
+      rgba(31,196,144,0.34) 32%,
+      rgba(31,196,144,0.18) 58%,
+      rgba(31,196,144,0.07) 80%,
+      rgba(31,196,144,0.02) 92%,
+      transparent 100%),
+    radial-gradient(ellipse 28% 2.6% at 53% 63%,
+      rgba(120,255,200,0.65) 0%,
+      rgba(31,196,144,0.45) 30%,
+      rgba(31,196,144,0.20) 60%,
+      rgba(31,196,144,0.06) 85%,
+      transparent 100%);
+}
+
 /* Multi-layer ambient halo behind the headset. Three stacked ellipses at
    progressively larger sizes / lower alphas give a very gradual fade to
    black and let the green wrap up around the lower goggle edges instead
@@ -390,6 +495,61 @@ h1 .accent {
   width: 100%;
   transform: translateX(2rem) scale(1.25);
   transform-origin: center center;
+}
+
+@media (max-width: 1200px) {
+  .headset { transform: translateX(1rem) scale(1.1); }
+}
+
+@media (max-width: 900px) {
+  /* Bigger on mobile so the headset reads as the dominant hero element,
+     and nudge it up into the viewport so the goggles sit closer to the
+     hero copy above. */
+  .headset {
+    transform: translateY(-4rem) scale(1.22);
+    transform-origin: center 40%;
+  }
+
+  /* The visual block is taller than its image due to the upward translate
+     above — pull its bottom margin back so the tagline below doesn't pick
+     up extra whitespace. */
+  .hero-visual { margin-bottom: -4rem; }
+
+  /* Glow needs to track up so contact shadows sit directly under the
+     goggles on the narrower viewport. Re-anchor each gradient's y% AND
+     translate the whole pseudo by the same -4rem the headset moved, so
+     the contact line stays glued to the bottom of the goggles. */
+  .hero-visual::before {
+    transform: translateY(-4rem);
+    background:
+      radial-gradient(ellipse 60% 36% at 53% 64%,
+        rgba(31,196,144,0.14) 0%,
+        rgba(31,196,144,0.10) 22%,
+        rgba(31,196,144,0.06) 48%,
+        rgba(31,196,144,0.025) 72%,
+        rgba(31,196,144,0.008) 88%,
+        transparent 100%),
+      radial-gradient(ellipse 46% 26% at 53% 62%,
+        rgba(31,196,144,0.30) 0%,
+        rgba(31,196,144,0.22) 22%,
+        rgba(31,196,144,0.14) 44%,
+        rgba(31,196,144,0.07) 66%,
+        rgba(31,196,144,0.025) 84%,
+        transparent 100%),
+      radial-gradient(ellipse 33% 11% at 53% 54%,
+        rgba(31,196,144,0.52) 0%,
+        rgba(31,196,144,0.34) 32%,
+        rgba(31,196,144,0.18) 58%,
+        rgba(31,196,144,0.07) 80%,
+        rgba(31,196,144,0.02) 92%,
+        transparent 100%),
+      radial-gradient(ellipse 28% 2.6% at 53% 54%,
+        rgba(120,255,200,0.65) 0%,
+        rgba(31,196,144,0.45) 30%,
+        rgba(31,196,144,0.20) 60%,
+        rgba(31,196,144,0.06) 85%,
+        transparent 100%);
+  }
 }
 
 /* (Removed: the green line beam used to live here at z-index: 2 and was
@@ -587,6 +747,13 @@ h1 .accent {
 }
 .ba-label-before { left: 15%; }
 .ba-label-after  { right: 15%; }
+/* Hide the BEFORE/AFTER pill buttons on mobile — they're oversized in
+   the tight viewport and the slider drag still works without them. */
+@media (max-width: 900px) {
+  .ba-label,
+  .ba-label-before,
+  .ba-label-after { display: none !important; }
+}
 .ba-label:hover {
   background: rgba(255,255,255,0.18);
   color: #fff;
@@ -696,6 +863,13 @@ h1 .accent {
 .ba-slider.is-grabbing .ba-handle-knob svg,
 .ba-handle-knob:active svg {
   transform: scale(0.92);
+}
+
+/* Shrink the BEFORE/AFTER drag knob on mobile. Placed AFTER the base
+   .ba-handle-knob rule so the cascade resolves to the smaller size. */
+@media (max-width: 900px) {
+  .ba-handle-knob { width: 26px; height: 26px; }
+  .ba-handle-knob svg { width: 12px; height: 12px; }
 }
 
 /* ── Demo video shared base — used by the in-action stage below.
@@ -1138,6 +1312,53 @@ h2 em {
 .feature-card:hover::after {
   opacity: 1;
   transform: translate(0, 0);
+}
+
+/* ── Mobile scroll spotlight ──
+   Only ONE card is "active" at a time — whichever is closest to the
+   viewport center. Active card gets the desktop hover treatment
+   (mint border, corner bracket, rule fill, description in). Inactive
+   cards sit in a dim baseline. When the user scrolls past the last
+   card it falls back to baseline. Gated to ≤900px. */
+@media (max-width: 900px) {
+  .feature-card {
+    opacity: 0.55;
+    transition:
+      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.45s ease-out,
+      box-shadow 0.55s ease-out;
+  }
+  .feature-card p {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.45s ease-out,
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .feature-card.is-active-mobile {
+    opacity: 1;
+    border-color: rgba(31,196,144,0.34);
+    box-shadow:
+      0 18px 40px -10px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(31,196,144,0.06),
+      0 0 26px -8px rgba(31,196,144,0.18);
+  }
+  .feature-card.is-active-mobile .feature-rule {
+    width: 100%;
+    transition: width 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+  }
+  .feature-card.is-active-mobile::after {
+    opacity: 1;
+    transform: translate(0, 0);
+    transition:
+      opacity 0.5s ease-out 0.18s,
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+  }
+  .feature-card.is-active-mobile p {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.22s;
+  }
 }
 
 /* ── SEE IT IN ACTION — through the lens of a Vision Pro ──────────
@@ -2006,6 +2227,5 @@ footer {
 }
 
 @media (max-width: 600px) {
-  nav .nav-links { display: none; }
   .hero { padding-top: 8rem; }
 }
