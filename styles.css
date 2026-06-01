@@ -297,6 +297,56 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   .hero h1 { font-size: clamp(2.4rem, calc(-4.8rem + 32vw), 2.7rem); }
 }
 
+/* Mobile hero re-flow: visor sits BETWEEN headline and CTAs (matches the
+   reference mockup). We use display:contents on .hero-content so its
+   children join .hero-grid's flex order directly — no DOM change. */
+@media (max-width: 900px) {
+  .hero-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .hero-content { display: contents; }
+
+  .hero-eyebrow  { order: 1; margin-bottom: 1rem; }
+  .hero h1        { order: 2; margin-bottom: 1.5rem; }
+  /* Drop the gray subhead on phones — the H1 already carries the message
+     and the mockup's tighter rhythm reads cleaner without it. */
+  .hero-content > p { display: none; }
+  .hero-visual    { order: 3; }
+  .hero-actions   {
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 360px;
+    gap: 0.85rem;
+    margin: 0 auto 2.5rem;
+    /* Lift the CTAs above the headset (z-index:1) so its reflection sits
+       BEHIND them — the opaque primary fully occludes it and the
+       translucent secondary shows the dark backdrop, not the reflection.
+       Reads as solid buttons over the scene rather than a bleed-through. */
+    position: relative;
+    z-index: 2;
+  }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+  }
+  /* The ghost secondary nearly dissolves into the black field on phones
+     (near-black border + 0.04 fill). Give it a defined light edge and a
+     touch more fill so it reads as a tappable button — still clearly
+     subordinate to the solid green primary. Mobile-scoped; desktop keeps
+     its tuned look. */
+  .hero-actions .btn-secondary {
+    border-color: rgba(255,255,255,0.26);
+    background: rgba(255,255,255,0.06);
+  }
+}
+
 .hero-eyebrow {
   font-family: var(--font-display);
   color: var(--accent);
@@ -341,7 +391,9 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
 @media (max-width: 900px) {
   .hero-tagline {
     position: static;
-    margin-top: 2.5rem;
+    /* Tighten the oversized gap to the CTAs (the base .hero-actions also
+       contributes 2.5rem below) so the tagline sits up inside the fold. */
+    margin-top: 0.5rem;
     bottom: auto;
   }
   .hero .hero-tagline p {
@@ -524,57 +576,45 @@ h1 .accent {
 }
 
 @media (max-width: 900px) {
-  /* Bigger on mobile so the headset reads as the dominant hero element,
-     and nudge it up into the viewport so the goggles sit closer to the
-     hero copy above. will-change promotes .headset to its own composited
-     layer — stabilizes iOS Safari rasterization of the masked slider
-     contents inside this transformed parent (fixes black-flash on drag). */
+  /* Bigger on mobile so the headset reads as the dominant hero element.
+     Origin center/center matches desktop so the headset sits in its box
+     the same way — that lets the hand-tuned desktop glow on
+     .hero-visual::before land correctly under the goggles without a
+     mobile-specific override. will-change promotes .headset to its own
+     composited layer — stabilizes iOS Safari rasterization of the masked
+     slider contents inside this transformed parent (fixes black-flash). */
   .headset {
-    transform: translateY(-5rem) scale(1.32);
-    transform-origin: center 40%;
+    transform: scale(1.4);
+    transform-origin: center center;
     will-change: transform;
   }
 
-  /* The visual block is taller than its image due to the upward translate
-     above — pull its bottom margin back so the tagline below doesn't pick
-     up extra whitespace. */
-  .hero-visual { margin-bottom: -5rem; }
+  /* Reserve room below the goggles for the mirrored reflection so the
+     stacked CTAs start beneath it instead of under it. Use MARGIN (not
+     padding): the glow lives on .hero-visual::before anchored to the
+     padding box, so padding-bottom would stretch that box and drag the
+     contact glow down off the goggles. Margin opens the gap outside the
+     box — the reflection overflows into it and the glow stays hugged to
+     the goggle bottom exactly like desktop. */
+  /* margin-top gives the headline breathing room above the goggles;
+     margin-bottom set to 0 closes the dead space between the goggles and
+     the primary CTA so the button sits right under the bright part of the
+     reflection. The headset/headline shift down is offset by the top
+     padding below, which keeps the (already-good) bottom spacing intact. */
+  .hero-visual { margin-top: -0.5rem; margin-bottom: 0; padding-bottom: 0; }
 
-  /* Glow needs to track up so contact shadows sit directly under the
-     goggles on the narrower viewport. Re-anchor each gradient's y% AND
-     translate the whole pseudo by the same -5rem the headset moved, so
-     the contact line stays glued to the bottom of the goggles. */
-  .hero-visual::before {
-    transform: translateY(-5rem);
-    background:
-      radial-gradient(ellipse 60% 36% at 53% 64%,
-        rgba(31,196,144,0.14) 0%,
-        rgba(31,196,144,0.10) 22%,
-        rgba(31,196,144,0.06) 48%,
-        rgba(31,196,144,0.025) 72%,
-        rgba(31,196,144,0.008) 88%,
-        transparent 100%),
-      radial-gradient(ellipse 46% 26% at 53% 62%,
-        rgba(31,196,144,0.30) 0%,
-        rgba(31,196,144,0.22) 22%,
-        rgba(31,196,144,0.14) 44%,
-        rgba(31,196,144,0.07) 66%,
-        rgba(31,196,144,0.025) 84%,
-        transparent 100%),
-      radial-gradient(ellipse 33% 11% at 53% 54%,
-        rgba(31,196,144,0.52) 0%,
-        rgba(31,196,144,0.34) 32%,
-        rgba(31,196,144,0.18) 58%,
-        rgba(31,196,144,0.07) 80%,
-        rgba(31,196,144,0.02) 92%,
-        transparent 100%),
-      radial-gradient(ellipse 28% 2.6% at 53% 54%,
-        rgba(120,255,200,0.65) 0%,
-        rgba(31,196,144,0.45) 30%,
-        rgba(31,196,144,0.20) 60%,
-        rgba(31,196,144,0.06) 85%,
-        transparent 100%);
-  }
+  /* Nudge the whole glow down so the bright green contact line sits just
+     UNDER the two goggle shadows, matching desktop. With center/center
+     origin the inherited desktop gradient lands ~at the goggle bottom on
+     mobile, a hair too high; this drops it to right under the shadows. */
+  .hero-visual::before { transform: translateY(10px); }
+
+  /* Ease the reflection a touch on mobile (base 0.46) so its faint tail
+     in the gap above the primary CTA reads lighter, not muddy. Needs the
+     extra .headset specificity to win over the base rule, which sits
+     later in the source and would otherwise override it. Position is left
+     at the base (top:48% + scaleY(-1)) — already dialed in. */
+  .headset .headset-reflection-core { opacity: 0.36; }
 }
 
 /* (Removed: the green line beam used to live here at z-index: 2 and was
@@ -902,6 +942,38 @@ h1 .accent {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: rgba(255,255,255,0.22);
+  }
+  /* Desktop hides the divider line behind the knob via backdrop-blur,
+     which mobile can't use (iOS black-flash). A translucent white knob
+     can't hide a white line (white over white is always white), so
+     instead break the LINE behind the knob. The line normally is the
+     .ba-handle background; on mobile we move it to a ::before pseudo and
+     mask a transparent disc (~knob radius) out of its midpoint. The knob
+     is a real child, NOT the pseudo, so it stays fully visible — only the
+     line vanishes behind it, exactly like the desktop frosted look.
+     Applies to the main and mirrored sliders alike. */
+  .ba-handle {
+    background: none;
+    box-shadow: none;
+  }
+  .ba-handle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.55) 14%,
+      rgba(255,255,255,1) 50%,
+      rgba(255,255,255,0.55) 86%,
+      rgba(255,255,255,0) 100%
+    );
+    /* Hole radius tucks just inside the 13px knob radius so the line
+       reaches the knob edge (touches it) instead of stopping short. */
+    -webkit-mask: radial-gradient(circle 13px at 50% 50%,
+      transparent 0, transparent 10px, #000 12px);
+            mask: radial-gradient(circle 13px at 50% 50%,
+      transparent 0, transparent 10px, #000 12px);
   }
   .ba-handle-knob svg { width: 12px; height: 12px; }
   /* Promote the slider image layers to their own composited layers so
@@ -2279,5 +2351,10 @@ footer {
 }
 
 @media (max-width: 600px) {
-  .hero { padding-top: 8rem; }
+  /* Top padding absorbs the downward shift of the headset/headline group
+     (hero-visual margin-bottom is 0), so closing the goggles→CTA dead
+     space doesn't dump slack at the bottom — it lands as breathing room
+     under the nav instead. Trimmed 1rem to fund the headline→goggles
+     breathing room (hero-visual margin-top) without moving the bottom. */
+  .hero { padding-top: 7rem; }
 }
