@@ -320,7 +320,10 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    max-width: 360px;
+    /* Narrower than the headset so the stacked CTAs read as trim pills,
+       not full-bleed bars. Still wide enough for "Watch It in Action" +
+       its play icon to sit on one line. Centered via margin auto. */
+    max-width: 280px;
     gap: 0.85rem;
     margin: 0 auto 2.5rem;
     /* Lift the CTAs above the headset (z-index:1) so its reflection sits
@@ -609,12 +612,16 @@ h1 .accent {
      mobile, a hair too high; this drops it to right under the shadows. */
   .hero-visual::before { transform: translateY(10px); }
 
-  /* Ease the reflection a touch on mobile (base 0.46) so its faint tail
-     in the gap above the primary CTA reads lighter, not muddy. Needs the
-     extra .headset specificity to win over the base rule, which sits
-     later in the source and would otherwise override it. Position is left
-     at the base (top:48% + scaleY(-1)) — already dialed in. */
-  .headset .headset-reflection-core { opacity: 0.36; }
+  /* Drop the mirrored reflection entirely on mobile. It's a second copy of
+     the SVG-clipped/masked before-after slider (clip-path: url(#lens-clip)
+     + mask: url(#lens-mask) with an feGaussianBlur), and iOS Safari
+     intermittently fails to rasterize the lens when it's drawn twice inside
+     the transformed/composited headset — so often only ONE of the two
+     showed the real image, and reloads were a coin-flip. Rendering just the
+     main headset on phones makes the hero deterministic. Desktop keeps the
+     reflection (it renders fine there). Extra .headset specificity wins over
+     the base .headset-reflection-core rule that sits later in the source. */
+  .headset .headset-reflection-core { display: none; }
 }
 
 /* (Removed: the green line beam used to live here at z-index: 2 and was
