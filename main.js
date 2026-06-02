@@ -227,8 +227,8 @@ if (reduceMotion) {
 }
 
 
-// ── Cursor-tracking glow for feature & audience cards ──
-document.querySelectorAll('.feature-card, .audience-card').forEach((card) => {
+// ── Cursor-tracking glow for feature cards ──
+document.querySelectorAll('.feature-card').forEach((card) => {
   card.addEventListener('mousemove', (e) => {
     const rect = card.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -1061,4 +1061,74 @@ init();
     });
   }, { threshold: 0.25 });
   io.observe(cta);
+})();
+
+
+// ── WHY IT WINS — the line draws from confidence to revenue as you scroll ──
+(function () {
+  const why = document.getElementById('why');
+  const pin = why && why.querySelector('.why-pin');
+  const core = document.getElementById('why-line-core');
+  if (!why || !pin || !core) return;
+
+  const glowLine = document.getElementById('why-line-glow');
+  const tip = document.getElementById('why-tip');
+  const stops = Array.from(why.querySelectorAll('.why-stop'));
+  const svg = why.querySelector('.why-line');
+  const photo = why.querySelector('.why-photo');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const len = core.getTotalLength();
+
+  [core, glowLine].forEach((p) => { p.style.strokeDashoffset = len; p.style.strokeDasharray = len; });
+
+  // position each milestone exactly onto the path via the SVG's screen transform
+  function placeStops() {
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    // stops live inside .why-stage (which is translated), so measure against the
+    // svg's own box — NOT the pin — or they pick up the translateX twice.
+    const baseR = svg.getBoundingClientRect();
+    const pt = svg.createSVGPoint();
+    stops.forEach((s) => {
+      const onPath = core.getPointAtLength(len * parseFloat(s.dataset.frac));
+      pt.x = onPath.x; pt.y = onPath.y;
+      const sp = pt.matrixTransform(ctm);
+      s.style.left = (sp.x - baseR.left) + 'px';
+      s.style.top = (sp.y - baseR.top) + 'px';
+    });
+  }
+  placeStops();
+  requestAnimationFrame(placeStops);
+  addEventListener('resize', placeStops);
+  if (photo) photo.addEventListener('load', placeStops);
+
+  // reduced motion: show the finished line + all milestones, no scrub
+  if (reduce) {
+    [core, glowLine].forEach((p) => { p.style.strokeDashoffset = 0; });
+    pin.style.setProperty('--prog', 1);
+    stops.forEach((s) => s.classList.add('on'));
+    return;
+  }
+
+  const THRESH = [0.0, 0.446, 0.595, 0.746, 0.97];
+  function tick() {
+    const r = why.getBoundingClientRect();
+    const total = r.height - window.innerHeight;
+    let p = total > 0 ? (-r.top) / total : (r.top < 0 ? 1 : 0);
+    p = Math.max(0, Math.min(1, p));
+    const off = len * (1 - p);
+    core.style.strokeDashoffset = off;
+    glowLine.style.strokeDashoffset = off;
+    pin.style.setProperty('--prog', p);
+    if (tip) {
+      const pt = core.getPointAtLength(len * p);
+      tip.setAttribute('cx', pt.x);
+      tip.setAttribute('cy', pt.y);
+      tip.style.opacity = (p > 0.015 && p < 0.99) ? '1' : '0';
+    }
+    stops.forEach((s, i) => s.classList.toggle('on', p >= THRESH[i]));
+  }
+  addEventListener('scroll', tick, { passive: true });
+  addEventListener('resize', tick);
+  tick();
 })();

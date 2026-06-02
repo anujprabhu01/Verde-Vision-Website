@@ -15,6 +15,7 @@
   --green-card:   rgba(255,255,255,0.04);
   --green-border: #1e1e1e;
   --accent:       #1fc490;
+  --accent-bright:#7dffcf;
   --accent-dim:   #19a578;
   --accent-soft:  rgba(31,196,144,0.32);
   --text:         #d4d4d4;
@@ -217,9 +218,12 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
 
 /* ── HERO ── */
 .hero {
-  min-height: calc(100vh + 8rem);
+  /* +8rem to both min-height and bottom padding keeps the headset + glow
+     vertically centered EXACTLY where they were, while extending the hero
+     down so the full Vision Pro reflection clears before the next section. */
+  min-height: calc(100vh + 16rem);
   display: flex; align-items: center;
-  padding: 7rem 0 clamp(4rem, 12vw, 15rem) 5vw;
+  padding: 7rem 0 calc(clamp(4rem, 12vw, 15rem) + 8rem) 5vw;
   position: relative;
   overflow: hidden;
 }
@@ -1797,155 +1801,94 @@ h2 em {
   .ia-meta-l { flex-wrap: wrap; }
 }
 
-/* ── AUDIENCE ──
-   Clean 2x2 grid with crisp dividers — geometric, no offsets. */
-.audience-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  margin-top: 3.5rem;
-  counter-reset: audience;
-  border-top: 1px solid var(--rule);
-  border-left: 1px solid var(--rule);
+/* ── WHY IT WINS — gold path over a real landscape ──
+   Pinned section. A warm gold line draws up the real lit walkway in the photo as
+   you scroll, igniting milestones beside it; the photo feathers into page-black. */
+.why { padding: 0; height: 300vh; position: relative; }
+.why-pin {
+  position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--green-dark);
+  --prog: 0; --why-gold: #e3a94e; --why-gold-bright: #ffd98a;
 }
 
-@media (max-width: 720px) {
-  .audience-grid { grid-template-columns: 1fr; }
+/* the scene — full-bleed landscape photo, nudged right, feathered into black */
+.why-stage { position: absolute; inset: 0; z-index: 0; transform: translateX(4%); }
+.why-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;
+  filter: brightness(0.82) saturate(0.96) contrast(1.02); }
+.why-scene-fade { position: absolute; inset: 0; pointer-events: none; background:
+  linear-gradient(to right, var(--green-dark) 0%, rgba(10,10,10,0.55) 20%, transparent 46%),
+  linear-gradient(to bottom, var(--green-dark) 0%, transparent 18%),
+  linear-gradient(to top, var(--green-dark) 0%, transparent 12%); }
+
+.why-line { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; }
+.why-line path { fill: none; stroke-linecap: round; }
+.why-line-glow { stroke: var(--why-gold); stroke-width: 0.8; opacity: 0.5; filter: url(#why-soft); }
+.why-line-core { stroke: url(#why-grad); stroke-width: 0.26; }
+.why-tip { fill: #fff2d6; filter: url(#why-soft); opacity: 0; transition: opacity 0.3s; }
+
+/* milestones beside the path */
+.why-stops { position: absolute; inset: 0; z-index: 2; }
+.why-stop { position: absolute; width: 54px; height: 54px; transform: translate(-50%, -50%);
+  opacity: 0.32; transition: opacity 0.6s ease; }
+.why-stop.on { opacity: 1; }
+.why-dot { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid rgba(255,235,200,0.32); color: #f6e8cb;
+  background: radial-gradient(circle at 50% 38%, #16120c, #0a0806);
+  box-shadow: 0 6px 20px -6px rgba(0,0,0,0.8);
+  transition: border-color 0.6s, box-shadow 0.6s; }
+.why-stop.on .why-dot { border-color: var(--why-gold); box-shadow: 0 0 26px rgba(227,169,78,0.55); }
+.why-stop-last.on .why-dot { border-color: var(--why-gold-bright); box-shadow: 0 0 38px rgba(255,217,138,0.65); }
+.why-dot svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.why-lbl { position: absolute; right: calc(100% + 1.1rem); top: 50%; transform: translateY(-50%);
+  width: max-content; max-width: 15rem; text-align: right; }
+.why-stop.lbl-right .why-lbl { right: auto; left: calc(100% + 1.1rem); text-align: left; }
+.why-lbl::before { content: ""; position: absolute; inset: -0.7rem -1rem; z-index: -1;
+  background: radial-gradient(125% 130% at 72% 50%, rgba(6,8,7,0.8), transparent 76%); }
+.why-lbl b { display: block; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400;
+  color: #fff; letter-spacing: -0.01em; text-shadow: 0 1px 12px rgba(0,0,0,0.8); }
+.why-lbl i { font-style: normal; font-size: 0.8rem; color: #c9bda8; display: block; line-height: 1.4;
+  margin-top: 0.12rem; text-shadow: 0 1px 10px rgba(0,0,0,0.85); }
+.why-stop-last .why-lbl b { color: var(--why-gold-bright); }
+
+/* content rail (left, over the feathered photo / black) */
+.why-content { position: relative; z-index: 5; height: 100%; max-width: 1480px; margin: 0 auto;
+  padding: 0 5vw; display: flex; align-items: center; }
+.why-rail { max-width: 32rem; }
+.why-rail .section-label { margin-bottom: 1.6rem; color: var(--accent); font-size: 1.05rem; letter-spacing: 0.26em; }
+.why-rail h2 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-bottom: 0; line-height: 1.08; white-space: nowrap; }
+.why-rail h2 em { color: var(--accent); }
+.why-levers { list-style: none; margin: 2.6rem 0 0; padding: 2.1rem 0 0;
+  border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 1.4rem; }
+.why-lever { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; }
+.why-lever-num { font-family: var(--font-mono); font-size: 0.74rem; color: var(--accent); letter-spacing: 0.18em; padding-top: 0.4rem; }
+.why-lever h3 { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; color: var(--white); margin-bottom: 0.15rem; }
+.why-lever p { font-size: 0.98rem; color: var(--text-muted); line-height: 1.55; }
+
+/* narrower desktops: photo takes more relative width, so keep the rail compact */
+@media (max-width: 1400px) {
+  .why-rail { max-width: 30rem; }
+  .why-rail h2 { font-size: clamp(2rem, 3.4vw, 2.75rem); }
 }
 
-.audience-card {
-  position: relative;
-  background: transparent;
-  border-right: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  border-radius: 0;
-  padding: 2.25rem 2rem 2rem;
-  overflow: hidden;
-  isolation: isolate;
-  counter-increment: audience;
-  transition: background 0.35s ease-out;
+/* mobile: photo as a dim backdrop, rail on top, no traced line/labels */
+@media (max-width: 960px) {
+  .why { height: auto; }
+  .why-pin { position: static; height: auto; min-height: 78vh; padding: 5.5rem 0; }
+  .why-stage { position: absolute; inset: 0; aspect-ratio: auto; opacity: 0.4; transform: none; }
+  .why-photo { object-position: center; }
+  /* drop the left scrim on mobile (text is full-width here) so the photo reads centered */
+  .why-scene-fade { background:
+    linear-gradient(to bottom, var(--green-dark) 0%, transparent 16%),
+    linear-gradient(to top, var(--green-dark) 0%, transparent 12%); }
+  .why-line, .why-stops { display: none; }
+  .why-content { position: relative; padding: 0 6vw; }
+  .why-rail { max-width: none; }
+  .why-rail h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
+  .why-rail h2 br { display: none; }   /* let the headline wrap naturally on phones */
 }
-
-/* Mono numeral pinned top-left, matching feature cards */
-.audience-card > h3::before {
-  content: counter(audience, decimal-leading-zero);
-  position: absolute;
-  top: 1.5rem; left: 2rem;
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  line-height: 1;
-  color: var(--accent);
+@media (prefers-reduced-motion: reduce) {
+  .why-stop { transition: none; }
+  .why-tip { display: none; }
 }
-
-/* Cursor-following glow */
-.audience-card::before {
-  content: "";
-  position: absolute; inset: 0;
-  background: radial-gradient(
-    360px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(31,196,144,0.14) 0%,
-    rgba(31,196,144,0.05) 35%,
-    transparent 65%
-  );
-  opacity: 0;
-  transition: opacity 0.4s ease-out;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.audience-card:hover {
-  background: rgba(255,255,255,0.025);
-}
-.audience-card:hover::before { opacity: 1; }
-
-.audience-card h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: -0.012em;
-  color: var(--white);
-  margin-top: 1.4rem;
-  margin-bottom: 0.55rem;
-}
-
-.audience-card p {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  line-height: 1.55;
-}
-
-/* ── WHY VISION PRO ── */
-.why {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  .why { grid-template-columns: 1fr; }
-  .why-visual { order: -1; }
-}
-
-.why-content p {
-  font-size: 1.05rem; color: var(--text-muted); margin-top: 1.2rem;
-  max-width: 480px;
-}
-
-.why-visual {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  isolation: isolate;
-}
-
-/* Geometric framed image — flat rectangle with corner brackets */
-.why-frame {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 5/4;
-  padding: 14px;
-}
-.why-frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 1px solid var(--rule);
-  pointer-events: none;
-}
-.why-image {
-  display: block;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center 60%;
-  position: relative;
-  z-index: 1;
-}
-.corner {
-  position: absolute;
-  width: 18px; height: 18px;
-  z-index: 2;
-  pointer-events: none;
-}
-.corner::before, .corner::after {
-  content: "";
-  position: absolute;
-  background: var(--accent);
-}
-.corner::before { width: 100%; height: 1px; }
-.corner::after  { width: 1px; height: 100%; }
-.corner-tl { top: 0; left: 0; }
-.corner-tl::before { top: 0; left: 0; }
-.corner-tl::after  { top: 0; left: 0; }
-.corner-tr { top: 0; right: 0; }
-.corner-tr::before { top: 0; right: 0; }
-.corner-tr::after  { top: 0; right: 0; }
-.corner-bl { bottom: 0; left: 0; }
-.corner-bl::before { bottom: 0; left: 0; }
-.corner-bl::after  { bottom: 0; left: 0; }
-.corner-br { bottom: 0; right: 0; }
-.corner-br::before { bottom: 0; right: 0; }
-.corner-br::after  { bottom: 0; right: 0; }
 
 /* ── BOOKING ── */
 .booking { background: transparent; }
@@ -2247,7 +2190,7 @@ footer {
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr;
   gap: 3rem 2rem;
   align-items: start;
 }
