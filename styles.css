@@ -373,7 +373,10 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
 /* Bottom-centered tagline + scroll cue */
 .hero-tagline {
   position: absolute;
-  bottom: 10.5rem;
+  /* Hero is 100vh + 16rem tall, so bottom:16rem pins the tagline's bottom
+     edge right at the fold (chevron as a scroll cue) with the text just
+     above it — visible without scrolling, on any viewport height. */
+  bottom: 16rem;
   left: 0; right: 0;
   z-index: 2;
   display: flex;
