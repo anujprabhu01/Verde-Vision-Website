@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=57" />
+  <link rel="stylesheet" href="styles.css?v=76" />
 </head>
 <body>
 
@@ -48,9 +48,8 @@
       <span class="nav-toggle-bar"></span>
     </button>
     <div class="nav-links" id="nav-links">
+      <a href="#why" class="nav-link">Why It Wins</a>
       <a href="#features" class="nav-link">Features</a>
-      <a href="#who" class="nav-link">Who It's For</a>
-      <a href="#why" class="nav-link">Why Vision Pro</a>
       <a href="#booking" class="nav-cta">Book a Demo</a>
     </div>
   </nav>
@@ -159,9 +158,56 @@
 
     <div class="hero-tagline">
       <p class="hero-tagline-text hero-anim hero-anim-5">Designed for landscape pros &mdash; Built to help you win</p>
-      <a href="#features" class="hero-scroll" aria-label="Scroll to next section">
+      <a href="#why" class="hero-scroll" aria-label="Scroll to next section">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </a>
+    </div>
+  </section>
+
+  <!-- WHY IT WINS — gold path traced up a real lit landscape toward the house -->
+  <section class="why" id="why">
+    <div class="why-pin">
+
+      <!-- the scene: full-bleed photo + gold path drawn up the real walkway -->
+      <div class="why-stage">
+        <img class="why-photo" src="sunset-mountain.webp?v=1" alt="A desert estate at dusk, a lit path winding up to the home" />
+        <div class="why-scene-fade" aria-hidden="true"></div>
+        <svg class="why-line" viewBox="0 0 100 56" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="why-grad" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0" stop-color="#e3a94e" stop-opacity="0.5"/>
+              <stop offset="0.55" stop-color="#f1b75e"/>
+              <stop offset="1" stop-color="#ffd98a"/>
+            </linearGradient>
+            <filter id="why-soft" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="0.85"/></filter>
+          </defs>
+          <path class="why-line-glow" id="why-line-glow" d="M43 45.3 C47.7 43.4 66.3 36.65 71.3 34.1 C76.3 31.55 74.2 31.27 73 30 C71.8 28.73 63.83 27.75 64 26.5 C64.17 25.25 74.75 23.83 74 22.5 C73.25 21.17 61.42 19.5 59.5 18.5 C57.58 17.5 62 16.83 62.5 16.5"></path>
+          <path class="why-line-core" id="why-line-core" d="M43 45.3 C47.7 43.4 66.3 36.65 71.3 34.1 C76.3 31.55 74.2 31.27 73 30 C71.8 28.73 63.83 27.75 64 26.5 C64.17 25.25 74.75 23.83 74 22.5 C73.25 21.17 61.42 19.5 59.5 18.5 C57.58 17.5 62 16.83 62.5 16.5"></path>
+          <circle class="why-tip" id="why-tip" r="0.6"></circle>
+        </svg>
+
+        <!-- words on the path (positioned onto the path by JS) -->
+        <div class="why-stops" id="why-stops">
+          <div class="why-stop lbl-right" data-frac="0"><span class="why-dot"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6"/><path d="M19 20a5 5 0 0 0-3-4.5"/></svg></span><div class="why-lbl"><b>More confidence</b><i>they see the full vision at true scale</i></div></div>
+          <div class="why-stop lbl-right" data-frac="0.446"><span class="why-dot"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><div class="why-lbl"><b>Fewer revisions</b><i>clarity up front, less back-and-forth</i></div></div>
+          <div class="why-stop" data-frac="0.595"><span class="why-dot"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div class="why-lbl"><b>Faster approvals</b><i>they understand it, so they sign sooner</i></div></div>
+          <div class="why-stop lbl-right" data-frac="0.746"><span class="why-dot"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 6.5A4 4 0 0 0 13 4h-2a3.5 3.5 0 0 0 0 7h2a3.5 3.5 0 0 1 0 7h-2A4 4 0 0 1 7 17"/></svg></span><div class="why-lbl"><b>Bigger projects</b><i>confident clients invest more</i></div></div>
+          <div class="why-stop why-stop-last lbl-right" data-frac="1"><span class="why-dot"><svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></span><div class="why-lbl"><b>More revenue</b><i>more deals, higher value, more profit</i></div></div>
+        </div>
+      </div>
+
+      <!-- content rail -->
+      <div class="why-content">
+        <div class="why-rail">
+          <div class="section-label" data-chapter="01">Why It Wins</div>
+          <h2>Turn <em>&ldquo;let me think about it&rdquo;</em> <br />into <em>&ldquo;let&rsquo;s build&nbsp;it.&rdquo;</em></h2>
+          <ol class="why-levers">
+            <li class="why-lever"><span class="why-lever-num">01</span><div><h3>Close more</h3><p>Confidence sells. A client who can see the result says yes &mdash; no leap of faith.</p></div></li>
+            <li class="why-lever"><span class="why-lever-num">02</span><div><h3>Sell bigger</h3><p>At true scale, the upgrade sells itself.</p></div></li>
+            <li class="why-lever"><span class="why-lever-num">03</span><div><h3>Close faster</h3><p>They&rsquo;re approving what they can see, not a drawing.</p></div></li>
+          </ol>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -170,7 +216,7 @@
     <div class="container">
       <div class="features-header">
         <div class="features-header-lede">
-          <div class="section-label reveal" data-chapter="01">What VerdeVision Does</div>
+          <div class="section-label reveal" data-chapter="02">What VerdeVision Does</div>
           <h2 class="reveal reveal-2">Everything you need to<br class="head-break" /> design with <em>confidence</em>.</h2>
         </div>
         <div class="features-header-desc reveal reveal-3">
@@ -251,7 +297,7 @@
   <section class="in-action" id="in-action" data-reveal-section>
     <div class="container">
       <div class="action-header">
-        <div class="section-label reveal" data-chapter="02">See It In Action</div>
+        <div class="section-label reveal" data-chapter="03">See It In Action</div>
         <h2 class="reveal reveal-2 action-headline">A real session, in a real <em>yard</em>.</h2>
       </div>
     </div>
@@ -315,66 +361,10 @@
     </div>
   </section>
 
-  <!-- WHO IT'S FOR -->
-  <section id="who" data-reveal-section>
-    <div class="container">
-      <div class="section-label reveal" data-chapter="03">Who It's For</div>
-      <h2 class="reveal reveal-2">Built for <em>everyone</em> who works with outdoor space</h2>
-      <p class="section-intro reveal reveal-3">
-        Whether you're redesigning your own backyard or presenting a $50k project to a client,
-        VerdeVision changes how you see the work.
-      </p>
-
-      <div class="audience-grid reveal reveal-4">
-        <div class="audience-card">
-          <h3>Homeowners</h3>
-          <p>Plan a yard renovation and see exactly what you're getting — before spending a dollar on plants or labor.</p>
-        </div>
-        <div class="audience-card">
-          <h3>Landscape Designers</h3>
-          <p>A powerful presentation and quoting tool that makes your proposals impossible to say no to.</p>
-        </div>
-        <div class="audience-card">
-          <h3>Nurseries & Garden Centers</h3>
-          <p>Help customers visualize how plants will look at home — turning browsers into buyers.</p>
-        </div>
-        <div class="audience-card">
-          <h3>Property Developers</h3>
-          <p>Mock up communal green spaces at true scale before any shovels hit the ground.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WHY VISION PRO -->
-  <section class="why" id="why" data-reveal-section>
-    <div class="why-content container" style="padding: 0;">
-      <div class="section-label reveal" data-chapter="04">Why Apple Vision Pro</div>
-      <h2 class="reveal reveal-2">Design <em>spatially</em>, judge <em>spatially</em></h2>
-      <p class="reveal reveal-3">
-        Traditional landscape design software shows you a flat picture on a screen.
-        VerdeVision puts the design <strong style="color: var(--text);">in your space</strong>, at full scale.
-      </p>
-      <p class="reveal reveal-4">
-        Walk around a virtual Mexican Fence Post Cactus. Look up to judge its height. Step back and
-        see how it frames the patio. You'll make better decisions faster — because spatially, it almost is real.
-      </p>
-    </div>
-    <div class="why-visual reveal reveal-3">
-      <div class="why-frame">
-        <span class="corner corner-tl" aria-hidden="true"></span>
-        <span class="corner corner-tr" aria-hidden="true"></span>
-        <span class="corner corner-bl" aria-hidden="true"></span>
-        <span class="corner corner-br" aria-hidden="true"></span>
-        <img class="why-image" src="After.png" alt="A designed landscape rendered through Verde Vision" />
-      </div>
-    </div>
-  </section>
-
   <!-- BOOK A DEMO -->
   <section class="booking" id="booking" data-reveal-section>
     <div class="container">
-      <div class="section-label reveal" data-chapter="05">Book a Demo</div>
+      <div class="section-label reveal" data-chapter="04">Book a Demo</div>
       <h2 class="reveal reveal-2">See VerdeVision in <em>action</em></h2>
       <p class="section-intro reveal reveal-3">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
 
@@ -472,15 +462,6 @@
         </ul>
       </div>
       <div class="footer-col">
-        <p class="footer-col-title">For</p>
-        <ul>
-          <li><a href="#who">Homeowners</a></li>
-          <li><a href="#who">Designers</a></li>
-          <li><a href="#who">Nurseries</a></li>
-          <li><a href="#who">Developers</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
         <p class="footer-col-title">Contact</p>
         <ul>
           <li><a href="mailto:demos@useverdevision.com">Email us</a></li>
@@ -494,6 +475,6 @@
     </div>
   </footer>
 
-  <script src="main.js?v=28"></script>
+  <script src="main.js?v=42"></script>
 </body>
 </html>
