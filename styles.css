@@ -316,8 +316,9 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   .hero-eyebrow  { order: 1; margin-bottom: 1rem; }
   .hero h1        { order: 2; margin-bottom: 1.5rem; }
   /* Drop the gray subhead on phones — the H1 already carries the message
-     and the mockup's tighter rhythm reads cleaner without it. */
-  .hero-content > p { display: none; }
+     and the mockup's tighter rhythm reads cleaner without it. Keep the
+     accent tagline visible (it's also a direct <p> child of hero-content). */
+  .hero-content > p:not(.hero-tagline-text) { display: none; }
   .hero-visual    { order: 3; }
   .hero-actions   {
     order: 4;
@@ -370,13 +371,25 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
    allowed to wrap naturally (matches the Mac layout). */
 .hero-line:first-child { white-space: nowrap; }
 
-/* Bottom-centered tagline + scroll cue */
+/* Positioning line under the hero CTAs (lives in the left column so it's
+   visible without scrolling at any viewport height). Higher specificity
+   than .hero p so it keeps the accent treatment, not the gray subhead. */
+.hero .hero-tagline-text {
+  color: var(--accent);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0;
+  max-width: 26rem;
+}
+
+/* Now holds only the centered scroll-cue chevron. */
 .hero-tagline {
   position: absolute;
-  /* Hero is 100vh + 16rem tall, so bottom:16rem pins the tagline's bottom
-     edge right at the fold (chevron as a scroll cue) with the text just
-     above it — visible without scrolling, on any viewport height. */
-  bottom: 16rem;
+  /* Hero is 100vh + 16rem tall; bottom:17rem floats the chevron just above
+     the fold, centered, as a scroll cue — clear of the headset. */
+  bottom: 17rem;
   left: 0; right: 0;
   z-index: 2;
   display: flex;
@@ -386,31 +399,23 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   pointer-events: none;
 }
 
-/* Higher specificity so this beats the later .hero p rule. */
-.hero .hero-tagline p {
-  color: var(--accent);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin: 0 0 0.75rem;
-  white-space: nowrap;
-  max-width: none;
-}
-
 @media (max-width: 900px) {
+  /* Tagline rejoins the flex flow right after the CTAs (order:5); the
+     chevron container stays at the very bottom as the scroll cue. */
   .hero-tagline {
     position: static;
-    /* Tighten the oversized gap to the CTAs (the base .hero-actions also
-       contributes 2.5rem below) so the tagline sits up inside the fold. */
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
     bottom: auto;
   }
-  .hero .hero-tagline p {
+  .hero .hero-tagline-text {
+    order: 5;
+    text-align: center;
     white-space: normal;
     font-size: 0.85rem;
     letter-spacing: 0.10em;
+    margin: 0 auto;
     padding: 0 1rem;
+    max-width: 320px;
   }
 }
 .hero-scroll {
