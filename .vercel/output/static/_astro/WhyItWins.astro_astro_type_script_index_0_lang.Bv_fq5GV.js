@@ -1,1 +1,0 @@
-import{_ as r}from"./preload-helper.CVfkMyKi.js";const s=new IntersectionObserver((o,t)=>{o[0].isIntersecting&&(t.disconnect(),r(()=>import("./ScrollPath.BpP0TEUh.js"),[]))},{threshold:.1}),e=document.querySelector(".why");e&&s.observe(e);

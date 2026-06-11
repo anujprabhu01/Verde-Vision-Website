@@ -1,7 +1,10 @@
 # build output
 dist/
+.vercel/output/
 # generated types
 .astro/
+# superpowers brainstorm artifacts
+.superpowers/
 
 # dependencies
 node_modules/

@@ -1,7 +1,0 @@
-{"type":"server-started","port":65329,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:65329","screen_dir":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/content","state_dir":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/state"}
-{"type":"screen-added","file":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/content/tech-stack.html"}
-{"type":"screen-added","file":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/content/architecture.html"}
-{"type":"screen-added","file":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/content/performance.html"}
-{"type":"screen-added","file":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/content/cross-device.html"}
-{"type":"screen-added","file":"/Users/anujprabhu/Verde-Vision-Website/.superpowers/brainstorm/8854-1781137276/content/migration-plan.html"}
-{"type":"server-stopped","reason":"idle timeout"}
