@@ -61,7 +61,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const a = (rect.width * 0.5) * SHAPE_SCALE_X;
     const b = (rect.height * 0.5) * SHAPE_SCALE_Y;
     if (a <= 0 || b <= 0) {
-      requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(frame);
       return;
     }
 
@@ -72,7 +72,7 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 
     const screenCY = cyDoc - scrollY;
     if (screenCY < -maxAxis || screenCY > viewH + maxAxis) {
-      requestAnimationFrame(frame);
+      rafId = requestAnimationFrame(frame);
       return;
     }
 
@@ -151,10 +151,18 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       }
     }
 
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
   }
 
   resize();
   window.addEventListener('resize', resize);
-  requestAnimationFrame(frame);
+  let rafId = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(rafId);
+    } else {
+      rafId = requestAnimationFrame(frame);
+    }
+  });
 }
