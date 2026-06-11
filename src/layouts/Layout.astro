@@ -1,0 +1,44 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource/fraunces/400.css';
+import '@fontsource/fraunces/400-italic.css';
+import '@fontsource/fraunces/500.css';
+import '@fontsource/fraunces/600.css';
+import '@fontsource/geist-mono/400.css';
+import '@fontsource/geist-mono/500.css';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'VerdeVision — See the yard before you build it',
+  description = 'VerdeVision is a spatial landscape design app for Apple Vision Pro. Drop life-size virtual plants into your real yard, walk around them, and price the design — all before breaking ground.',
+} = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/After.png" />
+    <meta property="og:site_name" content="VerdeVision" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="/After.png" />
+    <link rel="icon" type="image/png" href="/verde_vision_logo.png" />
+    <link rel="apple-touch-icon" href="/verde_vision_logo.png" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

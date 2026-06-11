@@ -1,0 +1,167 @@
+---
+import { Image } from 'astro:assets';
+import sunsetImg from '../assets/sunset-mountain.webp';
+---
+<section class="why" id="why">
+  <div class="why-pin">
+
+    <!-- the scene: full-bleed photo + gold path drawn up the real walkway -->
+    <div class="why-stage">
+      <Image
+        class="why-photo"
+        src={sunsetImg}
+        alt="A desert estate at dusk, a lit path winding up to the home"
+        widths={[800, 1200, 1800]}
+        sizes="100vw"
+      />
+      <div class="why-scene-fade" aria-hidden="true"></div>
+      <svg class="why-line" viewBox="0 0 100 56" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="why-grad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#e3a94e" stop-opacity="0.5"/>
+            <stop offset="0.55" stop-color="#f1b75e"/>
+            <stop offset="1" stop-color="#ffd98a"/>
+          </linearGradient>
+          <filter id="why-soft" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="0.85"/></filter>
+        </defs>
+        <path class="why-line-glow" id="why-line-glow" d="M43 45.3 C47.7 43.4 66.3 36.65 71.3 34.1 C76.3 31.55 74.2 31.27 73 30 C71.8 28.73 63.83 27.75 64 26.5 C64.17 25.25 74.75 23.83 74 22.5 C73.25 21.17 61.42 19.5 59.5 18.5 C57.58 17.5 62 16.83 62.5 16.5"></path>
+        <path class="why-line-core" id="why-line-core" d="M43 45.3 C47.7 43.4 66.3 36.65 71.3 34.1 C76.3 31.55 74.2 31.27 73 30 C71.8 28.73 63.83 27.75 64 26.5 C64.17 25.25 74.75 23.83 74 22.5 C73.25 21.17 61.42 19.5 59.5 18.5 C57.58 17.5 62 16.83 62.5 16.5"></path>
+        <circle class="why-tip" id="why-tip" r="0.6"></circle>
+      </svg>
+
+      <!-- words on the path (positioned onto the path by JS) -->
+      <div class="why-stops" id="why-stops">
+        <div class="why-stop lbl-right" data-frac="0"><span class="why-dot"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 6a3 3 0 0 1 0 6"/><path d="M19 20a5 5 0 0 0-3-4.5"/></svg></span><div class="why-lbl"><b>More confidence</b><i>they see the full vision at true scale</i></div></div>
+        <div class="why-stop lbl-right" data-frac="0.446"><span class="why-dot"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span><div class="why-lbl"><b>Fewer revisions</b><i>clarity up front, less back-and-forth</i></div></div>
+        <div class="why-stop" data-frac="0.595"><span class="why-dot"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><div class="why-lbl"><b>Faster approvals</b><i>they understand it, so they sign sooner</i></div></div>
+        <div class="why-stop lbl-right" data-frac="0.746"><span class="why-dot"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 6.5A4 4 0 0 0 13 4h-2a3.5 3.5 0 0 0 0 7h2a3.5 3.5 0 0 1 0 7h-2A4 4 0 0 1 7 17"/></svg></span><div class="why-lbl"><b>Bigger projects</b><i>confident clients invest more</i></div></div>
+        <div class="why-stop why-stop-last lbl-right" data-frac="1"><span class="why-dot"><svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></span><div class="why-lbl"><b>More revenue</b><i>more deals, higher value, more profit</i></div></div>
+      </div>
+    </div>
+
+    <!-- content rail -->
+    <div class="why-content">
+      <div class="why-rail">
+        <div class="section-label" data-chapter="01">Why It Wins</div>
+        <h2>Turn <em>&ldquo;let me think about it&rdquo;</em> <br />into <em>&ldquo;let&rsquo;s build&nbsp;it.&rdquo;</em></h2>
+        <ol class="why-levers">
+          <li class="why-lever"><span class="why-lever-num">01</span><div><h3>Close more</h3><p>Confidence sells. A client who can see the result says yes &mdash; no leap of faith.</p></div></li>
+          <li class="why-lever"><span class="why-lever-num">02</span><div><h3>Sell bigger</h3><p>At true scale, the upgrade sells itself.</p></div></li>
+          <li class="why-lever"><span class="why-lever-num">03</span><div><h3>Close faster</h3><p>They&rsquo;re approving what they can see, not a drawing.</p></div></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // client:visible pattern — only load the scroll animation when .why enters viewport
+  const _obs = new IntersectionObserver((entries, o) => {
+    if (entries[0].isIntersecting) {
+      o.disconnect();
+      import('./islands/ScrollPath.ts');
+    }
+  }, { threshold: 0.1 });
+  const _whyEl = document.querySelector('.why');
+  if (_whyEl) _obs.observe(_whyEl);
+</script>
+
+<style>
+  /* ── WHY IT WINS — gold path over a real landscape ──
+     Pinned section. A warm gold line draws up the real lit walkway in the photo as
+     you scroll, igniting milestones beside it; the photo feathers into page-black. */
+  .why { padding: 0; height: 300vh; position: relative; }
+  .why-pin {
+    position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--green-dark);
+    --prog: 0; --why-gold: #e3a94e; --why-gold-bright: #ffd98a;
+  }
+
+  /* the scene — full-bleed landscape photo, nudged right, feathered into black */
+  .why-stage { position: absolute; inset: 0; z-index: 0; transform: translateX(4%); }
+  .why-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(0.82) saturate(0.96) contrast(1.02);
+    display: block;
+  }
+  .why-scene-fade { position: absolute; inset: 0; pointer-events: none; background:
+    linear-gradient(to right, var(--green-dark) 0%, rgba(10,10,10,0.55) 20%, transparent 46%),
+    linear-gradient(to bottom, var(--green-dark) 0%, transparent 18%),
+    linear-gradient(to top, var(--green-dark) 0%, transparent 12%); }
+
+  .why-line { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; }
+  .why-line path { fill: none; stroke-linecap: round; }
+  .why-line-glow { stroke: var(--why-gold); stroke-width: 0.8; opacity: 0.5; filter: url(#why-soft); }
+  .why-line-core { stroke: url(#why-grad); stroke-width: 0.26; }
+  .why-tip { fill: #fff2d6; filter: url(#why-soft); opacity: 0; transition: opacity 0.3s; }
+
+  /* milestones beside the path */
+  .why-stops { position: absolute; inset: 0; z-index: 2; }
+  .why-stop { position: absolute; width: 54px; height: 54px; transform: translate(-50%, -50%);
+    opacity: 0.32; transition: opacity 0.6s ease; }
+  .why-stop.on { opacity: 1; }
+  .why-dot { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center;
+    border: 1.5px solid rgba(255,235,200,0.32); color: #f6e8cb;
+    background: radial-gradient(circle at 50% 38%, #16120c, #0a0806);
+    box-shadow: 0 6px 20px -6px rgba(0,0,0,0.8);
+    transition: border-color 0.6s, box-shadow 0.6s; }
+  .why-stop.on .why-dot { border-color: var(--why-gold); box-shadow: 0 0 26px rgba(227,169,78,0.55); }
+  .why-stop-last.on .why-dot { border-color: var(--why-gold-bright); box-shadow: 0 0 38px rgba(255,217,138,0.65); }
+  .why-dot svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .why-lbl { position: absolute; right: calc(100% + 1.1rem); top: 50%; transform: translateY(-50%);
+    width: max-content; max-width: 15rem; text-align: right; }
+  .why-stop.lbl-right .why-lbl { right: auto; left: calc(100% + 1.1rem); text-align: left; }
+  .why-lbl::before { content: ""; position: absolute; inset: -0.7rem -1rem; z-index: -1;
+    background: radial-gradient(125% 130% at 72% 50%, rgba(6,8,7,0.8), transparent 76%); }
+  .why-lbl b { display: block; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400;
+    color: #fff; letter-spacing: -0.01em; text-shadow: 0 1px 12px rgba(0,0,0,0.8); }
+  .why-lbl i { font-style: normal; font-size: 0.8rem; color: #c9bda8; display: block; line-height: 1.4;
+    margin-top: 0.12rem; text-shadow: 0 1px 10px rgba(0,0,0,0.85); }
+  .why-stop-last .why-lbl b { color: var(--why-gold-bright); }
+
+  /* content rail (left, over the feathered photo / black) */
+  .why-content { position: relative; z-index: 5; height: 100%; max-width: 1480px; margin: 0 auto;
+    padding: 0 5vw; display: flex; align-items: center; }
+  .why-rail { max-width: 32rem; }
+  .why-rail .section-label { margin-bottom: 1.6rem; color: var(--accent); font-size: 1.05rem; letter-spacing: 0.26em; }
+  .why-rail h2 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-bottom: 0; line-height: 1.08; white-space: nowrap; }
+  .why-rail h2 em { color: var(--accent); }
+  .why-levers { list-style: none; margin: 2.6rem 0 0; padding: 2.1rem 0 0;
+    border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 1.4rem; }
+  .why-lever { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; }
+  .why-lever-num { font-family: var(--font-mono); font-size: 0.74rem; color: var(--accent); letter-spacing: 0.18em; padding-top: 0.4rem; }
+  .why-lever h3 { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; color: var(--white); margin-bottom: 0.15rem; }
+  .why-lever p { font-size: 0.98rem; color: var(--text-muted); line-height: 1.55; }
+
+  /* narrower desktops: photo takes more relative width, so keep the rail compact */
+  @media (max-width: 1400px) {
+    .why-rail { max-width: 30rem; }
+    .why-rail h2 { font-size: clamp(2rem, 3.4vw, 2.75rem); }
+  }
+
+  /* mobile: photo as a dim backdrop, rail on top, no traced line/labels */
+  @media (max-width: 960px) {
+    .why { height: auto; }
+    .why-pin { position: static; height: auto; min-height: 78vh; padding: 5.5rem 0; }
+    .why-stage { position: absolute; inset: 0; aspect-ratio: auto; opacity: 0.4; transform: none; }
+    .why-photo { object-position: center; }
+    /* drop the left scrim on mobile (text is full-width here) so the photo reads centered */
+    .why-scene-fade { background:
+      linear-gradient(to bottom, var(--green-dark) 0%, transparent 16%),
+      linear-gradient(to top, var(--green-dark) 0%, transparent 12%); }
+    .why-line, .why-stops { display: none; }
+    .why-content { position: relative; padding: 0 6vw; }
+    .why-rail { max-width: none; }
+    .why-rail h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
+    .why-rail h2 br { display: none; }   /* let the headline wrap naturally on phones */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .why-stop { transition: none; }
+    .why-tip { display: none; }
+  }
+</style>

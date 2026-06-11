@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import WhyItWins from '../components/WhyItWins.astro';
+import Features from '../components/Features.astro';
+import InAction from '../components/InAction.astro';
+import Booking from '../components/Booking.astro';
+import CTA from '../components/CTA.astro';
+import Footer from '../components/Footer.astro';
+---
+<Layout>
+  <script>
+    import('../components/islands/ScrollProgress.ts');
+  </script>
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <canvas class="grid-lines" aria-hidden="true"></canvas>
+  <Nav />
+  <main>
+    <Hero />
+    <WhyItWins />
+    <Features />
+    <InAction />
+    <Booking />
+    <CTA />
+  </main>
+  <Footer />
+  <script>
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => import('../components/islands/CanvasGrid.ts'));
+    } else {
+      setTimeout(() => import('../components/islands/CanvasGrid.ts'), 2000);
+    }
+  </script>
+</Layout>

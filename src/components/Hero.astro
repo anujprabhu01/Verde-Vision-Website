@@ -1,0 +1,891 @@
+---
+import { Image } from 'astro:assets';
+import headsetImg from '../assets/HeadsetTransparent.png';
+import beforeImg from '../assets/Before.png';
+import afterImg from '../assets/After.png';
+---
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-content">
+      <div class="hero-eyebrow hero-anim hero-anim-1">Spatial Landscape Design</div>
+
+      <h1>
+        <span class="hero-line hero-anim hero-anim-2">See the yard</span><br/>
+        <span class="accent hero-line hero-anim hero-anim-3">before you build it.</span>
+      </h1>
+
+      <p class="hero-anim hero-anim-4">
+        Design, visualize, and price outdoor spaces in real time with AR —
+        all before breaking ground.
+      </p>
+
+      <div class="hero-actions hero-anim hero-anim-5">
+        <a href="#booking" class="btn-primary">Book a Demo &rarr;</a>
+        <a href="#in-action" class="btn-secondary">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          Watch It in Action
+        </a>
+      </div>
+
+    </div>
+
+    <div class="hero-visual">
+      <!-- SVG defs: lens-shaped clip (hard) + soft feathered mask -->
+      <svg class="lens-clip-defs" width="0" height="0" aria-hidden="true">
+        <defs>
+          <clipPath id="lens-clip" clipPathUnits="objectBoundingBox">
+            <path d="M 0.06,0.28
+                     C 0.08,0.14 0.18,0.06 0.32,0.07
+                     C 0.42,0.08 0.58,0.08 0.68,0.07
+                     C 0.82,0.06 0.92,0.14 0.94,0.28
+                     C 0.98,0.55 0.95,0.80 0.86,0.94
+                     C 0.78,1.00 0.66,0.98 0.59,0.88
+                     C 0.55,0.82 0.50,0.80 0.45,0.82
+                     C 0.41,0.84 0.41,0.86 0.41,0.88
+                     C 0.34,0.98 0.22,1.00 0.14,0.94
+                     C 0.05,0.80 0.02,0.55 0.06,0.28 Z" />
+          </clipPath>
+
+          <filter id="lens-feather" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="0.025" />
+          </filter>
+
+          <mask id="lens-mask" maskContentUnits="objectBoundingBox">
+            <path d="M 0.10,0.32
+                     C 0.12,0.18 0.22,0.12 0.34,0.13
+                     C 0.42,0.14 0.58,0.14 0.66,0.13
+                     C 0.78,0.12 0.88,0.18 0.90,0.32
+                     C 0.94,0.55 0.91,0.74 0.84,0.86
+                     C 0.76,0.92 0.66,0.90 0.59,0.84
+                     C 0.55,0.80 0.50,0.78 0.45,0.80
+                     C 0.41,0.82 0.41,0.84 0.41,0.84
+                     C 0.34,0.90 0.24,0.92 0.16,0.86
+                     C 0.09,0.74 0.06,0.55 0.10,0.32 Z"
+                 fill="white" filter="url(#lens-feather)" />
+          </mask>
+        </defs>
+      </svg>
+
+      <div class="headset">
+        <div class="headset-core">
+          <div class="ba-slider" id="ba-slider">
+            <div class="ba-stage">
+              <div class="ba-img ba-after">
+                <Image
+                  src={afterImg}
+                  alt="After landscape design"
+                  widths={[400, 700, 900]}
+                  sizes="(max-width: 900px) 80vw, 45vw"
+                  loading="eager"
+                />
+              </div>
+              <div class="ba-img ba-before" id="ba-before">
+                <Image
+                  src={beforeImg}
+                  alt="Before landscape design"
+                  widths={[400, 700, 900]}
+                  sizes="(max-width: 900px) 80vw, 45vw"
+                  loading="eager"
+                />
+              </div>
+            </div>
+            <div class="ba-handle" id="ba-handle">
+              <div class="ba-handle-knob">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 3 12 9 6"/><polyline points="15 18 21 12 15 6"/></svg>
+              </div>
+            </div>
+          </div>
+          <Image
+            class="headset-img"
+            src={headsetImg}
+            alt="Apple Vision Pro"
+            widths={[400, 700, 1000]}
+            sizes="(max-width: 900px) 80vw, 50vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+
+        <!-- Mirrored reflection: shows the same scene + headset, flipped + blurred -->
+        <div class="headset-reflection-core" aria-hidden="true">
+          <div class="ba-slider ba-slider-mirror">
+            <div class="ba-stage">
+              <div class="ba-img ba-after">
+                <Image src={afterImg} alt="" />
+              </div>
+              <div class="ba-img ba-before">
+                <Image src={beforeImg} alt="" />
+              </div>
+            </div>
+            <div class="ba-handle">
+              <div class="ba-handle-knob">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 3 12 9 6"/><polyline points="15 18 21 12 15 6"/></svg>
+              </div>
+            </div>
+          </div>
+          <Image class="headset-img" src={headsetImg} alt="" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-tagline">
+    <p class="hero-tagline-text hero-anim hero-anim-5">Designed for landscape pros &mdash; Built to help you win</p>
+    <a href="#why" class="hero-scroll" aria-label="Scroll to next section">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </div>
+</section>
+
+<script>
+  import('./islands/BASlider.ts');
+</script>
+
+<style>
+/* ── HERO ── */
+.hero {
+  /* +8rem to both min-height and bottom padding keeps the headset + glow
+     vertically centered EXACTLY where they were, while extending the hero
+     down so the full Vision Pro reflection clears before the next section. */
+  min-height: calc(100vh + 16rem); /* fallback */
+  min-height: calc(100dvh + 16rem);
+  display: flex; align-items: center;
+  padding: 7rem 0 calc(clamp(4rem, 12vw, 15rem) + 8rem) 5vw;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    min-height: auto;
+    padding: 6rem 5vw 3rem;
+    /* Stack hero-grid above hero-tagline (was absolute on desktop). */
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Windows-laptop short viewports (typically 1366×768): the desktop
+   hero is min-height calc(100vh + 8rem), and Chrome's URL/tab bars eat
+   ~120px of vertical space — together those push the absolute-positioned
+   tagline below the fold. Drop the +8rem cushion and trim the bottom
+   padding so the tagline lands inside the visible viewport. Scoped to
+   max-height: 820px so any common Mac (≥900) is untouched. */
+@media (max-height: 820px) and (min-width: 901px) {
+  .hero {
+    min-height: 100vh; /* fallback */
+    min-height: 100dvh;
+    padding-bottom: clamp(2.5rem, 7vw, 5rem);
+  }
+  .hero-tagline { bottom: 6.5rem; }
+}
+
+/* Hero glow now lives on .hero-visual::before so it tracks the headset's
+   container across viewport widths. See that rule below. */
+
+.hero-grid {
+  width: 100%;
+  max-width: 1800px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 5fr 10fr;
+  gap: 2.5rem;
+  align-items: center;
+  position: relative; z-index: 1;
+}
+
+/* At Windows-laptop widths the text column needs a touch more room so
+   "See the yard" doesn't wrap. Slight redistribution toward the text. */
+@media (min-width: 901px) and (max-width: 1300px) {
+  .hero-grid { grid-template-columns: 6fr 9fr; }
+}
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
+
+.hero-content {
+  text-align: left;
+  display: flex; flex-direction: column; align-items: flex-start;
+  margin-top: 1rem;
+  position: relative;
+  isolation: isolate;
+}
+
+@media (max-width: 900px) {
+  .hero-content {
+    margin-top: 0;
+    align-items: center;
+    text-align: center;
+  }
+  .hero-content .hero-actions { justify-content: center; }
+  .hero p { margin-left: auto; margin-right: auto; }
+  /* Shrink the headline on phones so "before you build it." fits on a
+     single line — keeps the H1 to a clean two-line layout instead of
+     orphaning "it." onto a third line. */
+  /* Clamp so the H1 holds two lines across every mobile width:
+     - 2.4rem at ≤360px (narrow Android) so "before you build it." fits
+     - 2.7rem at ≥375px (iPhone) for proper visual weight
+     The calc() linearly crosses 38.4px at 360px and 43.2px at 375px. */
+  .hero h1 { font-size: clamp(2.4rem, calc(-4.8rem + 32vw), 2.7rem); }
+}
+
+/* Mobile hero re-flow: visor sits BETWEEN headline and CTAs (matches the
+   reference mockup). We use display:contents on .hero-content so its
+   children join .hero-grid's flex order directly — no DOM change. */
+@media (max-width: 900px) {
+  .hero-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .hero-content { display: contents; }
+
+  .hero-eyebrow  { order: 1; margin-bottom: 1rem; }
+  .hero h1        { order: 2; margin-bottom: 1.5rem; }
+  /* Drop the gray subhead on phones — the H1 already carries the message
+     and the mockup's tighter rhythm reads cleaner without it. */
+  .hero-content > p { display: none; }
+  .hero-visual    { order: 3; }
+  .hero-actions   {
+    order: 4;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    /* Narrower than the headset so the stacked CTAs read as trim pills,
+       not full-bleed bars. Still wide enough for "Watch It in Action" +
+       its play icon to sit on one line. Centered via margin auto. */
+    max-width: 280px;
+    gap: 0.85rem;
+    margin: 0 auto 2.5rem;
+    /* Lift the CTAs above the headset (z-index:1) so its reflection sits
+       BEHIND them — the opaque primary fully occludes it and the
+       translucent secondary shows the dark backdrop, not the reflection.
+       Reads as solid buttons over the scene rather than a bleed-through. */
+    position: relative;
+    z-index: 2;
+  }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+  }
+  /* The ghost secondary nearly dissolves into the black field on phones
+     (near-black border + 0.04 fill). Give it a defined light edge and a
+     touch more fill so it reads as a tappable button — still clearly
+     subordinate to the solid green primary. Mobile-scoped; desktop keeps
+     its tuned look. */
+  .hero-actions .btn-secondary {
+    border-color: rgba(255,255,255,0.26);
+    background: rgba(255,255,255,0.06);
+  }
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.hero-line { display: inline-block; }
+/* "See the yard" should always sit on a single line — it's always short
+   enough that this never forces grid column growth. The second line is
+   allowed to wrap naturally (matches the Mac layout). */
+.hero-line:first-child { white-space: nowrap; }
+
+/* Bottom-centered tagline + scroll cue */
+.hero-tagline {
+  position: absolute;
+  bottom: 10.5rem;
+  left: 0; right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Higher specificity so this beats the later .hero p rule. */
+.hero .hero-tagline p {
+  color: var(--accent);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+  white-space: nowrap;
+  max-width: none;
+}
+
+@media (max-width: 900px) {
+  .hero-tagline {
+    position: static;
+    /* Tighten the oversized gap to the CTAs (the base .hero-actions also
+       contributes 2.5rem below) so the tagline sits up inside the fold. */
+    margin-top: 0.5rem;
+    bottom: auto;
+  }
+  .hero .hero-tagline p {
+    white-space: normal;
+    font-size: 0.85rem;
+    letter-spacing: 0.10em;
+    padding: 0 1rem;
+  }
+}
+
+.hero-scroll {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease-out;
+  animation: bounce-arrow 2.2s ease-in-out infinite;
+}
+.hero-scroll:hover { color: var(--accent); }
+.hero-scroll svg { width: 22px; height: 22px; }
+
+@keyframes bounce-arrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 7.4vw, 5.6rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+h1 .accent {
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+.hero p {
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  color: var(--text-muted); max-width: 480px;
+  margin-bottom: 2rem;
+}
+
+.hero-actions {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Hero entrance animations (from blend-hero-glow) ── */
+.hero-anim {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: heroRise 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hero-anim-1 { animation-delay: 0ms;    transform: translateY(0); animation-name: heroFade; }
+.hero-anim-2 { animation-delay: 300ms;  transform: translateY(12px); }
+.hero-anim-3 { animation-delay: 700ms;  transform: translateY(16px); }
+.hero-anim-4 { animation-delay: 1100ms; transform: translateY(0); animation-name: heroFade; }
+.hero-anim-5 { animation-delay: 1500ms; transform: translateY(8px); }
+
+@keyframes heroRise {
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroFade {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.btn-secondary svg { width: 14px; height: 14px; }
+
+.btn-primary {
+  background: var(--accent); color: #0a0a0a;
+  padding: 0.85rem 2.2rem; border-radius: 999px;
+  font-size: 1rem; font-weight: 700; text-decoration: none;
+  border: none; cursor: pointer; font-family: inherit;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 0 32px rgba(31,196,144,0.25);
+}
+.btn-primary:hover {
+  background: #2ee08a; transform: translateY(-2px);
+  box-shadow: 0 0 48px rgba(31,196,144,0.4);
+}
+.btn-primary:disabled {
+  opacity: 0.4; cursor: not-allowed; transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  border: 1px solid var(--green-border);
+  color: var(--text); padding: 0.85rem 2.2rem; border-radius: 999px;
+  font-size: 1rem; font-weight: 600; text-decoration: none;
+  background: rgba(255,255,255,0.04);
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.hero-visual {
+  width: 100%;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Layered green glow anchored to the headset's container so it follows
+   the headset on every viewport. Pseudo is oversized via negative insets
+   so the wide outer wash has room to bleed beyond .hero-visual's box. */
+.hero-visual::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -25%; right: -25%; bottom: -30%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 36% at 53% 74%,
+      rgba(31,196,144,0.14) 0%,
+      rgba(31,196,144,0.10) 22%,
+      rgba(31,196,144,0.06) 48%,
+      rgba(31,196,144,0.025) 72%,
+      rgba(31,196,144,0.008) 88%,
+      transparent 100%),
+    radial-gradient(ellipse 46% 26% at 53% 72%,
+      rgba(31,196,144,0.30) 0%,
+      rgba(31,196,144,0.22) 22%,
+      rgba(31,196,144,0.14) 44%,
+      rgba(31,196,144,0.07) 66%,
+      rgba(31,196,144,0.025) 84%,
+      transparent 100%),
+    radial-gradient(ellipse 33% 11% at 53% 63%,
+      rgba(31,196,144,0.52) 0%,
+      rgba(31,196,144,0.34) 32%,
+      rgba(31,196,144,0.18) 58%,
+      rgba(31,196,144,0.07) 80%,
+      rgba(31,196,144,0.02) 92%,
+      transparent 100%),
+    radial-gradient(ellipse 28% 2.6% at 53% 63%,
+      rgba(120,255,200,0.65) 0%,
+      rgba(31,196,144,0.45) 30%,
+      rgba(31,196,144,0.20) 60%,
+      rgba(31,196,144,0.06) 85%,
+      transparent 100%);
+}
+
+/* Multi-layer ambient halo behind the headset. Three stacked ellipses at
+   progressively larger sizes / lower alphas give a very gradual fade to
+   black and let the green wrap up around the lower goggle edges instead
+   of stopping abruptly underneath. */
+/* Background halo behind the headset removed per request. The green
+   contact-line glow on .hero::before and the headset rim drop-shadow
+   provide the only remaining green accents. */
+
+/* ── Vision Pro headset with embedded slider ── */
+.headset {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  transform: translateX(2rem) scale(1.25);
+  transform-origin: center center;
+}
+
+@media (max-width: 1200px) {
+  .headset { transform: translateX(1rem) scale(1.1); }
+}
+
+@media (max-width: 900px) {
+  /* Bigger on mobile so the headset reads as the dominant hero element.
+     Origin center/center matches desktop so the headset sits in its box
+     the same way — that lets the hand-tuned desktop glow on
+     .hero-visual::before land correctly under the goggles without a
+     mobile-specific override. will-change promotes .headset to its own
+     composited layer — stabilizes iOS Safari rasterization of the masked
+     slider contents inside this transformed parent (fixes black-flash). */
+  .headset {
+    transform: scale(1.4);
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  /* Reserve room below the goggles for the mirrored reflection so the
+     stacked CTAs start beneath it instead of under it. Use MARGIN (not
+     padding): the glow lives on .hero-visual::before anchored to the
+     padding box, so padding-bottom would stretch that box and drag the
+     contact glow down off the goggles. Margin opens the gap outside the
+     box — the reflection overflows into it and the glow stays hugged to
+     the goggle bottom exactly like desktop. */
+  /* margin-top gives the headline breathing room above the goggles;
+     margin-bottom set to 0 closes the dead space between the goggles and
+     the primary CTA so the button sits right under the bright part of the
+     reflection. The headset/headline shift down is offset by the top
+     padding below, which keeps the (already-good) bottom spacing intact. */
+  .hero-visual { margin-top: -0.5rem; margin-bottom: 0; padding-bottom: 0; }
+
+  /* Nudge the whole glow down so the bright green contact line sits just
+     UNDER the two goggle shadows, matching desktop. With center/center
+     origin the inherited desktop gradient lands ~at the goggle bottom on
+     mobile, a hair too high; this drops it to right under the shadows. */
+  .hero-visual::before { transform: translateY(10px); }
+
+  /* Drop the mirrored reflection entirely on mobile. It's a second copy of
+     the SVG-clipped/masked before-after slider (clip-path: url(#lens-clip)
+     + mask: url(#lens-mask) with an feGaussianBlur), and iOS Safari
+     intermittently fails to rasterize the lens when it's drawn twice inside
+     the transformed/composited headset — so often only ONE of the two
+     showed the real image, and reloads were a coin-flip. Rendering just the
+     main headset on phones makes the hero deterministic. Desktop keeps the
+     reflection (it renders fine there). Extra .headset specificity wins over
+     the base .headset-reflection-core rule that sits later in the source. */
+  .headset .headset-reflection-core { display: none; }
+}
+
+/* (Removed: the green line beam used to live here at z-index: 2 and was
+   rendering OVER the headset image. Glow now comes purely from the halo
+   behind the headset on .hero-visual::before plus the rim drop-shadow.) */
+
+/* Two small contact shadows — one under each goggle where the headset
+   meets the reflective surface. Tight and soft so they ground the
+   headset without breaking the green halo. */
+.headset::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 73.6%;
+  transform: translate(-50%, -50%);
+  width: 72%;
+  height: 14px;
+  pointer-events: none;
+  z-index: 3;
+  /* Multiply so the shadow only darkens whatever's behind it (the
+     green halo, the dark backdrop). Pure black at any alpha never
+     adds its own color — no green ring around the shadow. */
+  mix-blend-mode: multiply;
+  background:
+    /* Left contact shadow — horizontally elongated ellipse so the
+       natural radial falloff produces a teardrop: full-height under
+       the goggle, tapering to ~zero height as it approaches the
+       middle. Softer peak + extra mid stops so it dissolves smoothly
+       into the surrounding green glow rather than cutting against it. */
+    radial-gradient(ellipse 30% 100% at 24% 50%,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,0.96) 4%,
+      rgba(0,0,0,0.82) 8%,
+      rgba(0,0,0,0.58) 14%,
+      rgba(0,0,0,0.42) 26%,
+      rgba(0,0,0,0.28) 42%,
+      rgba(0,0,0,0.16) 58%,
+      rgba(0,0,0,0.08) 74%,
+      rgba(0,0,0,0.03) 88%,
+      rgba(0,0,0,0.008) 96%,
+      transparent 100%),
+    /* Right contact shadow — mirror */
+    radial-gradient(ellipse 30% 100% at 76% 50%,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,0.96) 4%,
+      rgba(0,0,0,0.82) 8%,
+      rgba(0,0,0,0.58) 14%,
+      rgba(0,0,0,0.42) 26%,
+      rgba(0,0,0,0.28) 42%,
+      rgba(0,0,0,0.16) 58%,
+      rgba(0,0,0,0.08) 74%,
+      rgba(0,0,0,0.03) 88%,
+      rgba(0,0,0,0.008) 96%,
+      transparent 100%);
+}
+
+/* Tight green rim glow that hugs the headset silhouette, plus a
+   stronger diffuse halo so the headset reads as backlit by the green
+   bloom on .hero-visual::before. */
+.headset-core {
+  position: relative;
+  width: 100%;
+  filter:
+    drop-shadow(0 0 4px  rgba(31,196,144,0.10))
+    drop-shadow(0 0 10px rgba(31,196,144,0.06));
+}
+
+/* Mirrored reflection — a visual clone of .headset-core (slider + image),
+   flipped, blurred, and mask-faded so it looks like a real reflection on
+   a glossy floor. */
+.headset-reflection-core {
+  position: absolute;
+  left: 0;
+  top: 48%;
+  width: 100%;
+  display: block;
+  pointer-events: none;
+  transform: scaleY(-1);
+  opacity: 0.46;
+  filter:
+    blur(2px) brightness(1) contrast(1.2) saturate(0.95)
+    drop-shadow(0 0 18px rgba(31,196,144,0.28))
+    drop-shadow(0 0 42px rgba(31,196,144,0.18));
+  -webkit-mask-image: linear-gradient(to top,
+    rgba(0,0,0,0.58) 0%,
+    rgba(0,0,0,0.51) 22%,
+    rgba(0,0,0,0.32) 58%,
+    rgba(0,0,0,0.09) 84%,
+    transparent 100%);
+          mask-image: linear-gradient(to top,
+    rgba(0,0,0,0.58) 0%,
+    rgba(0,0,0,0.51) 22%,
+    rgba(0,0,0,0.32) 58%,
+    rgba(0,0,0,0.09) 84%,
+    transparent 100%);
+}
+
+/* The mirrored slider should never be interactive. */
+.ba-slider-mirror {
+  cursor: default;
+  pointer-events: none;
+}
+.ba-slider-mirror .ba-label,
+.ba-slider-mirror .ba-handle-knob {
+  pointer-events: none;
+  cursor: default;
+}
+
+.headset-img {
+  position: relative;
+  width: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lens-clip-defs {
+  position: absolute;
+  width: 0; height: 0;
+  pointer-events: none;
+}
+
+/* ── Before/After slider — clipped to lens shape ── */
+.ba-slider {
+  position: absolute;
+  top: 26%; bottom: 32%;
+  left: 21%; right: 21%;
+  clip-path: url(#lens-clip);
+  -webkit-clip-path: url(#lens-clip);
+  cursor: ew-resize;
+  user-select: none;
+  z-index: 2;
+  /* Lens-color backdrop so images fade into the dark glass */
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, #1a1a1a 0%, #0a0a0a 60%, #050505 100%);
+}
+
+/* Soft-masked image stage inside the slider */
+.ba-stage {
+  position: absolute; inset: 0;
+  -webkit-mask: url(#lens-mask);
+          mask: url(#lens-mask);
+}
+
+/* B/A image positioning — images replace old background-image CSS */
+.ba-img {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ba-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 75%;
+  display: block;
+}
+
+.ba-after {
+  /* background-position handled by object-position on img */
+}
+
+/* Driven by --ba-pct (set on :root by main.js). Both the live slider's
+   .ba-before AND the mirror reflection's .ba-before track the same var,
+   so dragging the slider also moves the reflection in lockstep. */
+.ba-before {
+  clip-path: inset(0 calc(100% - var(--ba-pct, 50) * 1%) 0 0);
+  justify-content: flex-end;
+}
+
+.ba-label {
+  position: absolute;
+  top: 18%;
+  z-index: 4;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.10);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 999px;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.28),
+              inset 0 1px 0 rgba(255,255,255,0.35),
+              inset 0 -1px 0 rgba(0,0,0,0.18);
+  transition: background 0.22s ease-out,
+              color 0.22s ease-out,
+              border-color 0.22s ease-out,
+              box-shadow 0.22s ease-out,
+              transform 0.22s ease-out;
+}
+.ba-label-before { left: 15%; }
+.ba-label-after  { right: 15%; }
+/* Hide the BEFORE/AFTER pill buttons on mobile — they're oversized in
+   the tight viewport and the slider drag still works without them. */
+@media (max-width: 900px) {
+  .ba-label,
+  .ba-label-before,
+  .ba-label-after { display: none !important; }
+}
+.ba-label:hover {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.38),
+              0 0 0 4px rgba(255,255,255,0.06),
+              inset 0 1px 0 rgba(255,255,255,0.55),
+              inset 0 -1px 0 rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+}
+.ba-label.is-active {
+  background: rgba(255,255,255,0.85);
+  color: #0a0a0a;
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.32),
+              inset 0 1px 0 rgba(255,255,255,0.9),
+              inset 0 -1px 0 rgba(0,0,0,0.08);
+}
+.ba-label.is-active:hover {
+  background: rgba(255,255,255,0.95);
+  color: #0a0a0a;
+  transform: translateY(-1px);
+}
+
+.ba-handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: calc(var(--ba-pct, 50) * 1%);
+  width: 1.5px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.55) 14%,
+    rgba(255,255,255,1) 38%,
+    rgba(255,255,255,0) 46%,
+    rgba(255,255,255,0) 54%,
+    rgba(255,255,255,1) 62%,
+    rgba(255,255,255,0.55) 86%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(255,255,255,0.5);
+}
+
+.ba-handle-line {
+  position: absolute; inset: 0;
+}
+
+.ba-handle-knob {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: auto;
+  cursor: grab;
+  transition: opacity 0.2s ease-out;
+}
+.ba-handle-knob svg {
+  width: 26px; height: 26px;
+  color: rgba(255,255,255,0.85);
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+              color 0.2s ease-out;
+}
+.ba-handle-knob:hover svg {
+  color: rgba(255,255,255,1);
+  transform: scale(1.15);
+}
+
+.ba-slider.is-grabbing { cursor: grabbing; }
+.ba-slider.is-grabbing .ba-handle-knob,
+.ba-handle-knob:active {
+  cursor: grabbing;
+}
+.ba-slider.is-grabbing .ba-handle-knob svg,
+.ba-handle-knob:active svg {
+  transform: scale(0.9);
+  color: rgba(255,255,255,0.7);
+}
+
+/* Shrink the BEFORE/AFTER drag knob on mobile. Placed AFTER the base
+   .ba-handle-knob rule so the cascade resolves to the smaller size.
+   Also drop backdrop-filter on mobile — on iOS Safari, a backdrop-filter
+   sampling through a mask/clip inside a transformed parent intermittently
+   returns black mid-drag. Solid translucent background looks the same at
+   phone scale and avoids the bug. */
+@media (max-width: 900px) {
+  /* Desktop hides the divider line behind the knob via backdrop-blur,
+     which mobile can't use (iOS black-flash). A translucent white knob
+     can't hide a white line (white over white is always white), so
+     instead break the LINE behind the knob. The line normally is the
+     .ba-handle background; on mobile we move it to a ::before pseudo and
+     mask a transparent disc (~knob radius) out of its midpoint. The knob
+     is a real child, NOT the pseudo, so it stays fully visible — only the
+     line vanishes behind it, exactly like the desktop frosted look.
+     Applies to the main and mirrored sliders alike. */
+  .ba-handle {
+    background: none;
+    box-shadow: none;
+  }
+  .ba-handle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.55) 14%,
+      rgba(255,255,255,1) 50%,
+      rgba(255,255,255,0.55) 86%,
+      rgba(255,255,255,0) 100%
+    );
+    /* Hole radius tucks just inside the 13px knob radius so the line
+       reaches the knob edge (touches it) instead of stopping short. */
+    -webkit-mask: radial-gradient(circle 13px at 50% 50%,
+      transparent 0, transparent 10px, #000 12px);
+            mask: radial-gradient(circle 13px at 50% 50%,
+      transparent 0, transparent 10px, #000 12px);
+  }
+  .ba-handle-knob svg { width: 18px; height: 18px; }
+  /* Promote the slider image layers to their own composited layers so
+     iOS doesn't re-rasterize them through the parent's transform/clip on
+     every drag frame — eliminates the intermittent black flash. */
+  .ba-stage,
+  .ba-img { transform: translateZ(0); }
+}
+</style>

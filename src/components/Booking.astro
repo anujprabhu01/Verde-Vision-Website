@@ -1,0 +1,230 @@
+---
+---
+<section class="booking" id="booking" data-reveal-section>
+  <div class="container">
+    <div class="section-label reveal" data-chapter="04">Book a Demo</div>
+    <h2 class="reveal reveal-2">See VerdeVision in <em>action</em></h2>
+    <p class="section-intro reveal reveal-3">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
+
+    <div class="booking-card reveal reveal-4" id="booking-card">
+
+      <!-- Calendar -->
+      <div class="booking-col">
+        <p class="booking-col-label">Select a date</p>
+        <div class="calendar">
+          <div class="cal-header">
+            <button class="cal-nav" id="cal-prev">&#8592;</button>
+            <span class="cal-month-label" id="cal-month-label"></span>
+            <button class="cal-nav" id="cal-next">&#8594;</button>
+          </div>
+          <div class="cal-weekdays">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="cal-days" id="cal-days"></div>
+        </div>
+      </div>
+
+      <!-- Time slots -->
+      <div class="booking-col" id="times-col">
+        <p class="booking-col-label">Select a time <span id="selected-date-label"></span></p>
+        <div class="time-slots" id="time-slots">
+          <p class="booking-placeholder">Choose a date to see available times.</p>
+        </div>
+      </div>
+
+      <!-- Contact form -->
+      <div class="booking-col" id="form-col">
+        <p class="booking-col-label">Your details</p>
+        <form class="demo-form" id="demo-form">
+          <input type="text" id="form-name" placeholder="Full name" required />
+          <input type="email" id="form-email" placeholder="Email address" required />
+          <textarea id="form-note" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
+          <button type="submit" class="btn-primary" id="confirm-btn" disabled>Confirm Booking</button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Confirmation -->
+    <div class="booking-confirmation" id="booking-confirmation">
+      <div class="confirm-icon">&#10003;</div>
+      <h3>You're booked!</h3>
+      <p id="confirm-details"></p>
+      <p class="confirm-sub">We'll be in touch shortly with everything you need.</p>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  import('./islands/BookingWidget.ts');
+</script>
+
+<style>
+  /* ── BOOKING ── */
+  .booking { background: transparent; }
+
+  .booking-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .booking-card { grid-template-columns: 1fr; }
+  }
+
+  .booking-col-label {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .booking-col-label span {
+    text-transform: none; letter-spacing: 0;
+    color: var(--accent); font-weight: 700;
+  }
+
+  /* Calendar */
+  .calendar {
+    background: var(--green-card);
+    border: 1px solid var(--green-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+  }
+
+  .cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .cal-month-label {
+    font-size: 0.95rem; font-weight: 600; color: var(--white);
+  }
+
+  .cal-nav {
+    background: none; border: 1px solid var(--green-border);
+    color: var(--text-muted); border-radius: 8px;
+    width: 30px; height: 30px; cursor: pointer;
+    font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+
+  .cal-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 0.5rem;
+  }
+  .cal-weekdays span {
+    text-align: center; font-size: 0.7rem; font-weight: 600;
+    color: var(--text-muted); padding: 0.25rem 0;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .cal-days {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 0.85rem; cursor: pointer;
+    color: var(--text); border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    font-family: inherit;
+    background: none;
+  }
+  .cal-day:hover:not(:disabled) {
+    background: rgba(31,196,144,0.1);
+    border-color: rgba(31,196,144,0.2);
+  }
+  .cal-day.selected {
+    background: var(--accent);
+    color: #0a0a0a; font-weight: 700;
+    border-color: var(--accent);
+  }
+  .cal-day:disabled {
+    color: rgba(255,255,255,0.25);
+    cursor: not-allowed;
+  }
+  .cal-day.empty { background: none; border: none; cursor: default; }
+
+  /* Time slots */
+  .time-slots {
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+
+  .booking-placeholder {
+    font-size: 0.9rem; color: var(--text-muted);
+    padding: 1rem 0;
+  }
+
+  .time-slot {
+    background: var(--green-card);
+    border: 1px solid var(--green-border);
+    border-radius: 10px; padding: 0.65rem 1rem;
+    font-size: 0.9rem; color: var(--text);
+    cursor: pointer; text-align: left; width: 100%;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .time-slot:hover {
+    border-color: rgba(31,196,144,0.3);
+    background: rgba(255,255,255,0.06);
+  }
+  .time-slot.selected {
+    border-color: var(--accent);
+    background: rgba(31,196,144,0.1);
+    color: var(--white); font-weight: 600;
+  }
+
+  /* Form */
+  .demo-form {
+    display: flex; flex-direction: column; gap: 0.75rem;
+  }
+
+  .demo-form input,
+  .demo-form textarea {
+    background: var(--green-card);
+    border: 1px solid var(--green-border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.92rem; color: var(--text);
+    font-family: inherit; width: 100%;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  .demo-form input::placeholder,
+  .demo-form textarea::placeholder { color: var(--text-muted); }
+  .demo-form input:focus,
+  .demo-form textarea:focus {
+    outline: none;
+    border-color: rgba(31,196,144,0.4);
+  }
+
+  .demo-form .btn-primary { width: 100%; margin-top: 0.25rem; }
+
+  /* Confirmation */
+  .booking-confirmation {
+    display: none;
+    text-align: center; padding: 4rem 2rem;
+  }
+  .booking-confirmation.visible { display: block; }
+
+  .confirm-icon {
+    width: 64px; height: 64px; border-radius: 0;
+    background: rgba(31,196,144,0.12);
+    border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: var(--accent);
+    margin: 0 auto 1.5rem;
+  }
+  .booking-confirmation h3 {
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--white); margin-bottom: 0.75rem;
+  }
+  .booking-confirmation p { color: var(--text-muted); font-size: 1rem; }
+  .confirm-sub { margin-top: 0.5rem; font-size: 0.9rem !important; }
+</style>

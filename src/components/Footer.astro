@@ -1,0 +1,122 @@
+---
+---
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">Verde<span>Vision</span></div>
+      <p class="footer-tagline">Spatial landscape design for Apple Vision Pro. Designed in California.</p>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Product</p>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#in-action">See it in action</a></li>
+        <li><a href="#why">Why Vision Pro</a></li>
+        <li><a href="#booking">Book a demo</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <p class="footer-col-title">Contact</p>
+      <ul>
+        <li><a href="mailto:demos@useverdevision.com">Email us</a></li>
+        <li><a href="#booking">Schedule a call</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-meta">Built for Apple Vision Pro</span>
+    <span>&copy; 2026 VerdeVision. All rights reserved.</span>
+  </div>
+</footer>
+
+<style>
+  /* ── FOOTER — editorial columns ── */
+  footer {
+    padding: 5rem 5vw 2.5rem;
+    border-top: 1px solid var(--green-border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: var(--green-dark);
+    position: relative;
+  }
+  .footer-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 3rem 2rem;
+    align-items: start;
+  }
+  .footer-brand .footer-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.55rem;
+    letter-spacing: -0.025em;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 0.85rem;
+  }
+  .footer-brand .footer-logo span {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .footer-tagline {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    max-width: 28ch;
+    line-height: 1.55;
+  }
+  .footer-col-title {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .footer-col ul { list-style: none; padding: 0; margin: 0; }
+  .footer-col li { margin-bottom: 0.55rem; }
+  .footer-col a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.18s ease;
+    position: relative;
+  }
+  .footer-col a:hover { color: var(--accent); }
+
+  .footer-bottom {
+    max-width: 1100px;
+    margin: 3.5rem auto 0;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--green-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+  .footer-bottom .footer-meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  @media (max-width: 800px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem 1.5rem;
+    }
+    .footer-brand { grid-column: 1 / -1; }
+  }
+  @media (max-width: 480px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
