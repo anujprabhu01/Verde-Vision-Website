@@ -264,7 +264,7 @@ function render() {
     const ptsPx = b.points.map(([c, r]) => [ox + c * CELL, oy + r * CELL]);
     const pair = offsetPair(ptsPx, w);
     const sides = (pair as any).single ? [(pair as any).single] : [(pair as any).left, (pair as any).right];
-    const delay = isTrunk ? 0 : depthDelay[depthIdx] + Math.random() * 0.22;
+    const delay = isTrunk ? 0 : depthDelay[depthIdx] + rand() * 0.22;
     const dur   = isTrunk ? depthDur[0] : depthDur[depthIdx];
 
     sides.forEach((side: number[][]) => {
@@ -287,7 +287,7 @@ function render() {
   leafCells.forEach(({ c, r, depth }) => {
     const lateral = Math.abs(c - (COLS - 1) / 2) / Math.max(1, (COLS - 1) / 2);
     const depthBoost = depth >= 3 ? 0 : depth === 2 ? 0.10 : 0.20;
-    const delay = TOTAL - 1.30 + lateral * -0.25 + depthBoost + Math.random() * 0.20;
+    const delay = TOTAL - 1.30 + lateral * -0.25 + depthBoost + rand() * 0.20;
     const radius = depth >= 3 ? 2.6 : depth === 2 ? 2.4 : 2.2;
     const node = document.createElementNS(SVG_NS, 'circle');
     node.setAttribute('cx', String(ox + c * CELL));

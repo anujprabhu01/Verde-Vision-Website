@@ -1,0 +1,98 @@
+<h2>Migration Strategy</h2>
+<p class="subtitle">How we get from the current site to Astro without breaking the live site at any point.</p>
+
+<div class="section">
+  <h3>Branch strategy — current site stays live throughout</h3>
+  <div style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;margin-top:10px">
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <span style="padding:3px 10px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:999px;font-size:11px;color:#1fc490;white-space:nowrap">main</span>
+        <span style="color:#bbb">Current site — stays live on useverdevision.com throughout</span>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <span style="padding:3px 10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:999px;font-size:11px;color:#c9a84c;white-space:nowrap">astro-migration</span>
+        <span style="color:#bbb">New branch — Vercel gives this a preview URL automatically</span>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;padding-top:4px;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px">
+        <span style="padding:3px 10px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:999px;font-size:11px;color:#1fc490;white-space:nowrap">merge → main</span>
+        <span style="color:#bbb">Only when fully tested and approved — then useverdevision.com updates</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Order of operations</h3>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;font-size:13px">
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">1</span>
+      <div><strong>Scaffold + configure</strong> — <code>npm create astro</code>, install fontsource packages, configure Vercel adapter, set up PostCSS/Autoprefixer</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">2</span>
+      <div><strong>Layout.astro</strong> — base HTML shell, <code>&lt;head&gt;</code>, meta tags, OG tags, fontsource imports, global CSS tokens</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">3</span>
+      <div><strong>Nav + Footer</strong> — static components first, no interactivity needed yet. Establishes the shell of the page.</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">4</span>
+      <div><strong>Hero</strong> — static markup first (headline, CTAs), then add BASlider as a <code>client:load</code> island with Pointer Events API replacing the old mouse/touch handlers</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">5</span>
+      <div><strong>Why It Wins</strong> — migrate the scroll path animation as a <code>client:visible</code> island. Refactor scroll listeners → cached rAF loop</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">6</span>
+      <div><strong>Features</strong> — swap <code>&lt;img&gt;</code> tags for Astro <code>&lt;Image&gt;</code>. Move all 5 feature PNGs to <code>src/assets/</code>. This is where the biggest single performance win happens.</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">7</span>
+      <div><strong>In Action</strong> — video section + controls as a <code>client:visible</code> island. Video itself stays on CDN (r2.dev), only the JS controls are an island.</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">8</span>
+      <div><strong>Booking</strong> — calendar + form as a <code>client:load</code> island. Logic is self-contained, moves cleanly.</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(31,196,144,0.15);border:1px solid rgba(31,196,144,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1fc490;font-weight:600">9</span>
+      <div><strong>CTA + canvas grid</strong> — CTA tree as <code>client:visible</code>, canvas grid as <code>client:idle</code>. Last to load, least critical.</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#c9a84c;font-weight:600">✓</span>
+      <div><strong>Cross-device audit</strong> — test on iOS Safari, Android Chrome, desktop Chrome/Firefox/Safari. Fix any remaining inconsistencies.</div>
+    </div>
+
+    <div style="display:flex;gap:12px">
+      <span style="flex-shrink:0;width:24px;height:24px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#c9a84c;font-weight:600">✓</span>
+      <div><strong>Merge to main</strong> — Vercel auto-deploys. useverdevision.com updates. Done.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px">
+  <p class="label">What stays exactly the same</p>
+  <ul style="font-size:13px;margin-top:8px;padding-left:16px;line-height:1.8;color:#bbb">
+    <li>All copy and content</li>
+    <li>Visual design direction (colors, typography, layout)</li>
+    <li>Domain (useverdevision.com)</li>
+    <li>GitHub repo (anujprabhu01/Verde-Vision-Website)</li>
+    <li>Vercel auto-deploy on push to main</li>
+    <li>All existing assets (logo, headset image, video CDN URL)</li>
+  </ul>
+</div>
+
+<p style="margin-top:20px;color:#999;font-size:14px">Does this migration sequence look right?</p>
