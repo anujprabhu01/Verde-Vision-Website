@@ -71,10 +71,22 @@ import afterImg from '../assets/After.png';
           <div class="ba-slider" id="ba-slider">
             <div class="ba-stage">
               <div class="ba-img ba-after">
-                <Image src={afterImg} alt="After landscape design" />
+                <Image
+                  src={afterImg}
+                  alt="After landscape design"
+                  widths={[400, 700, 900]}
+                  sizes="(max-width: 900px) 80vw, 45vw"
+                  loading="eager"
+                />
               </div>
               <div class="ba-img ba-before" id="ba-before">
-                <Image src={beforeImg} alt="Before landscape design" />
+                <Image
+                  src={beforeImg}
+                  alt="Before landscape design"
+                  widths={[400, 700, 900]}
+                  sizes="(max-width: 900px) 80vw, 45vw"
+                  loading="eager"
+                />
               </div>
             </div>
             <div class="ba-handle" id="ba-handle">
@@ -83,7 +95,15 @@ import afterImg from '../assets/After.png';
               </div>
             </div>
           </div>
-          <Image class="headset-img" src={headsetImg} alt="Apple Vision Pro" />
+          <Image
+            class="headset-img"
+            src={headsetImg}
+            alt="Apple Vision Pro"
+            widths={[400, 700, 1000]}
+            sizes="(max-width: 900px) 80vw, 50vw"
+            loading="eager"
+            fetchpriority="high"
+          />
         </div>
 
         <!-- Mirrored reflection: shows the same scene + headset, flipped + blurred -->
