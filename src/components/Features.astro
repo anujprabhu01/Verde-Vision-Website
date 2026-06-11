@@ -1,0 +1,175 @@
+---
+import { Image } from 'astro:assets';
+import feat01 from '../assets/feature-01-design.png';
+import feat02 from '../assets/feature-02-blueprint.png';
+import feat03 from '../assets/feature-03-estimate.png';
+import feat04 from '../assets/feature-04-persist.png';
+import feat05 from '../assets/feature-05-crew.png';
+
+const features = [
+  { src: feat01, alt: 'Design in real space', index: '01 / 05', title: 'Design in <em>Real</em> Space', desc: 'Drop life-size 3D plants into the real yard. Walk around them at true mature scale — before you buy a thing.', hero: true },
+  { src: feat02, alt: 'Permit-ready blueprints', index: '02 / 05', title: 'Permit-Ready Blueprints', desc: 'One tap, one scaled PDF — plant symbols, dimensions, and a full plant schedule. No CAD required.', hero: false },
+  { src: feat03, alt: 'Quote on the spot', index: '03 / 05', title: 'Quote on the Spot', desc: 'Itemized PDF estimates with plant pricing and labor — generated while you\'re still in the yard.', hero: false },
+  { src: feat04, alt: 'Pick up on any visit', index: '04 / 05', title: 'Pick Up On Any Visit', desc: 'Real-world anchors lock the design to the property. Return weeks later — everything snaps back into place.', hero: false },
+  { src: feat05, alt: 'Guide your crew', index: '05 / 05', title: 'Guide Your Crew', desc: 'Hand off the headset. Your install crew sees exactly where every plant goes.', hero: false },
+];
+---
+
+<section class="features" id="features" data-reveal-section>
+  <div class="container">
+    <div class="features-header">
+      <div class="features-header-lede">
+        <div class="section-label reveal" data-chapter="02">What VerdeVision Does</div>
+        <h2 class="reveal reveal-2">Everything you need to<br class="head-break" /> design with <em>confidence</em>.</h2>
+      </div>
+      <div class="features-header-desc reveal reveal-3">
+        <p class="section-intro">
+          A spatial landscape design app for Apple Vision Pro. Walk the property, drop life-size plants,
+          and hand off install-ready plans — all before you break ground.
+        </p>
+      </div>
+    </div>
+
+    <div class="features-grid reveal reveal-4">
+      {features.map((f, i) => (
+        <article class={`feature-card${f.hero ? ' feature-card-hero' : ''}`} data-feature={String(i + 1).padStart(2, '0')}>
+          <div class="feature-image-wrapper">
+            <Image
+              src={f.src}
+              alt={f.alt}
+              class="feature-image"
+              widths={[400, 800]}
+              sizes="(max-width: 600px) 400px, 800px"
+            />
+          </div>
+          <div class="feature-overlay" aria-hidden="true"></div>
+          <div class="feature-body">
+            <span class="feature-index">{f.index}</span>
+            <h3 set:html={f.title} />
+            <p>{f.desc}</p>
+          </div>
+          <span class="feature-rule" aria-hidden="true"></span>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Image wrapper replaces the old background-image approach */
+  .feature-image-wrapper {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .feature-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    background-color: #0c0c0c;
+    transform: scale(1.02);
+    filter: saturate(0.96) contrast(1.02);
+    transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 0.6s ease-out;
+    will-change: transform;
+  }
+  .feature-card:hover .feature-image {
+    transform: scale(1.07);
+    filter: saturate(1.05) contrast(1.05);
+  }
+  .feature-card.is-active-mobile .feature-image {
+    transform: scale(1.07);
+    filter: saturate(1.05) contrast(1.05);
+  }
+</style>
+
+<script>
+  // Feature card cursor glow
+  document.querySelectorAll<HTMLElement>('.feature-card').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--mx', `${x}%`);
+      card.style.setProperty('--my', `${y}%`);
+    });
+  });
+
+  // ── Mobile scroll spotlight for feature cards ──
+  // Only ONE card is "active" at a time: whichever's center is closest
+  // to viewport center while at least partially on screen. As the user
+  // scrolls down, the active class hops from card to card; scrolling
+  // past the last card drops all of them back to the dim baseline.
+  // Gated to ≤900px so pointer-device users keep the desktop hover UX.
+  (() => {
+    const mq = window.matchMedia('(max-width: 900px)');
+    const cards = document.querySelectorAll<HTMLElement>('.feature-card');
+    if (!cards.length) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let rafId: number | null = null;
+    let attached = false;
+
+    const setActive = (card: HTMLElement | null) => {
+      cards.forEach((c) => {
+        if (c === card) c.classList.add('is-active-mobile');
+        else c.classList.remove('is-active-mobile');
+      });
+    };
+
+    const pick = () => {
+      const vh = window.innerHeight;
+      const viewportCenter = vh / 2;
+      // A card must overlap the viewport's middle band to be eligible —
+      // outside of that band the section gets no spotlight (so scrolling
+      // past the last card lets it fade back to baseline).
+      const bandTop = vh * 0.15;
+      const bandBot = vh * 0.85;
+      let best: HTMLElement | null = null;
+      let bestDist = Infinity;
+      cards.forEach((c) => {
+        const r = c.getBoundingClientRect();
+        if (r.bottom < bandTop || r.top > bandBot) return;
+        const center = r.top + r.height / 2;
+        const dist = Math.abs(center - viewportCenter);
+        if (dist < bestDist) { bestDist = dist; best = c; }
+      });
+      setActive(best);
+      rafId = null;
+    };
+
+    const onScroll = () => {
+      if (rafId == null) rafId = requestAnimationFrame(pick);
+    };
+
+    const enable = () => {
+      if (attached) return;
+      if (reduceMotion) {
+        // Without motion preference, just spotlight the first card so
+        // descriptions remain readable.
+        setActive(cards[0]);
+        return;
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      attached = true;
+      pick();
+    };
+
+    const disable = () => {
+      if (attached) {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+        attached = false;
+      }
+      if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
+      cards.forEach((c) => c.classList.remove('is-active-mobile'));
+    };
+
+    const sync = () => (mq.matches ? enable() : disable());
+    sync();
+    mq.addEventListener('change', sync);
+  })();
+</script>
