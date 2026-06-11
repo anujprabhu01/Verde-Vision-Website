@@ -18,21 +18,24 @@
 </nav>
 
 <script>
-  const nav = document.querySelector('nav')!;
-  const toggle = document.querySelector('.nav-toggle')!;
-  const links = nav.querySelectorAll('.nav-links a');
-  const close = () => {
-    nav.classList.remove('is-open');
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'Open menu');
-  };
-  toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-  });
-  links.forEach(link => link.addEventListener('click', close));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  (() => {
+    const nav = document.querySelector('nav');
+    const toggle = document.querySelector('.nav-toggle');
+    if (!nav || !toggle) return;
+    const links = nav.querySelectorAll('.nav-links a');
+    const close = () => {
+      nav.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open menu');
+    };
+    toggle.addEventListener('click', () => {
+      const open = nav.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    links.forEach(link => link.addEventListener('click', close));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
 </script>
 
 <style>
@@ -134,13 +137,15 @@
       gap: 2rem;
       opacity: 0;
       pointer-events: none;
+      visibility: hidden;
       transform: translateY(-8px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
       z-index: 105;
     }
     nav.is-open .nav-links {
       opacity: 1;
       pointer-events: auto;
+      visibility: visible;
       transform: translateY(0);
     }
     .nav-links .nav-link {
