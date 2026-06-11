@@ -10,6 +10,9 @@ import CTA from '../components/CTA.astro';
 import Footer from '../components/Footer.astro';
 ---
 <Layout>
+  <script>
+    import('../components/islands/ScrollProgress.ts');
+  </script>
   <div class="scroll-progress" aria-hidden="true"></div>
   <canvas class="grid-lines" aria-hidden="true"></canvas>
   <Nav />
@@ -22,4 +25,11 @@ import Footer from '../components/Footer.astro';
     <CTA />
   </main>
   <Footer />
+  <script>
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => import('../components/islands/CanvasGrid.ts'));
+    } else {
+      setTimeout(() => import('../components/islands/CanvasGrid.ts'), 2000);
+    }
+  </script>
 </Layout>
