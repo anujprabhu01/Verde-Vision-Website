@@ -668,52 +668,51 @@ h1 .accent {
 }
 
 /* Studio surface, anchored to the headset's container so it follows
-   the headset on every viewport. The implied surface line sits at
-   y = 63% of this (oversized) box. Real product-shadow anatomy: a tight
-   dark core right at the contact, a mid penumbra, and a broad faint
-   ambient pool — every layer reaches zero by ~±42% from center so the
-   shadow can never hit a viewport or section edge and clip flat. */
+   the headset on every viewport. .hero-visual sits flush against the
+   right edge of the viewport with very little margin before `.hero`'s
+   overflow:hidden clips it — so unlike a symmetric layout, this box can
+   only extend a little to the right (2%) but has lots of room on the
+   left (-20%). Every gradient layer is sized to reach zero by ~±35% from
+   its center, comfortably inside that right-side limit on every viewport
+   so nothing gets clipped flat. */
 .hero-visual::before {
   content: "";
   position: absolute;
-  top: 0; left: -25%; right: -25%; bottom: -30%;
+  top: 0; left: -20%; right: 2%; bottom: -22%;
   pointer-events: none;
   z-index: 0;
   background:
-    /* surface edge — a sharp, bright specular line where the device meets
-       the glass: tighter and brighter than a matte surface so the plane
+    /* surface edge — a bright specular band where the device meets the
+       glass: tighter and brighter than a matte surface so the plane
        reads as polished glass catching the daylight */
-    radial-gradient(ellipse 44% 0.32% at 53% 62.7%,
-      rgba(255,253,246,0.92) 0%,
-      rgba(251,244,228,0.46) 38%,
-      rgba(235,224,203,0.14) 70%,
+    radial-gradient(ellipse 30% 1% at 60% 64%,
+      rgba(255,253,246,0.85) 0%,
+      rgba(251,244,228,0.42) 42%,
+      rgba(235,224,203,0.12) 75%,
       transparent 100%),
-    /* core — softer contact shadow: glass transmits light, so the shadow
-       directly under the device is lighter than it would be on matte ground */
-    radial-gradient(ellipse 26% 1.6% at 53% 63.1%,
+    /* core — tight, soft contact shadow right under the device. Glass
+       transmits light, so this stays lighter than shadow on matte ground */
+    radial-gradient(ellipse 17% 2.4% at 60% 65%,
       rgba(24,34,27,0.30) 0%,
-      rgba(24,34,27,0.21) 35%,
-      rgba(24,34,27,0.09) 68%,
-      rgba(24,34,27,0.02) 88%,
+      rgba(24,34,27,0.18) 38%,
+      rgba(24,34,27,0.06) 72%,
       transparent 100%),
     /* penumbra — soft mid shadow, slightly forward of the device */
-    radial-gradient(ellipse 32% 4.2% at 53% 63.9%,
-      rgba(24,34,27,0.17) 0%,
-      rgba(24,34,27,0.10) 40%,
-      rgba(24,34,27,0.04) 68%,
-      rgba(24,34,27,0.01) 86%,
+    radial-gradient(ellipse 24% 5% at 60% 66%,
+      rgba(24,34,27,0.14) 0%,
+      rgba(24,34,27,0.06) 50%,
+      rgba(24,34,27,0.015) 80%,
       transparent 100%),
-    /* ambient — broad, very faint, swallows the other two smoothly */
-    radial-gradient(ellipse 40% 7.5% at 53% 64.6%,
-      rgba(24,34,27,0.075) 0%,
-      rgba(24,34,27,0.045) 42%,
-      rgba(24,34,27,0.018) 68%,
-      rgba(24,34,27,0.005) 86%,
+    /* ambient — broad, very faint, swallows the other layers smoothly
+       and fully fades out before the right edge of this box */
+    radial-gradient(ellipse 32% 8% at 60% 67%,
+      rgba(24,34,27,0.05) 0%,
+      rgba(24,34,27,0.02) 50%,
       transparent 100%),
     /* warm daylight wash behind the device */
-    radial-gradient(ellipse 44% 32% at 53% 49%,
-      rgba(208,182,130,0.18) 0%,
-      rgba(208,182,130,0.07) 52%,
+    radial-gradient(ellipse 36% 28% at 60% 52%,
+      rgba(208,182,130,0.16) 0%,
+      rgba(208,182,130,0.06) 55%,
       transparent 100%);
 }
 
@@ -804,39 +803,42 @@ h1 .accent {
        middle. Softer peak + extra mid stops so it dissolves smoothly
        into the surrounding green glow rather than cutting against it. */
     radial-gradient(ellipse 30% 100% at 24% 50%,
-      rgba(0,0,0,0.72) 0%,
-      rgba(0,0,0,0.68) 4%,
-      rgba(0,0,0,0.56) 8%,
-      rgba(0,0,0,0.40) 14%,
-      rgba(0,0,0,0.29) 26%,
-      rgba(0,0,0,0.19) 42%,
-      rgba(0,0,0,0.11) 58%,
-      rgba(0,0,0,0.055) 74%,
-      rgba(0,0,0,0.02) 88%,
-      rgba(0,0,0,0.006) 96%,
+      rgba(0,0,0,0.45) 0%,
+      rgba(0,0,0,0.42) 4%,
+      rgba(0,0,0,0.34) 8%,
+      rgba(0,0,0,0.24) 14%,
+      rgba(0,0,0,0.17) 26%,
+      rgba(0,0,0,0.11) 42%,
+      rgba(0,0,0,0.065) 58%,
+      rgba(0,0,0,0.032) 74%,
+      rgba(0,0,0,0.012) 88%,
+      rgba(0,0,0,0.004) 96%,
       transparent 100%),
     /* Right contact shadow — mirror */
     radial-gradient(ellipse 30% 100% at 76% 50%,
-      rgba(0,0,0,0.72) 0%,
-      rgba(0,0,0,0.68) 4%,
-      rgba(0,0,0,0.56) 8%,
-      rgba(0,0,0,0.40) 14%,
-      rgba(0,0,0,0.29) 26%,
-      rgba(0,0,0,0.19) 42%,
-      rgba(0,0,0,0.11) 58%,
-      rgba(0,0,0,0.055) 74%,
-      rgba(0,0,0,0.02) 88%,
-      rgba(0,0,0,0.006) 96%,
+      rgba(0,0,0,0.45) 0%,
+      rgba(0,0,0,0.42) 4%,
+      rgba(0,0,0,0.34) 8%,
+      rgba(0,0,0,0.24) 14%,
+      rgba(0,0,0,0.17) 26%,
+      rgba(0,0,0,0.11) 42%,
+      rgba(0,0,0,0.065) 58%,
+      rgba(0,0,0,0.032) 74%,
+      rgba(0,0,0,0.012) 88%,
+      rgba(0,0,0,0.004) 96%,
       transparent 100%);
 }
 
 /* Tight green rim glow that hugs the headset silhouette, plus a
    stronger diffuse halo so the headset reads as backlit by the green
-   bloom on .hero-visual::before. */
+   bloom on .hero-visual::before. The drop-shadow is small and tight —
+   a silhouette-shaped shadow reads as a "sticker" cutout if it's large,
+   so it's kept subtle and the floor gradient on .hero-visual::before
+   carries the real "resting on glass" shadow. */
 .headset-core {
   position: relative;
   width: 100%;
-  filter: drop-shadow(0 22px 34px rgba(28,42,33,0.16));
+  filter: drop-shadow(0 8px 12px rgba(28,42,33,0.14));
 }
 
 /* Mirrored reflection — a visual clone of .headset-core (slider + image),
