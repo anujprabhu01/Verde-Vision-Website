@@ -1,16 +1,26 @@
 // Always open the landing page at the top — don't let the browser restore a
 // mid-page scroll on reload (it also pre-triggers on-scroll reveals), and
-// don't let a leftover #section hash (from in-page nav) jump us back down.
+// don't let a leftover #section hash (from in-page nav) jump us back there.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 if (window.location.hash) {
   history.replaceState(null, '', window.location.pathname + window.location.search);
-  const snapToTop = () => window.scrollTo(0, 0);
-  snapToTop();
-  // The browser's own scroll-to-fragment can land *after* this script runs —
-  // it waits for layout to settle, which here means the serif webfont
-  // finishing its swap — so reassert the top once load/fonts catch up.
-  window.addEventListener('load', snapToTop);
-  document.fonts?.ready.then(snapToTop);
+}
+{
+  // The browser can (re)apply its remembered/fragment scroll position after
+  // this script runs — once webfonts swap, or once the Plant Library's 3D
+  // models load and settle the layout — so keep pinning to the top for a
+  // few seconds, until the visitor scrolls on their own.
+  let settled = false;
+  const stop = () => { settled = true; };
+  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(type =>
+    window.addEventListener(type, stop, { once: true, passive: true }));
+  const start = performance.now();
+  const poll = () => {
+    if (settled) return;
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+    if (performance.now() - start < 4000) requestAnimationFrame(poll);
+  };
+  poll();
 }
 
 // ── Mobile nav toggle ──
