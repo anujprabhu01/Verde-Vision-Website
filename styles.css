@@ -9,33 +9,50 @@
 }
 
 :root {
-  /* Palette — dark + mint, no gold */
-  --green-dark:   #0a0a0a;
-  --green-mid:    #111111;
-  --green-card:   rgba(255,255,255,0.04);
-  --green-border: #1e1e1e;
-  --accent:       #1fc490;
-  --accent-bright:#7dffcf;
-  --accent-dim:   #19a578;
-  --accent-soft:  rgba(31,196,144,0.32);
-  --text:         #d4d4d4;
-  --text-muted:   #8e8e8e;
-  --text-faint:   #5e5e5e;
-  --white:        #ffffff;
-  --rule:         rgba(255,255,255,0.08);
-  --rule-strong:  rgba(255,255,255,0.14);
-  --gold:         #c9a84c;
-  --gold-soft:    rgba(201,168,76,0.42);
+  /* Palette — warm paper + botanical ink. Green is pigment, not light:
+     it never glows, it prints. Clay is the warm counterpoint, used
+     sparingly; gold belongs to the path in "why it wins". */
+  --green-dark:   #ebe0cb;                /* page paper — desert sand / kraft */
+  --green-mid:    #e0d3b6;                /* tinted blocks — deeper sand band */
+  --green-card:   #f5eeda;               /* raised surfaces — warm cream */
+  --green-border: rgba(28,42,33,0.16);
+  --accent:       #2e5d43;                /* botanical green ink */
+  --accent-bright:#3c7857;                /* hover green */
+  --accent-dim:   #234a35;
+  --accent-soft:  rgba(46,93,67,0.22);
+  --clay:         #b0552f;                /* warm accent — eyebrows, marks */
+  --text:         #2b372f;
+  --text-muted:   #5c675e;
+  --text-faint:   #97a098;
+  --white:        #1c2a21;                /* highest-contrast ink (was white-on-dark) */
+  --rule:         rgba(28,42,33,0.14);
+  --rule-strong:  rgba(28,42,33,0.30);
+  --gold:         #a87b2f;
+  --gold-soft:    rgba(168,123,47,0.42);
 
-  /* Typography — single Geist family with Mono for technical labels */
-  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-serif:   'Fraunces', 'Iowan Old Style', 'Apple Garamond', Georgia, serif;
-  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* Typography — Newsreader carries the voice (editorial, grounded,
+     roman by default); Schibsted Grotesk does the quiet work. Mono
+     survives only for genuinely numeric UI (timecodes). */
+  --font-display: 'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-serif:   'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --font-body:    'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono:    'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Engraved rule — the decorative primitive: a hairline pressed into
+     the paper, darkest at its center. Replaces the glass-edge glow. */
+  --glass-edge: linear-gradient(90deg,
+    transparent,
+    rgba(28,42,33,0.20) 30%,
+    rgba(28,42,33,0.30) 50%,
+    rgba(28,42,33,0.20) 70%,
+    transparent);
 }
 
 html {
   scroll-behavior: smooth;
+  /* Anchor jumps (#why, #features, #plant-library…) clear the fixed nav
+     instead of tucking the section eyebrow behind it. */
+  scroll-padding-top: 5rem;
   /* Reserve space for the scrollbar so the centered grid doesn't shift
      left when the scrollbar appears (Windows / non-overlay scrollbars). */
   scrollbar-gutter: stable;
@@ -45,34 +62,29 @@ body {
   background-color: var(--green-dark);
   color: var(--text);
   font-family: var(--font-body);
-  line-height: 1.6;
-  overflow-x: hidden;
+  line-height: 1.65;
+  /* clip (not hidden) prevents horizontal scroll WITHOUT making <body> a scroll
+     container — `overflow-x: hidden` forces overflow-y to compute to auto, which
+     turns body into the scrollport and pins descendant view() scroll-timelines. */
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* ── FILM GRAIN
+/* ── PAPER GRAIN
    A static SVG-turbulence noise layer above the page but below modal UI.
-   Soft-light blend keeps it as texture, not pattern. */
+   Multiply blend presses it into the paper as texture, not pattern. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.07;
-  mix-blend-mode: soft-light;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   background-size: 220px 220px;
-}
-
-/* ── BLUEPRINT GRID LINES
-   Canvas overlay that animates subtle accent-green hairlines between
-   adjacent dots in the body grid. Driven by main.js. Respects
-   prefers-reduced-motion (script bails out). */
-.grid-lines {
-  display: none;
 }
 
 /* ── SCROLL PROGRESS
@@ -84,7 +96,7 @@ body::after {
   height: 2px;
   z-index: 200;
   pointer-events: none;
-  background: rgba(255,255,255,0.04);
+  background: rgba(28,42,33,0.06);
 }
 .scroll-progress::after {
   content: "";
@@ -92,7 +104,6 @@ body::after {
   height: 100%;
   width: calc(var(--scroll-progress, 0) * 100%);
   background: var(--accent);
-  box-shadow: 0 0 10px rgba(31,196,144,0.45);
   transform-origin: left center;
 }
 
@@ -100,11 +111,11 @@ body::after {
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 1.1rem 5vw;
-  background: rgba(10,10,10,0.7);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--green-border);
+  padding: 1.15rem 5vw;
+  background: rgba(235,224,203,0.82);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--rule);
 }
 
 .nav-logo {
@@ -122,7 +133,7 @@ nav {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.18em;
-  color: var(--white);
+  color: var(--white);  /* ink */
   line-height: 1;
 }
 
@@ -135,12 +146,12 @@ nav a.nav-link:hover { color: var(--white); }
 
 .nav-cta {
   margin-left: 2rem;
-  background: var(--accent); color: #0a0a0a;
-  padding: 0.45rem 1.1rem; border-radius: 999px;
+  background: var(--accent); color: #ebe0cb;
+  padding: 0.5rem 1.15rem; border-radius: 8px;
   font-size: 0.88rem; font-weight: 600; text-decoration: none;
   transition: background 0.2s, transform 0.15s;
 }
-.nav-cta:hover { background: #2ee08a; transform: translateY(-1px); }
+.nav-cta:hover { background: var(--accent-bright); transform: translateY(-1px); }
 
 /* Hamburger — hidden on desktop, shown ≤900px */
 .nav-toggle {
@@ -157,7 +168,7 @@ nav a.nav-link:hover { color: var(--white); }
   z-index: 110;
   transition: background 0.2s, border-color 0.2s;
 }
-.nav-toggle:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.2); }
+.nav-toggle:hover { background: rgba(28,42,33,0.05); border-color: var(--rule-strong); }
 .nav-toggle-bar {
   display: block;
   width: 18px; height: 1.5px;
@@ -177,14 +188,14 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
        so the overlay can escape to the viewport edges. */
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(10,10,10,0.92);
+    background: rgba(235,224,203,0.96);
   }
   .nav-toggle { display: flex; }
   .nav-logo-text { font-size: 0.9rem; }
   .nav-links {
     position: fixed;
     inset: 0;
-    background: rgba(10,10,10,0.97);
+    background: rgba(235,224,203,0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     display: flex;
@@ -218,14 +229,31 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
 
 /* ── HERO ── */
 .hero {
-  /* +8rem to both min-height and bottom padding keeps the headset + glow
-     vertically centered EXACTLY where they were, while extending the hero
-     down so the full Vision Pro reflection clears before the next section. */
-  min-height: calc(100vh + 16rem);
+  /* A modest cushion below the fold lets the reflection clear without
+     opening a large dead zone — the sunlit floor (::before) fills the
+     lower scene so the space reads as room, not emptiness. */
+  min-height: calc(100vh + 6rem);
   display: flex; align-items: center;
-  padding: 7rem 0 calc(clamp(4rem, 12vw, 15rem) + 8rem) 5vw;
+  padding: 7rem 0 calc(clamp(3rem, 9vw, 9rem) + 2rem) 5vw;
   position: relative;
   overflow: hidden;
+}
+
+/* Sunlit floor: the lower half of the hero warms into a desert-lit
+   surface, so the headset (and its reflection) sit on an implied floor
+   instead of floating in flat sand, and the lower scene has a purpose. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom,
+      transparent 50%,
+      rgba(208,182,130,0.05) 66%,
+      rgba(199,169,116,0.10) 84%,
+      rgba(190,159,106,0.14) 100%);
 }
 
 @media (max-width: 900px) {
@@ -249,7 +277,36 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
     min-height: 100vh;
     padding-bottom: clamp(2.5rem, 7vw, 5rem);
   }
-  .hero-tagline { bottom: 6.5rem; }
+  /* Needs the `.hero` prefix to out-specify the unconditional
+     `.hero-tagline { bottom: 16rem }` rule defined later in this file —
+     media queries add no specificity, so an equal-specificity rule further
+     down would otherwise win and leave the tagline stuck at 16rem.
+     2rem keeps the tagline + chevron clear of the (vertically centered)
+     CTA row across the whole laptop-height range (~700–820px): the
+     centered content's bottom edge and a bottom-pinned tagline converge as
+     height shrinks, so a larger offset collides with the buttons. */
+  .hero .hero-tagline { bottom: 2rem; }
+  /* Trimming the bottom cushion (above) shortens the hero, so its
+     `overflow: hidden` now clips the mirrored headset reflection + green
+     glow on a hard edge instead of letting them fade out before the next
+     section (the tall/Mac hero keeps ~280px of padding below the reflection,
+     so it never clips there). This band fades whatever the clip catches into
+     the page background — which the next section (.why-pin) also uses — so
+     the hero dissolves smoothly into it. Sits below the tagline (z-index 2)
+     so the tagline + chevron stay legible. */
+  .hero::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 15rem;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(235,224,203,0)    0%,
+      rgba(235,224,203,0.4) 40%,
+      rgba(235,224,203,0.85) 72%,
+      var(--green-dark)  100%);
+  }
 }
 
 /* Hero glow now lives on .hero-visual::before so it tracks the headset's
@@ -298,7 +355,7 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
      - 2.4rem at ≤360px (narrow Android) so "before you build it." fits
      - 2.7rem at ≥375px (iPhone) for proper visual weight
      The calc() linearly crosses 38.4px at 360px and 43.2px at 375px. */
-  .hero h1 { font-size: clamp(2.4rem, calc(-4.8rem + 32vw), 2.7rem); }
+  .hero h1 { font-size: clamp(2.05rem, calc(-3.9rem + 27vw), 2.4rem); }
 }
 
 /* Mobile hero re-flow: visor sits BETWEEN headline and CTAs (matches the
@@ -316,8 +373,9 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   .hero-eyebrow  { order: 1; margin-bottom: 1rem; }
   .hero h1        { order: 2; margin-bottom: 1.5rem; }
   /* Drop the gray subhead on phones — the H1 already carries the message
-     and the mockup's tighter rhythm reads cleaner without it. */
-  .hero-content > p { display: none; }
+     and the mockup's tighter rhythm reads cleaner without it. (The trust
+     line is also a <p>; keep it.) */
+  .hero-content > p:not(.hero-trust) { display: none; }
   .hero-visual    { order: 3; }
   .hero-actions   {
     order: 4;
@@ -349,19 +407,26 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
      subordinate to the solid green primary. Mobile-scoped; desktop keeps
      its tuned look. */
   .hero-actions .btn-secondary {
-    border-color: rgba(255,255,255,0.26);
-    background: rgba(255,255,255,0.06);
+    border-color: var(--rule-strong);
+    background: var(--green-card);
+  }
+  /* Trust line sits centered under the CTAs, above the headset reflection. */
+  .hero-trust {
+    order: 5;
+    margin: -1.4rem auto 0;
+    position: relative;
+    z-index: 2;
   }
 }
 
 .hero-eyebrow {
   font-family: var(--font-display);
   color: var(--accent);
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.6rem;
 }
 
 .hero-line { display: inline-block; }
@@ -370,10 +435,26 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
    allowed to wrap naturally (matches the Mac layout). */
 .hero-line:first-child { white-space: nowrap; }
 
-/* Bottom-centered tagline + scroll cue */
+/* Centered tagline + scroll-cue chevron at the bottom of the hero. The
+   text-shadow keeps the green legible where the line overlaps the
+   headset's reflection glow. Higher specificity than .hero p so it keeps
+   the accent treatment, not the gray subhead. */
+.hero .hero-tagline-text {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+  white-space: nowrap;
+  max-width: none;
+}
+
 .hero-tagline {
   position: absolute;
-  bottom: 10.5rem;
+  /* Hero is 100vh + 6rem tall, so bottom:6rem keeps the centered tagline
+     just above the fold (text + scroll-cue chevron) on any height. */
+  bottom: 6rem;
   left: 0; right: 0;
   z-index: 2;
   display: flex;
@@ -383,30 +464,17 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   pointer-events: none;
 }
 
-/* Higher specificity so this beats the later .hero p rule. */
-.hero .hero-tagline p {
-  color: var(--accent);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin: 0 0 0.75rem;
-  white-space: nowrap;
-  max-width: none;
-}
-
 @media (max-width: 900px) {
   .hero-tagline {
     position: static;
-    /* Tighten the oversized gap to the CTAs (the base .hero-actions also
-       contributes 2.5rem below) so the tagline sits up inside the fold. */
     margin-top: 0.5rem;
     bottom: auto;
   }
-  .hero .hero-tagline p {
+  .hero .hero-tagline-text {
     white-space: normal;
     font-size: 0.85rem;
     letter-spacing: 0.10em;
+    margin: 0 auto 0.75rem;
     padding: 0 1rem;
   }
 }
@@ -439,8 +507,8 @@ h1 {
 
 h1 .accent {
   color: var(--accent);
-  font-style: italic;
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 500;
   letter-spacing: -0.015em;
 }
 
@@ -452,7 +520,84 @@ h1 .accent {
 
 .hero-actions {
   display: flex; gap: 1rem; flex-wrap: wrap;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.4rem;
+}
+
+/* Trust line — surfaces the platform right where the decision happens. */
+.hero-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.hero-trust strong { color: var(--text); font-weight: 600; }
+
+/* ── CREDIBILITY BAR — a slow infinite ticker on a raised, darker sand band
+   so it lifts off the page paper. Overrides the tall default section padding;
+   the band reads as a distinct strip directly under the hero. */
+.cred-bar {
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  /* deeper sand than the page paper, so the strip pops */
+  background: #d0bd91;
+  /* raised: a bright top edge, a soft inner base, and a cast shadow below */
+  box-shadow:
+    inset 0 1px 0 rgba(255,252,244,0.55),
+    inset 0 -1px 0 rgba(28,42,33,0.10),
+    0 12px 28px -18px rgba(28,42,33,0.5);
+}
+/* viewport clips the track and feathers both ends so phrases dissolve in/out */
+.cred-viewport {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 7%, #000 93%, transparent 100%);
+}
+.cred-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: clamp(1.6rem, 3vw, 2.8rem);
+  margin: 0;
+  padding: clamp(0.85rem, 1.8vw, 1.15rem) 0;
+  list-style: none;
+  animation: credScroll 52s linear infinite;
+  will-change: transform;
+}
+.cred-bar:hover .cred-track { animation-play-state: paused; }
+
+.cred-item {
+  flex: none;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2b372f;
+}
+.cred-sep {
+  flex: none;
+  color: var(--gold);
+  font-size: 0.72rem;
+  line-height: 1;
+  transform: translateY(0.02em);
+  opacity: 0.85;
+}
+
+@keyframes credScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cred-track { animation: none; justify-content: center; width: 100%; flex-wrap: wrap; row-gap: 0.4rem; padding-inline: 5vw; }
+  .cred-viewport { -webkit-mask-image: none; mask-image: none; }
 }
 
 /* ── Hero entrance animations (from blend-hero-glow) ── */
@@ -488,16 +633,16 @@ h1 .accent {
 .btn-secondary svg { width: 14px; height: 14px; }
 
 .btn-primary {
-  background: var(--accent); color: #0a0a0a;
-  padding: 0.85rem 2.2rem; border-radius: 999px;
-  font-size: 1rem; font-weight: 700; text-decoration: none;
+  background: var(--accent); color: #ebe0cb;
+  padding: 0.9rem 2.2rem; border-radius: 8px;
+  font-size: 1rem; font-weight: 600; text-decoration: none;
   border: none; cursor: pointer; font-family: inherit;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 0 32px rgba(31,196,144,0.25);
+  box-shadow: 0 10px 22px -10px rgba(35,74,53,0.45);
 }
 .btn-primary:hover {
-  background: #2ee08a; transform: translateY(-2px);
-  box-shadow: 0 0 48px rgba(31,196,144,0.4);
+  background: var(--accent-bright); transform: translateY(-2px);
+  box-shadow: 0 14px 28px -10px rgba(35,74,53,0.5);
 }
 .btn-primary:disabled {
   opacity: 0.4; cursor: not-allowed; transform: none;
@@ -505,15 +650,15 @@ h1 .accent {
 }
 
 .btn-secondary {
-  border: 1px solid var(--green-border);
-  color: var(--text); padding: 0.85rem 2.2rem; border-radius: 999px;
-  font-size: 1rem; font-weight: 600; text-decoration: none;
-  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--rule-strong);
+  color: var(--white); padding: 0.9rem 2.2rem; border-radius: 8px;
+  font-size: 1rem; font-weight: 500; text-decoration: none;
+  background: var(--green-card);
   transition: background 0.2s, border-color 0.2s;
 }
 .btn-secondary:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.3);
+  background: #fbf6ea;
+  border-color: rgba(28,42,33,0.45);
 }
 
 .hero-visual {
@@ -522,52 +667,54 @@ h1 .accent {
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Layered green glow anchored to the headset's container so it follows
-   the headset on every viewport. Pseudo is oversized via negative insets
-   so the wide outer wash has room to bleed beyond .hero-visual's box. */
+/* Studio surface, anchored to the headset's container so it follows
+   the headset on every viewport. .hero-visual sits flush against the
+   right edge of the viewport with very little margin before `.hero`'s
+   overflow:hidden clips it — so unlike a symmetric layout, this box can
+   only extend a little to the right (2%) but has lots of room on the
+   left (-20%). Every gradient layer is sized to reach zero by ~±35% from
+   its center, comfortably inside that right-side limit on every viewport
+   so nothing gets clipped flat. */
 .hero-visual::before {
   content: "";
   position: absolute;
-  top: 0; left: -25%; right: -25%; bottom: -30%;
+  top: 0; left: -20%; right: 2%; bottom: -22%;
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(ellipse 60% 36% at 53% 74%,
-      rgba(31,196,144,0.14) 0%,
-      rgba(31,196,144,0.10) 22%,
-      rgba(31,196,144,0.06) 48%,
-      rgba(31,196,144,0.025) 72%,
-      rgba(31,196,144,0.008) 88%,
+    /* surface edge — a bright specular band where the device meets the
+       glass: tighter and brighter than a matte surface so the plane
+       reads as polished glass catching the daylight */
+    radial-gradient(ellipse 30% 1% at 60% 64%,
+      rgba(255,253,246,0.85) 0%,
+      rgba(251,244,228,0.42) 42%,
+      rgba(235,224,203,0.12) 75%,
       transparent 100%),
-    radial-gradient(ellipse 46% 26% at 53% 72%,
-      rgba(31,196,144,0.30) 0%,
-      rgba(31,196,144,0.22) 22%,
-      rgba(31,196,144,0.14) 44%,
-      rgba(31,196,144,0.07) 66%,
-      rgba(31,196,144,0.025) 84%,
+    /* core — tight, soft contact shadow right under the device. Glass
+       transmits light, so this stays lighter than shadow on matte ground */
+    radial-gradient(ellipse 17% 2.4% at 60% 65%,
+      rgba(24,34,27,0.30) 0%,
+      rgba(24,34,27,0.18) 38%,
+      rgba(24,34,27,0.06) 72%,
       transparent 100%),
-    radial-gradient(ellipse 33% 11% at 53% 63%,
-      rgba(31,196,144,0.52) 0%,
-      rgba(31,196,144,0.34) 32%,
-      rgba(31,196,144,0.18) 58%,
-      rgba(31,196,144,0.07) 80%,
-      rgba(31,196,144,0.02) 92%,
+    /* penumbra — soft mid shadow, slightly forward of the device */
+    radial-gradient(ellipse 24% 5% at 60% 66%,
+      rgba(24,34,27,0.14) 0%,
+      rgba(24,34,27,0.06) 50%,
+      rgba(24,34,27,0.015) 80%,
       transparent 100%),
-    radial-gradient(ellipse 28% 2.6% at 53% 63%,
-      rgba(120,255,200,0.65) 0%,
-      rgba(31,196,144,0.45) 30%,
-      rgba(31,196,144,0.20) 60%,
-      rgba(31,196,144,0.06) 85%,
+    /* ambient — broad, very faint, swallows the other layers smoothly
+       and fully fades out before the right edge of this box */
+    radial-gradient(ellipse 32% 8% at 60% 67%,
+      rgba(24,34,27,0.05) 0%,
+      rgba(24,34,27,0.02) 50%,
+      transparent 100%),
+    /* warm daylight wash behind the device */
+    radial-gradient(ellipse 36% 28% at 60% 52%,
+      rgba(208,182,130,0.16) 0%,
+      rgba(208,182,130,0.06) 55%,
       transparent 100%);
 }
-
-/* Multi-layer ambient halo behind the headset. Three stacked ellipses at
-   progressively larger sizes / lower alphas give a very gradual fade to
-   black and let the green wrap up around the lower goggle edges instead
-   of stopping abruptly underneath. */
-/* Background halo behind the headset removed per request. The green
-   contact-line glow on .hero::before and the headset rim drop-shadow
-   provide the only remaining green accents. */
 
 /* ── Vision Pro headset with embedded slider ── */
 .headset {
@@ -656,41 +803,42 @@ h1 .accent {
        middle. Softer peak + extra mid stops so it dissolves smoothly
        into the surrounding green glow rather than cutting against it. */
     radial-gradient(ellipse 30% 100% at 24% 50%,
-      rgba(0,0,0,1) 0%,
-      rgba(0,0,0,0.96) 4%,
-      rgba(0,0,0,0.82) 8%,
-      rgba(0,0,0,0.58) 14%,
-      rgba(0,0,0,0.42) 26%,
-      rgba(0,0,0,0.28) 42%,
-      rgba(0,0,0,0.16) 58%,
-      rgba(0,0,0,0.08) 74%,
-      rgba(0,0,0,0.03) 88%,
-      rgba(0,0,0,0.008) 96%,
+      rgba(0,0,0,0.45) 0%,
+      rgba(0,0,0,0.42) 4%,
+      rgba(0,0,0,0.34) 8%,
+      rgba(0,0,0,0.24) 14%,
+      rgba(0,0,0,0.17) 26%,
+      rgba(0,0,0,0.11) 42%,
+      rgba(0,0,0,0.065) 58%,
+      rgba(0,0,0,0.032) 74%,
+      rgba(0,0,0,0.012) 88%,
+      rgba(0,0,0,0.004) 96%,
       transparent 100%),
     /* Right contact shadow — mirror */
     radial-gradient(ellipse 30% 100% at 76% 50%,
-      rgba(0,0,0,1) 0%,
-      rgba(0,0,0,0.96) 4%,
-      rgba(0,0,0,0.82) 8%,
-      rgba(0,0,0,0.58) 14%,
-      rgba(0,0,0,0.42) 26%,
-      rgba(0,0,0,0.28) 42%,
-      rgba(0,0,0,0.16) 58%,
-      rgba(0,0,0,0.08) 74%,
-      rgba(0,0,0,0.03) 88%,
-      rgba(0,0,0,0.008) 96%,
+      rgba(0,0,0,0.45) 0%,
+      rgba(0,0,0,0.42) 4%,
+      rgba(0,0,0,0.34) 8%,
+      rgba(0,0,0,0.24) 14%,
+      rgba(0,0,0,0.17) 26%,
+      rgba(0,0,0,0.11) 42%,
+      rgba(0,0,0,0.065) 58%,
+      rgba(0,0,0,0.032) 74%,
+      rgba(0,0,0,0.012) 88%,
+      rgba(0,0,0,0.004) 96%,
       transparent 100%);
 }
 
 /* Tight green rim glow that hugs the headset silhouette, plus a
    stronger diffuse halo so the headset reads as backlit by the green
-   bloom on .hero-visual::before. */
+   bloom on .hero-visual::before. The drop-shadow is small and tight —
+   a silhouette-shaped shadow reads as a "sticker" cutout if it's large,
+   so it's kept subtle and the floor gradient on .hero-visual::before
+   carries the real "resting on glass" shadow. */
 .headset-core {
   position: relative;
   width: 100%;
-  filter:
-    drop-shadow(0 0 4px  rgba(31,196,144,0.10))
-    drop-shadow(0 0 10px rgba(31,196,144,0.06));
+  filter: drop-shadow(0 8px 12px rgba(28,42,33,0.14));
 }
 
 /* Mirrored reflection — a visual clone of .headset-core (slider + image),
@@ -704,23 +852,24 @@ h1 .accent {
   display: block;
   pointer-events: none;
   transform: scaleY(-1);
-  opacity: 0.46;
-  filter:
-    blur(2px) brightness(1) contrast(1.2) saturate(0.95)
-    drop-shadow(0 0 18px rgba(31,196,144,0.28))
-    drop-shadow(0 0 42px rgba(31,196,144,0.18));
+  /* Glass-table read: a crisp mirror that's only faintly present and dies
+     out quickly as it recedes — clear right at the contact line, gone by the
+     lower third. Lower opacity + faster mask fade keeps it from competing
+     with the headset itself. */
+  opacity: 0.2;
+  filter: blur(0.5px) brightness(1.02) saturate(0.95);
   -webkit-mask-image: linear-gradient(to top,
-    rgba(0,0,0,0.58) 0%,
-    rgba(0,0,0,0.51) 22%,
-    rgba(0,0,0,0.32) 58%,
-    rgba(0,0,0,0.09) 84%,
-    transparent 100%);
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.42) 16%,
+    rgba(0,0,0,0.16) 36%,
+    rgba(0,0,0,0.04) 54%,
+    transparent 72%);
           mask-image: linear-gradient(to top,
-    rgba(0,0,0,0.58) 0%,
-    rgba(0,0,0,0.51) 22%,
-    rgba(0,0,0,0.32) 58%,
-    rgba(0,0,0,0.09) 84%,
-    transparent 100%);
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.42) 16%,
+    rgba(0,0,0,0.16) 36%,
+    rgba(0,0,0,0.04) 54%,
+    transparent 72%);
 }
 
 /* The mirrored slider should never be interactive. */
@@ -778,6 +927,13 @@ h1 .accent {
   padding: 1.5rem;
 }
 
+/* Promote the slider image layers to their own composited layers so the
+   browser doesn't re-rasterize them through .headset's scale transform plus
+   the SVG clip/mask on every sweep/drag frame — smooths the animation and
+   avoids intermittent black flashes on weaker GPUs (was mobile-only). */
+.ba-stage,
+.ba-img { transform: translateZ(0); }
+
 .ba-after {
   background-image: url('After.png');
   background-size: cover;
@@ -804,14 +960,15 @@ h1 .accent {
   font-weight: 600;
   letter-spacing: 0.16em;
   color: rgba(255,255,255,0.92);
-  background: rgba(255,255,255,0.10);
+  /* Slightly more opaque fill replaces the dropped backdrop-filter (see
+     .ba-handle-knob) so the pills stay legible over the photo without a
+     live blur. */
+  background: rgba(255,255,255,0.16);
   padding: 0.3rem 0.8rem;
   border: 1px solid rgba(255,255,255,0.22);
   border-radius: 999px;
   cursor: pointer;
   pointer-events: auto;
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
   box-shadow: 0 2px 10px rgba(0,0,0,0.28),
               inset 0 1px 0 rgba(255,255,255,0.35),
               inset 0 -1px 0 rgba(0,0,0,0.18);
@@ -859,6 +1016,18 @@ h1 .accent {
   top: 0; bottom: 0;
   left: calc(var(--ba-pct, 50) * 1%);
   width: 1.5px;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+  /* Soft glow halo for the divider. The bright line itself lives on ::before
+     so a gap can be masked out where it passes behind the (now non-blurred)
+     knob — a translucent-white knob can't otherwise hide a white line. */
+  box-shadow: 0 0 12px rgba(255,255,255,0.5);
+}
+.ba-handle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     to bottom,
     rgba(255,255,255,0) 0%,
@@ -867,10 +1036,11 @@ h1 .accent {
     rgba(255,255,255,0.55) 86%,
     rgba(255,255,255,0) 100%
   );
-  transform: translateX(-50%);
-  z-index: 2;
-  pointer-events: none;
-  box-shadow: 0 0 12px rgba(255,255,255,0.5);
+  /* Hole ~ the 38px knob's radius (19px) so the line meets the knob edge. */
+  -webkit-mask: radial-gradient(circle 19px at 50% 50%,
+    transparent 0, transparent 16px, #000 18px);
+          mask: radial-gradient(circle 19px at 50% 50%,
+    transparent 0, transparent 16px, #000 18px);
 }
 
 .ba-handle-line {
@@ -883,10 +1053,12 @@ h1 .accent {
   transform: translate(-50%, -50%) scale(1);
   width: 38px; height: 38px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.14);
+  /* No backdrop-filter: a live blur sampling through the slider's SVG
+     clip-path + mask inside the scaled .headset flickered / flashed black on
+     some GPUs (same bug already worked around on mobile). A plain translucent
+     white + the inset highlights below keep the glassy look without it. */
+  background: rgba(255,255,255,0.18);
   border: 1px solid rgba(255,255,255,0.4);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
   display: flex; align-items: center; justify-content: center;
   color: rgba(255,255,255,0.95);
   pointer-events: auto;
@@ -987,11 +1159,6 @@ h1 .accent {
       transparent 0, transparent 10px, #000 12px);
   }
   .ba-handle-knob svg { width: 12px; height: 12px; }
-  /* Promote the slider image layers to their own composited layers so
-     iOS doesn't re-rasterize them through the parent's transform/clip on
-     every drag frame — eliminates the intermittent black flash. */
-  .ba-stage,
-  .ba-img { transform: translateZ(0); }
 }
 
 /* ── Demo video shared base — used by the in-action stage below.
@@ -1015,34 +1182,45 @@ h1 .accent {
 .demo-video-mute.is-unmuted .icon-unmuted { display: block; }
 
 /* ── SECTIONS ── */
-section { padding: 7rem 5vw; position: relative; }
+section { padding: clamp(7rem, 11vh, 9.5rem) 5vw; position: relative; }
 
-/* Section divider — full-width blueprint hairline with a centered reticle.
-   Applied to every reveal section *except* the hero (which sits before the
-   first one), the divider lives at the top edge of the section. */
+/* Section divider — a glass edge catching light: hairline that brightens
+   toward its center. Lives at the top edge of every reveal section. */
 [data-reveal-section]::before {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0; left: 12%; right: 12%;
   height: 1px;
-  background: var(--rule-strong);
+  background: var(--glass-edge);
   pointer-events: none;
 }
 
+/* Section runner — an italic serif aside in the accent green, trailed by
+   a beam of light. Replaces the numbered mono chapter chips. */
 .section-label {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
   color: var(--accent);
-  font-weight: 600;
   margin-bottom: 1.5rem;
 }
-/* Chapter number — Geist Mono numeral wrapped in brackets */
+.section-label::after {
+  content: "";
+  width: 76px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(28,42,33,0.40),
+    rgba(28,42,33,0.18) 55%,
+    transparent);
+}
 
 [data-reveal-section] .container { position: relative; }
-[data-reveal-section] .section-label[data-chapter] { position: relative; z-index: 2; }
+[data-reveal-section] .section-label { position: relative; z-index: 2; }
 [data-reveal-section] h2 { position: relative; z-index: 2; }
 [data-reveal-section] .section-intro { position: relative; z-index: 2; }
 
@@ -1056,9 +1234,9 @@ h2 {
   margin-bottom: 1.2rem;
 }
 h2 em {
-  font-style: italic;
+  font-style: normal;
   color: var(--accent);
-  font-weight: inherit;
+  font-weight: 500;
 }
 
 .section-intro {
@@ -1067,7 +1245,83 @@ h2 em {
 }
 
 /* ── FEATURES ── */
-.features { background: transparent; }
+/* overflow: clip (not hidden) so the section still clips the bleeding fronds
+   WITHOUT becoming a scroll container — otherwise it would capture the fronds'
+   view() scroll-timeline and pin their grow animation. */
+.features { background: transparent; position: relative; overflow: clip; }
+/* keep the editorial content above the foliage rail */
+.features > .container { position: relative; z-index: 1; }
+
+/* ── LUSH PALM FRONDS — real cutouts down the RIGHT edge ──
+   Each frond pops in once as it scrolls into view (.is-in, set by main.js):
+   opacity + a slide/scale settle from the right. No idle motion — cheap,
+   one-shot transitions only, so scrolling stays smooth. Text stays on the
+   left; fronds bleed off the right and reach toward the copy. */
+.features-foliage {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: clamp(560px, 66vw, 1120px);
+  z-index: 0;
+  pointer-events: none;
+}
+.ff-frond {
+  position: absolute;
+  right: 0;
+  display: block;
+  height: auto;
+  transform-origin: right center;
+  /* Base = final, visible state. This is the fallback for browsers without
+     scroll-driven animations; the grow is layered on in the @supports block. */
+  opacity: 1;
+  transform: rotate(var(--rot, 0deg)) scaleY(var(--flip, 1));
+  /* darken + mute toward the botanical-ink palette so the bright stock green
+     sits in the Verde Vision theme rather than popping out of it */
+  filter: brightness(0.82) saturate(0.86) contrast(1.04) sepia(0.08) hue-rotate(-6deg);
+}
+
+/* placement — deliberately irregular sizes / angles / vertical rhythm so the
+   cluster reads natural, not tiled. Stems run well off the right edge. */
+.ff-1 { top: 20%;  right: -16%; width: 62%; --rot: 2deg;   --flip: -1; } /* angled up, dropped enough to clear the header */
+.ff-2 { top: 31%;  right: -24%; width: 80%; --rot: 16deg;  --flip: 1;  z-index: 2; } /* horizontal (frond's natural angle is ~17° down, so +16 levels it) */
+.ff-3 { top: 46%;  right: -14%; width: 57%; --rot: 7deg;   --flip: 1; } /* slightly bigger, eased up to ~10° down (less down) */
+.ff-4 { top: 61%;  right: -27%; width: 86%; --rot: 4deg;   --flip: -1; }
+.ff-5 { top: 76%;  right: -17%; width: 68%; --rot: -13deg; --flip: 1; z-index: 2; }
+
+/* The grow itself: a scroll-driven animation tied to each frond's own position
+   in the viewport, so it scales up from the stem as it scrolls into view —
+   continuous with scroll, independent of where the page first loads. */
+@keyframes frondGrow {
+  from { opacity: 0; transform: translateX(46px) translateY(18px) scale(0.34) rotate(var(--rot, 0deg)) scaleY(var(--flip, 1)); }
+  to   { opacity: 1; transform: translateX(0)    translateY(0)    scale(1)    rotate(var(--rot, 0deg)) scaleY(var(--flip, 1)); }
+}
+@supports (animation-timeline: view()) {
+  .ff-frond {
+    animation: frondGrow both;
+    animation-timeline: view();
+    /* grow over the first third of the frond's pass through the viewport, so
+       it's still visibly growing as it rises into view (not done at the edge) */
+    animation-range: cover 0% cover 38%;
+  }
+}
+
+/* On smaller screens the copy uses more of the width, so let the fronds bleed
+   further off the right (more stem off-screen) and thin one out. */
+@media (max-width: 1023px) {
+  .features-foliage { width: clamp(320px, 66vw, 520px); opacity: 0.9; }
+  .ff-1 { width: 64%; right: -22%; }
+  .ff-2 { width: 60%; right: -30%; }
+  .ff-3 { display: none; }
+  .ff-4 { width: 62%; right: -32%; }
+  .ff-5 { width: 72%; right: -26%; }
+}
+@media (max-width: 640px) {
+  .features-foliage { opacity: 0.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* no grow — fronds simply present in their final state */
+  .ff-frond { animation: none; opacity: 1; }
+}
 
 /* Features breathes wider than the standard container so the asymmetric
    grid has room to feel architectural. Matches the wider container set
@@ -1115,25 +1369,6 @@ h2 em {
   background: var(--rule-strong);
 }
 
-.features-header-tag {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--accent);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.features-header-tag::before {
-  content: "";
-  width: 0.85rem;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.7;
-}
-
 .features-header .section-intro {
   margin-bottom: 0;
   max-width: 50ch;
@@ -1152,349 +1387,306 @@ h2 em {
   .features-header-desc { padding-bottom: 0; }
 }
 
-/* 3-column grid. Hero card (top-left) spans 2 columns; the other 4 each
-   take 1 column. Top row: hero(2) + narrow(1) = 3 cells. Bottom row:
-   narrow(1) × 3 = 3 cells. Five cards total. */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr;
-  gap: 1.5rem;
-  margin-top: 0;
-}
-
-/* Layered card composition:
-   bg image → blueprint placeholder → gradient overlay → body (text)
-   Image scales on hover; rule and corner bracket animate in for a
-   restrained editorial flourish. */
-.feature-card {
-  position: relative;
-  grid-column: span 1;
-  min-height: 380px;
-  background: #0c0c0c;
-  border: 1px solid var(--rule);
-  border-radius: 0;
+/* ── FEATURES — capability statements that reveal on scroll ── */
+.feature-rows {
+  list-style: none;
+  margin: clamp(3rem, 6vw, 5.5rem) 0 0;
   padding: 0;
-  overflow: hidden;
-  isolation: isolate;
-  display: block;
-  transition:
-    border-color 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  counter-reset: feat;
 }
-
-.feature-card-hero {
-  grid-column: span 2;
-  min-height: 540px;
-}
-
-@media (max-width: 1100px) {
-  .features-grid { grid-template-columns: repeat(2, 1fr); }
-  .feature-card,
-  .feature-card-hero { grid-column: span 1; min-height: 380px; }
-}
-@media (max-width: 580px) {
-  .features-grid { grid-template-columns: 1fr; gap: 1rem; }
-  .feature-card,
-  .feature-card-hero { min-height: 320px; }
-}
-
-/* Image as full-bleed backdrop. Slow zoom on hover for a premium feel. */
-.feature-image {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-color: #0c0c0c;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  transform: scale(1.02);
-  filter: saturate(0.96) contrast(1.02);
-  transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1),
-              filter 0.6s ease-out;
-  will-change: transform;
-}
-
-.feature-card:hover .feature-image {
-  transform: scale(1.07);
-  filter: saturate(1.05) contrast(1.05);
-}
-
-.feature-card[data-feature="02"] .feature-image,
-.feature-card[data-feature="03"] .feature-image {
-  background-size: 78% auto;
-}
-
-/* Blueprint backdrop for cards without a real image — a quiet mint dot
-   grid on dark base. Architectural, sympathetic to the site's aesthetic,
-   so empty cards never read as broken. Hidden once a real image loads. */
-.feature-image-placeholder {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-start;
-  padding: 1.4rem 1.6rem;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(31,196,144,0.34);
-  background-color: #0a0a0a;
-  background-image:
-    radial-gradient(circle at center, rgba(31,196,144,0.11) 0.85px, transparent 1.25px),
-    linear-gradient(135deg, rgba(255,255,255,0.012) 0%, rgba(31,196,144,0.03) 100%);
-  background-size: 22px 22px, 100% 100%;
-  background-position: 0 0, 0 0;
-  pointer-events: none;
-}
-
-.feature-image.is-loaded ~ .feature-image-placeholder { display: none; }
-
-/* Two-axis overlay so headline + body always pass over any image:
-   - Top: heavy dark wash that fades by ~50% line
-   - Side: soft left vignette for the title's reading column
-   - Bottom: gentle lift so imagery stays vivid */
-.feature-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg,
-      rgba(8,8,8,0.92) 0%,
-      rgba(8,8,8,0.78) 18%,
-      rgba(8,8,8,0.5) 40%,
-      rgba(8,8,8,0.22) 64%,
-      rgba(8,8,8,0.06) 86%,
-      rgba(8,8,8,0) 100%),
-    linear-gradient(95deg,
-      rgba(8,8,8,0.45) 0%,
-      rgba(8,8,8,0.18) 38%,
-      rgba(8,8,8,0) 70%);
-  transition: opacity 0.5s ease-out;
-}
-
-.feature-card:hover .feature-overlay { opacity: 0.92; }
-
-/* Cursor-following mint glow — adds depth without competing with text. */
-.feature-card::before {
-  content: "";
-  position: absolute; inset: 0;
-  z-index: 2;
-  background: radial-gradient(
-    520px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(31,196,144,0.18) 0%,
-    rgba(31,196,144,0.06) 38%,
-    transparent 68%
-  );
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 0.5s ease-out;
-  pointer-events: none;
-}
-.feature-card:hover::before { opacity: 1; }
-
-/* Body floats on top — the editorial column. */
-.feature-body {
+.feature-row {
+  display: grid;
+  grid-template-columns: minmax(3.5rem, auto) 1fr;
+  column-gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+  padding: clamp(2rem, 3.4vw, 3.1rem) 0;
   position: relative;
-  z-index: 3;
-  padding: 1.7rem 1.85rem 1.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  pointer-events: none;
 }
-.feature-body a,
-.feature-body button { pointer-events: auto; }
-
-.feature-card-hero .feature-body {
-  padding: 2.1rem 2.2rem 1.85rem;
-  max-width: 78%;
-}
-
-.feature-index {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.2rem;
-}
-.feature-index::before {
+/* engraved hairline above each row (base = drawn; scroll-driven below) */
+.feature-row::before {
   content: "";
-  width: 0.9rem;
+  position: absolute;
+  top: 0; left: 0; right: 0;
   height: 1px;
-  background: var(--accent);
-  opacity: 0.7;
+  background: var(--rule-strong);
+  transform: scaleX(1);
+  transform-origin: left center;
 }
 
-.feature-card h3 {
+.feature-row-num {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-style: italic;
+  font-size: clamp(1.1rem, 1.5vw, 1.45rem);
+  color: var(--accent);
+  line-height: 1;
+  padding-top: 0.5rem;
+}
+
+.feature-row-body { max-width: 52ch; }
+
+/* line-mask reveal: the title wipes up from behind its own clip */
+.feature-row-title {
+  font-family: var(--font-serif);
   font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -0.012em;
+  font-size: clamp(1.9rem, 3.6vw, 3.1rem);
+  line-height: 1.04;
+  letter-spacing: -0.018em;
   color: var(--white);
   margin: 0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+  /* clip (not hidden) keeps the title-wipe mask without making this a scroll
+     container that would pin the span's view() timeline */
+  overflow: clip;
 }
-.feature-card h3 em {
-  font-style: italic;
-  color: var(--accent);
-  font-weight: 400;
+.feature-row-title > span { display: inline-block; }
+
+.feature-row-copy {
+  margin: 1.1rem 0 0;
+  font-size: clamp(1rem, 1.25vw, 1.12rem);
+  line-height: 1.6;
+  color: var(--text-muted);
 }
 
-.feature-card-hero h3 {
-  font-size: 2.2rem;
-  letter-spacing: -0.02em;
-  max-width: 14ch;
-  line-height: 1.06;
-}
+/* ── Scroll-driven reveal — the row's rule draws, number + copy rise, and the
+   title wipes up as the row scrolls into view, in tandem with the palm grow.
+   Base states above are the final/visible states, so browsers without
+   scroll-driven animations just show the rows normally. ── */
+@keyframes fr-rule { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fr-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fr-wipe { from { transform: translateY(105%); } to { transform: translateY(0); } }
 
-.feature-card p {
-  font-size: 0.93rem;
-  line-height: 1.55;
-  color: rgba(212,212,212,0.88);
-  margin: 0;
-  max-width: 38ch;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
-}
-.feature-card-hero p {
-  font-size: 1.04rem;
-  max-width: 46ch;
-  color: rgba(220,220,220,0.92);
-}
-
-/* Hover-reveal for description copy on pointer devices. Title stays
-   visible to anchor the card; the description fades + lifts in. Touch
-   devices skip this (no hover signal), so copy is always visible. */
-@media (hover: hover) and (pointer: fine) {
-  .feature-card p {
-    opacity: 0;
-    transform: translateY(6px);
-    transition:
-      opacity 0.28s ease-out,
-      transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+@supports (animation-timeline: view()) {
+  /* cover-based ranges so each row visibly rises/wipes as it travels up into
+     the middle of the viewport (not finished down at the bottom edge),
+     staggered, and in tandem with the palm grow */
+  .feature-row::before {
+    animation: fr-rule both; animation-timeline: view(); animation-range: cover 2% cover 24%;
   }
-  .feature-card:hover p,
-  .feature-card:focus-within p {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.06s;
+  .feature-row-num {
+    animation: fr-rise both; animation-timeline: view(); animation-range: cover 8% cover 30%;
+  }
+  .feature-row-title > span {
+    animation: fr-wipe both; animation-timeline: view(); animation-range: cover 10% cover 34%;
+  }
+  .feature-row-copy {
+    animation: fr-rise both; animation-timeline: view(); animation-range: cover 16% cover 42%;
   }
 }
 
-/* Bottom rule slides across on hover — small premium tell. */
-.feature-rule {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 1px;
-  width: 0;
-  background: var(--accent);
-  z-index: 4;
-  transition: width 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-  box-shadow: 0 0 14px rgba(31,196,144,0.55);
+@media (prefers-reduced-motion: reduce) {
+  .feature-row::before,
+  .feature-row-num,
+  .feature-row-title > span,
+  .feature-row-copy { animation: none; }
 }
 
-/* Mint corner bracket (top-right) appears on hover — echoes .why-frame
-   brackets and ties the card into the site's blueprint vocabulary. */
-.feature-card::after {
+@media (max-width: 640px) {
+  .feature-row { grid-template-columns: 1fr; row-gap: 0.4rem; }
+  .feature-row-num { padding-top: 0; }
+}
+
+/* ── PLANT LIBRARY — the desert catalog carousel ──
+   The selected specimen stands large and centered, rendered in botanical
+   ink; a placard carries its real horticultural specs; the filmstrip
+   below changes it. */
+.library {
+  background: var(--green-mid);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+.library-header { text-align: center; max-width: 720px; margin: 0 auto; }
+.library-header .section-label { justify-content: center; }
+.library-header .section-label::after { display: none; }
+.library-header .section-intro { margin: 1.1rem auto 0; }
+
+.library-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(380px, 56vh, 620px);
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* warm daylight wash + grounded shadow behind the specimen */
+.library-stage::before {
   content: "";
   position: absolute;
-  top: 12px; right: 12px;
-  width: 14px; height: 14px;
-  border-top: 1px solid var(--accent);
-  border-right: 1px solid var(--accent);
-  opacity: 0;
-  transform: translate(-3px, 3px);
-  z-index: 4;
+  left: 50%; top: 50%;
+  width: min(760px, 86vw); height: 100%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
-  transition: opacity 0.5s ease-out,
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  background:
+    radial-gradient(ellipse 34% 4% at 50% 84%,
+      rgba(28,42,33,0.12) 0%, rgba(28,42,33,0.05) 50%, transparent 100%),
+    radial-gradient(ellipse 40% 30% at 50% 50%,
+      rgba(208,182,130,0.16) 0%, rgba(208,182,130,0.05) 55%, transparent 100%);
+}
+.library-canvas-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(640px, 84vw);
+  height: 100%;
+  cursor: grab;
+}
+.library-canvas-wrap:active { cursor: grabbing; }
+.library-canvas-wrap canvas { display: block; }
+
+/* museum placard, lower-left of the stage */
+.library-placard {
+  position: absolute;
+  left: clamp(1.2rem, 5vw, 5rem);
+  bottom: clamp(1rem, 4vh, 2.5rem);
+  z-index: 3;
+  max-width: 16rem;
+  pointer-events: none;
+}
+.library-common {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--white);
+  line-height: 1.05;
+}
+.library-latin {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--accent);
+  margin-top: 0.15rem;
+}
+.library-specs {
+  margin-top: 1.1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem 1.4rem;
+}
+.library-specs div { display: flex; flex-direction: column; gap: 0.1rem; }
+.library-specs dt {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.library-specs dd {
+  font-size: 0.92rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
-.feature-card:hover {
-  border-color: rgba(31,196,144,0.34);
-  transform: translateY(-4px);
-  box-shadow:
-    0 28px 60px -10px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(31,196,144,0.06),
-    0 0 38px -8px rgba(31,196,144,0.18);
+.library-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  background: var(--green-card);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s, background 0.2s;
 }
-.feature-card:hover .feature-rule { width: 100%; }
-.feature-card:hover::after {
-  opacity: 1;
-  transform: translate(0, 0);
+.library-arrow:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-50%) scale(1.06);
 }
+.library-arrow svg { width: 22px; height: 22px; }
+.library-prev { left: clamp(0.5rem, 3vw, 3rem); }
+.library-next { right: clamp(0.5rem, 3vw, 3rem); }
 
-/* ── Mobile scroll spotlight ──
-   Only ONE card is "active" at a time — whichever is closest to the
-   viewport center. Active card gets the desktop hover treatment
-   (mint border, corner bracket, rule fill, description in). Inactive
-   cards sit in a dim baseline. When the user scrolls past the last
-   card it falls back to baseline. Gated to ≤900px. */
-@media (max-width: 900px) {
-  .feature-card {
-    opacity: 0.55;
-    transform: translateY(0);
-    transition:
-      opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 0.45s ease-out,
-      box-shadow 0.55s ease-out;
+.library-hint {
+  position: absolute;
+  right: clamp(1.2rem, 5vw, 5rem);
+  bottom: clamp(1rem, 4vh, 2.5rem);
+  z-index: 3;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.library-hint.is-hidden { opacity: 0; }
+
+/* filmstrip — scrollable row of plant names; active is highlighted */
+.library-strip {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  padding: 0 5vw 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 42%;   /* lets the active thumb settle near center */
+  justify-content: flex-start;
+}
+.library-strip::-webkit-scrollbar { display: none; }
+/* center only when the whole catalog fits without overflow (no clipped ends) */
+@media (min-width: 1340px) { .library-strip { justify-content: safe center; } }
+
+.library-thumb {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.25s, border-color 0.25s;
+}
+.library-thumb:hover { background: rgba(28,42,33,0.04); }
+.library-thumb.is-active {
+  background: var(--green-card);
+  border-color: var(--green-border);
+}
+.library-thumb-common {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+.library-thumb-latin {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+.library-thumb.is-active .library-thumb-common { color: var(--white); }
+.library-thumb.is-active .library-thumb-latin { color: var(--accent); }
+
+.library-no3d .library-canvas-wrap,
+.library-no3d .library-arrow,
+.library-no3d .library-hint { display: none; }
+.library-no3d .library-placard { position: static; margin: 0 auto; text-align: center; }
+
+@media (max-width: 640px) {
+  .library-placard {
+    position: static;
+    margin: 0 auto;
+    max-width: none;
+    text-align: center;
+    padding: 0 5vw;
   }
-  .feature-card p {
-    opacity: 0;
-    transform: translateY(8px);
-    transition:
-      opacity 0.45s ease-out,
-      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .feature-card.is-active-mobile {
-    opacity: 1;
-    /* On phones the page is constantly moving as the user scrolls, which
-       dwarfs the 4px lift the Mac uses on hover. 10px gives the active
-       card a perceptible "pop" against the scroll motion without feeling
-       jumpy. */
-    transform: translateY(-10px);
-    border-color: rgba(31,196,144,0.34);
-    box-shadow:
-      0 18px 40px -10px rgba(0,0,0,0.5),
-      0 0 0 1px rgba(31,196,144,0.06),
-      0 0 26px -8px rgba(31,196,144,0.18);
-  }
-  .feature-card.is-active-mobile .feature-rule {
-    width: 100%;
-    transition: width 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
-  }
-  /* Mirror the Mac hover image-zoom on the active mobile card — the
-     subtle scale + saturation bump is what gives Mac's hover its visible
-     "grows" feel; without it, the 10px lift alone reads as flat. */
-  .feature-card.is-active-mobile .feature-image {
-    transform: scale(1.07);
-    filter: saturate(1.05) contrast(1.05);
-  }
-  .feature-card.is-active-mobile::after {
-    opacity: 1;
-    transform: translate(0, 0);
-    transition:
-      opacity 0.5s ease-out 0.18s,
-      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
-  }
-  .feature-card.is-active-mobile p {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.22s;
-  }
+  .library-specs { max-width: 18rem; margin-left: auto; margin-right: auto; }
+  .library-stage { flex-direction: column; height: auto; }
+  .library-canvas-wrap { height: min(78vw, 360px); }
+  .library-hint { display: none; }
+  .library-arrow { top: min(39vw, 180px); }
 }
 
 /* ── SEE IT IN ACTION — through the lens of a Vision Pro ──────────
@@ -1522,18 +1714,15 @@ h2 em {
 .action-header .section-label {
   margin-bottom: 1rem;
 }
-.action-header .section-label::before,
-.action-header .section-label::after {
+/* Centered runner: mirror the beam on both sides. */
+.action-header .section-label::before {
   content: "";
-  display: inline-block;
-  vertical-align: middle;
-  width: 28px;
+  width: 76px;
   height: 1px;
-  background: var(--rule-strong);
-  margin: 0 0.85rem 0.18em 0;
-}
-.action-header .section-label::after {
-  margin: 0 0 0.18em 0.85rem;
+  background: linear-gradient(270deg,
+    rgba(28,42,33,0.40),
+    rgba(28,42,33,0.18) 55%,
+    transparent);
 }
 .action-headline {
   font-size: clamp(2.6rem, 5.4vw, 4rem);
@@ -1653,8 +1842,8 @@ h2 em {
       rgba(0,0,0,0.26) 100%);
 }
 
-/* Meta strip below the headset. Editorial mono with a slim scrubber
-   in the center column and controls on the right. */
+/* Meta strip below the headset — a quiet editorial caption with a slim
+   scrubber in the center column and controls on the right. */
 .ia-bar {
   margin: -7rem auto 0;
   max-width: 1480px;
@@ -1664,37 +1853,18 @@ h2 em {
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
   align-items: center;
   gap: 1.6rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 .ia-meta-l {
   display: flex;
   align-items: center;
   gap: 0.95rem;
-  color: var(--text-faint);
-}
-.ia-fig {
-  color: var(--accent);
-  letter-spacing: 0.22em;
-  position: relative;
-  padding-right: 0.95rem;
-}
-.ia-fig::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 0.85em;
-  background: var(--rule-strong);
 }
 .ia-place {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
-  letter-spacing: 0.14em;
 }
 
 .ia-meta-r {
@@ -1705,6 +1875,8 @@ h2 em {
 }
 .ia-time {
   color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   font-feature-settings: "tnum" 1;
   letter-spacing: 0.14em;
 }
@@ -1734,8 +1906,7 @@ h2 em {
 .action-progress:focus-visible .action-progress-knob {
   transform: translate(-50%, -50%) scale(1.25);
   box-shadow:
-    0 0 0 5px rgba(31,196,144,0.35),
-    0 0 14px rgba(31,196,144,0.7);
+    0 0 0 5px rgba(46,93,67,0.3);
 }
 .action-progress-track {
   position: absolute;
@@ -1749,7 +1920,7 @@ h2 em {
   height: 2px; transform: translateY(-50%);
   width: 0%;
   background: var(--accent);
-  box-shadow: 0 0 12px rgba(31,196,144,0.7);
+  box-shadow: none;
   transition: width 0.12s linear;
   pointer-events: none;
 }
@@ -1760,7 +1931,7 @@ h2 em {
   width: 10px; height: 10px;
   border-radius: 999px;
   background: var(--white);
-  box-shadow: 0 0 0 4px rgba(31,196,144,0.22), 0 0 12px rgba(31,196,144,0.5);
+  box-shadow: 0 0 0 4px rgba(46,93,67,0.2);
   transform: translate(-50%, -50%);
   transition: transform 0.18s ease-out;
   pointer-events: none;
@@ -1773,8 +1944,8 @@ h2 em {
 .action-ctl {
   width: 36px; height: 36px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(10,10,10,0.62);
+  border: 1px solid var(--rule-strong);
+  background: var(--green-card);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--white);
@@ -1784,7 +1955,7 @@ h2 em {
   padding: 0;
 }
 .action-ctl:hover {
-  background: rgba(31,196,144,0.18);
+  background: rgba(46,93,67,0.12);
   border-color: var(--accent);
   transform: translateY(-1px);
 }
@@ -1801,93 +1972,131 @@ h2 em {
   .ia-meta-l { flex-wrap: wrap; }
 }
 
-/* ── WHY IT WINS — gold path over a real landscape ──
-   Pinned section. A warm gold line draws up the real lit walkway in the photo as
-   you scroll, igniting milestones beside it; the photo feathers into page-black. */
-.why { padding: 0; height: 300vh; position: relative; }
-.why-pin {
-  position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--green-dark);
-  --prog: 0; --why-gold: #e3a94e; --why-gold-bright: #ffd98a;
+/* ── WHY IT WINS — an interactive topographic field ──
+   A dense contour map fills the section, redrawn live: it carries a gentle
+   dome under the cursor, and a much larger one under any bubble that's
+   expanded — so the terrain visibly rises around a bubble as it grows.
+   Geometry + render loop live in main.js (#why-topo canvas). */
+.why {
+  position: relative;
+  min-height: 100vh;
+  padding: 7rem 0;
+  background: var(--green-dark);
+  overflow: hidden;
+}
+.why-topo { position: absolute; inset: 0; z-index: 0; display: block; }
+
+.why-head { position: relative; z-index: 2; max-width: 34rem; padding: 0 5vw; pointer-events: none; }
+.why-head h2 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin: 0; line-height: 1.08; white-space: nowrap; }
+.why-head h2 em { color: var(--accent); }
+/* desktop: the headline sits in the middle of the topo field, with the
+   bubbles arranged in a ring around it (see --bx/--by below) */
+@media (min-width: 961px) {
+  .why-head {
+    position: absolute; inset: 0; max-width: none; padding: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .why-head .section-label::before {
+    content: "";
+    width: 76px;
+    height: 1px;
+    background: linear-gradient(270deg,
+      rgba(28,42,33,0.40),
+      rgba(28,42,33,0.18) 55%,
+      transparent);
+  }
 }
 
-/* the scene — full-bleed landscape photo, nudged right, feathered into black */
-.why-stage { position: absolute; inset: 0; z-index: 0; transform: translateX(4%); }
-.why-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center;
-  filter: brightness(0.82) saturate(0.96) contrast(1.02); }
-.why-scene-fade { position: absolute; inset: 0; pointer-events: none; background:
-  linear-gradient(to right, var(--green-dark) 0%, rgba(10,10,10,0.55) 20%, transparent 46%),
-  linear-gradient(to bottom, var(--green-dark) 0%, transparent 18%),
-  linear-gradient(to top, var(--green-dark) 0%, transparent 12%); }
-
-.why-line { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; }
-.why-line path { fill: none; stroke-linecap: round; }
-.why-line-glow { stroke: var(--why-gold); stroke-width: 0.8; opacity: 0.5; filter: url(#why-soft); }
-.why-line-core { stroke: url(#why-grad); stroke-width: 0.26; }
-.why-tip { fill: #fff2d6; filter: url(#why-soft); opacity: 0; transition: opacity 0.3s; }
-
-/* milestones beside the path */
-.why-stops { position: absolute; inset: 0; z-index: 2; }
-.why-stop { position: absolute; width: 54px; height: 54px; transform: translate(-50%, -50%);
-  opacity: 0.32; transition: opacity 0.6s ease; }
-.why-stop.on { opacity: 1; }
-.why-dot { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center;
-  border: 1.5px solid rgba(255,235,200,0.32); color: #f6e8cb;
-  background: radial-gradient(circle at 50% 38%, #16120c, #0a0806);
-  box-shadow: 0 6px 20px -6px rgba(0,0,0,0.8);
-  transition: border-color 0.6s, box-shadow 0.6s; }
-.why-stop.on .why-dot { border-color: var(--why-gold); box-shadow: 0 0 26px rgba(227,169,78,0.55); }
-.why-stop-last.on .why-dot { border-color: var(--why-gold-bright); box-shadow: 0 0 38px rgba(255,217,138,0.65); }
-.why-dot svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.why-lbl { position: absolute; right: calc(100% + 1.1rem); top: 50%; transform: translateY(-50%);
-  width: max-content; max-width: 15rem; text-align: right; }
-.why-stop.lbl-right .why-lbl { right: auto; left: calc(100% + 1.1rem); text-align: left; }
-.why-lbl::before { content: ""; position: absolute; inset: -0.7rem -1rem; z-index: -1;
-  background: radial-gradient(125% 130% at 72% 50%, rgba(6,8,7,0.8), transparent 76%); }
-.why-lbl b { display: block; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 400;
-  color: #fff; letter-spacing: -0.01em; text-shadow: 0 1px 12px rgba(0,0,0,0.8); }
-.why-lbl i { font-style: normal; font-size: 0.8rem; color: #c9bda8; display: block; line-height: 1.4;
-  margin-top: 0.12rem; text-shadow: 0 1px 10px rgba(0,0,0,0.85); }
-.why-stop-last .why-lbl b { color: var(--why-gold-bright); }
-
-/* content rail (left, over the feathered photo / black) */
-.why-content { position: relative; z-index: 5; height: 100%; max-width: 1480px; margin: 0 auto;
-  padding: 0 5vw; display: flex; align-items: center; }
-.why-rail { max-width: 32rem; }
-.why-rail .section-label { margin-bottom: 1.6rem; color: var(--accent); font-size: 1.05rem; letter-spacing: 0.26em; }
-.why-rail h2 { font-size: clamp(2.2rem, 4vw, 3.4rem); margin-bottom: 0; line-height: 1.08; white-space: nowrap; }
-.why-rail h2 em { color: var(--accent); }
-.why-levers { list-style: none; margin: 2.6rem 0 0; padding: 2.1rem 0 0;
-  border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 1.4rem; }
-.why-lever { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; }
-.why-lever-num { font-family: var(--font-mono); font-size: 0.74rem; color: var(--accent); letter-spacing: 0.18em; padding-top: 0.4rem; }
-.why-lever h3 { font-family: var(--font-serif); font-size: 1.45rem; font-weight: 400; color: var(--white); margin-bottom: 0.15rem; }
-.why-lever p { font-size: 0.98rem; color: var(--text-muted); line-height: 1.55; }
-
-/* narrower desktops: photo takes more relative width, so keep the rail compact */
-@media (max-width: 1400px) {
-  .why-rail { max-width: 30rem; }
-  .why-rail h2 { font-size: clamp(2rem, 3.4vw, 2.75rem); }
+/* the five bubbles — resting state: small numbered circles bearing a
+   "problem"; the numbering echoes the "Five familiar problems" framing */
+.why-bubbles { position: absolute; inset: 0; z-index: 3; counter-reset: why-bubble; }
+.why-bubble {
+  counter-increment: why-bubble;
+  position: absolute; left: var(--bx); top: var(--by);
+  width: var(--bd); height: var(--bd);
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
+  text-align: center; padding: 1rem;
+  border-radius: 50%; border: 1.5px solid rgba(46, 93, 67, 0.3);
+  background: var(--green-card); color: var(--white);
+  font: inherit; appearance: none; cursor: pointer; overflow: hidden;
+  box-shadow: 0 24px 50px -20px rgba(28, 42, 21, 0.4),
+              0 10px 20px -12px rgba(28, 42, 21, 0.25);
+  transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              height 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              border-color 0.6s ease, box-shadow 0.6s ease;
 }
+.why-bubble::before {
+  content: counter(why-bubble, decimal-leading-zero);
+  font-family: var(--font-serif); font-style: italic; font-size: 0.7rem;
+  letter-spacing: 0.16em; color: var(--clay); opacity: 0.6;
+}
+/* expanded state — only the hovered/active bubble grows, and the solution
+   settles in underneath the (now smaller) problem, so both stay readable */
+.why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
+  width: clamp(190px, 24vw, 290px); height: clamp(190px, 24vw, 290px);
+  border-color: var(--clay);
+  box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
+              0 18px 36px -16px rgba(28,42,33,0.3);
+  z-index: 5; outline: none;
+}
+.why-bubble-problem {
+  font-family: var(--font-serif); font-style: italic; font-weight: 500; font-size: 1.25rem; line-height: 1.3;
+  transition: font-size 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.4s ease;
+}
+.why-bubble-solution {
+  font-family: var(--font-serif); font-weight: 600; font-size: 1.3rem; line-height: 1.3;
+  color: var(--accent);
+  max-height: 0; opacity: 0; overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.6s ease;
+}
+/* entering: the bubble grows first, then the problem steps back to make
+   room for the solution settling in below it */
+.why-bubble:hover .why-bubble-problem,
+.why-bubble:focus-visible .why-bubble-problem,
+.why-bubble.is-active .why-bubble-problem { font-size: 1rem; opacity: 0.65; transition-delay: 0.15s; }
+.why-bubble:hover .why-bubble-solution,
+.why-bubble:focus-visible .why-bubble-solution,
+.why-bubble.is-active .why-bubble-solution { max-height: 8rem; opacity: 1; transition-delay: 0.35s; }
 
-/* mobile: photo as a dim backdrop, rail on top, no traced line/labels */
+/* base positions + sizes — desktop arranges the five in a ring around the
+   centred headline, clear of it and of each other at max expansion
+   (clamp(...,...,290px) → 145px radius) */
+.why-b1 { --bx: 44%; --by: 20%; --bd: 128px; }
+.why-b2 { --bx: 84%; --by: 30%; --bd: 164px; }
+.why-b3 { --bx: 76%; --by: 80%; --bd: 122px; }
+.why-b4 { --bx: 31%; --by: 78%; --bd: 124px; }
+.why-b5 { --bx: 15%; --by: 46%; --bd: 142px; }
+
 @media (max-width: 960px) {
-  .why { height: auto; }
-  .why-pin { position: static; height: auto; min-height: 78vh; padding: 5.5rem 0; }
-  .why-stage { position: absolute; inset: 0; aspect-ratio: auto; opacity: 0.4; transform: none; }
-  .why-photo { object-position: center; }
-  /* drop the left scrim on mobile (text is full-width here) so the photo reads centered */
-  .why-scene-fade { background:
-    linear-gradient(to bottom, var(--green-dark) 0%, transparent 16%),
-    linear-gradient(to top, var(--green-dark) 0%, transparent 12%); }
-  .why-line, .why-stops { display: none; }
-  .why-content { position: relative; padding: 0 6vw; }
-  .why-rail { max-width: none; }
-  .why-rail h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
-  .why-rail h2 br { display: none; }   /* let the headline wrap naturally on phones */
+  .why { min-height: 0; padding: 5rem 0 6rem; }
+  .why-head h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
+  .why-bubbles { position: relative; inset: auto; height: 86vh; min-height: 560px; margin-top: 3rem; }
+  .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, left, top, border-color, box-shadow; }
+  .why-bubble-problem { font-size: 1.05rem; line-height: 1.25; }
+  .why-bubble-solution { font-size: 1.05rem; }
+  .why-bubble:hover .why-bubble-problem,
+  .why-bubble:focus-visible .why-bubble-problem,
+  .why-bubble.is-active .why-bubble-problem { font-size: 0.85rem; }
+  .why-bubble:hover .why-bubble-solution,
+  .why-bubble:focus-visible .why-bubble-solution,
+  .why-bubble.is-active .why-bubble-solution { max-height: 6.5rem; }
+  /* expand toward the centre of the field, so a bubble near an edge never
+     grows past the viewport — only the size + position change, both still
+     percentages of .why-bubbles, so the move stays smooth */
+  .why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
+    left: 50%; top: 50%;
+    width: min(70vw, 230px); height: min(70vw, 230px);
+  }
+  .why-b1 { --bx: 76%; --by: 14%; --bd: 100px; }
+  .why-b2 { --bx: 26%; --by: 34%; --bd: 114px; }
+  .why-b3 { --bx: 60%; --by: 52%; --bd: 92px; }
+  .why-b4 { --bx: 30%; --by: 70%; --bd: 110px; }
+  .why-b5 { --bx: 70%; --by: 90%; --bd: 100px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .why-stop { transition: none; }
-  .why-tip { display: none; }
+  .why-bubble, .why-bubble-problem, .why-bubble-solution { transition: none; }
 }
 
 /* ── BOOKING ── */
@@ -1966,16 +2175,16 @@ h2 em {
   background: none;
 }
 .cal-day:hover:not(:disabled) {
-  background: rgba(31,196,144,0.1);
-  border-color: rgba(31,196,144,0.2);
+  background: rgba(46,93,67,0.08);
+  border-color: rgba(46,93,67,0.25);
 }
 .cal-day.selected {
   background: var(--accent);
-  color: #0a0a0a; font-weight: 700;
+  color: #ebe0cb; font-weight: 600;
   border-color: var(--accent);
 }
 .cal-day:disabled {
-  color: rgba(255,255,255,0.25);
+  color: rgba(28,42,33,0.22);
   cursor: not-allowed;
 }
 .cal-day.empty { background: none; border: none; cursor: default; }
@@ -2000,12 +2209,12 @@ h2 em {
   transition: border-color 0.15s, background 0.15s;
 }
 .time-slot:hover {
-  border-color: rgba(31,196,144,0.3);
-  background: rgba(255,255,255,0.06);
+  border-color: rgba(46,93,67,0.35);
+  background: #fbf6ea;
 }
 .time-slot.selected {
   border-color: var(--accent);
-  background: rgba(31,196,144,0.1);
+  background: rgba(46,93,67,0.10);
   color: var(--white); font-weight: 600;
 }
 
@@ -2030,7 +2239,7 @@ h2 em {
 .demo-form input:focus,
 .demo-form textarea:focus {
   outline: none;
-  border-color: rgba(31,196,144,0.4);
+  border-color: rgba(46,93,67,0.5);
 }
 
 .demo-form .btn-primary { width: 100%; margin-top: 0.25rem; }
@@ -2043,8 +2252,8 @@ h2 em {
 .booking-confirmation.visible { display: block; }
 
 .confirm-icon {
-  width: 64px; height: 64px; border-radius: 0;
-  background: rgba(31,196,144,0.12);
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(46,93,67,0.10);
   border: 1px solid var(--accent);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.8rem; color: var(--accent);
@@ -2057,19 +2266,16 @@ h2 em {
 .booking-confirmation p { color: var(--text-muted); font-size: 1rem; }
 .confirm-sub { margin-top: 0.5rem; font-size: 0.9rem !important; }
 
-/* ── CTA — editorial closing spread ── */
+/* ── CTA — the closing spread: late-afternoon light on paper, a thin
+   engraved horizon at the bottom edge. The warm wash answers the
+   hero's daylight. */
 .cta {
   text-align: center;
   position: relative;
   isolation: isolate;
-  background-color: var(--green-dark);
-  background-image:
-    radial-gradient(circle at center, rgba(255,255,255,0.04) 0.9px, transparent 1.2px);
-  background-size: 28px 28px;
-  background-position: 0 0;
+  background-color: var(--green-mid);
   border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  padding-top: 9rem; padding-bottom: 9rem;
+  padding-top: 10rem; padding-bottom: 11rem;
   overflow: hidden;
 }
 .cta::after {
@@ -2079,59 +2285,17 @@ h2 em {
   pointer-events: none;
   z-index: -1;
   background:
-    radial-gradient(ellipse 25% 12% at 50% 100%,
-      rgba(31,196,144,0.22) 0%,
-      rgba(31,196,144,0.08) 40%,
-      transparent 80%);
+    /* warm ground light along the bottom */
+    radial-gradient(ellipse 70% 32% at 50% 108%,
+      rgba(208,182,130,0.34) 0%,
+      rgba(208,182,130,0.12) 55%,
+      transparent 85%),
+    /* a breath of green from below */
+    radial-gradient(ellipse 38% 10% at 50% 102%,
+      rgba(46,93,67,0.12) 0%,
+      transparent 85%);
 }
 .cta .container { position: relative; z-index: 2; }
-
-/* ── CTA oak — grid-snapped tree that grows on first reveal ── */
-.cta-tree {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  overflow: visible;
-}
-.cta-tree-dots circle {
-  fill: rgba(255,255,255,0.085);
-}
-.cta-tree-branches path {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.05;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: var(--len);
-  stroke-dashoffset: var(--len);
-}
-.cta-tree.is-growing .cta-tree-branches path {
-  animation: oakGrow var(--dur, 1s) var(--delay, 0s) cubic-bezier(.55,.05,.35,1) forwards;
-}
-@keyframes oakGrow {
-  to { stroke-dashoffset: 0; }
-}
-.cta-tree-leaves circle {
-  fill: var(--accent);
-  opacity: 0;
-  transform-origin: center;
-  transform-box: fill-box;
-}
-.cta-tree.is-growing .cta-tree-leaves circle {
-  animation: oakLeaf 0.85s var(--delay, 4.2s) cubic-bezier(.4,.1,.3,1) forwards;
-}
-@keyframes oakLeaf {
-  0%   { opacity: 0; transform: scale(0.25); }
-  55%  { opacity: 1; transform: scale(1.55); }
-  100% { opacity: 0.88; transform: scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cta-tree.is-growing .cta-tree-branches path { animation: none; stroke-dashoffset: 0; }
-  .cta-tree.is-growing .cta-tree-leaves circle { animation: none; opacity: 0.85; transform: scale(1); }
-}
 
 .cta h2 {
   font-family: var(--font-serif);
@@ -2150,40 +2314,12 @@ h2 em {
 }
 .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-/* Corner brackets — terminal "stamp" framing on the CTA */
-.cta-corner {
-  position: absolute;
-  width: 28px; height: 28px;
-  pointer-events: none;
-  z-index: 1;
-}
-.cta-corner::before, .cta-corner::after {
-  content: "";
-  position: absolute;
-  background: var(--accent);
-}
-.cta-corner::before { width: 100%; height: 1px; }
-.cta-corner::after  { width: 1px; height: 100%; }
-.cta-corner-tl { top: 24px; left: 5vw; }
-.cta-corner-tl::before { top: 0; left: 0; }
-.cta-corner-tl::after  { top: 0; left: 0; }
-.cta-corner-tr { top: 24px; right: 5vw; }
-.cta-corner-tr::before { top: 0; right: 0; }
-.cta-corner-tr::after  { top: 0; right: 0; }
-.cta-corner-bl { bottom: 24px; left: 5vw; }
-.cta-corner-bl::before { bottom: 0; left: 0; }
-.cta-corner-bl::after  { bottom: 0; left: 0; }
-.cta-corner-br { bottom: 24px; right: 5vw; }
-.cta-corner-br::before { bottom: 0; right: 0; }
-.cta-corner-br::after  { bottom: 0; right: 0; }
-
-/* ── FOOTER — editorial columns ── */
+/* ── FOOTER — a deep botanical green block grounds the page ── */
 footer {
   padding: 5rem 5vw 2.5rem;
-  border-top: 1px solid var(--green-border);
   font-size: 0.85rem;
-  color: var(--text-muted);
-  background: var(--green-dark);
+  color: rgba(235,224,203,0.6);
+  background: #22382b;
   position: relative;
 }
 .footer-grid {
@@ -2199,61 +2335,59 @@ footer {
   font-weight: 700;
   font-size: 1.55rem;
   letter-spacing: -0.025em;
-  color: var(--white);
+  color: #ebe0cb;
   line-height: 1;
   margin-bottom: 0.85rem;
 }
 .footer-brand .footer-logo span {
-  color: var(--accent);
+  color: #9dc3a9;
   font-weight: 700;
 }
 .footer-tagline {
-  color: var(--text-muted);
+  color: rgba(235,224,203,0.55);
   font-size: 0.92rem;
   max-width: 28ch;
   line-height: 1.55;
 }
 .footer-col-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 0.68rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: #9dc3a9;
   margin-bottom: 1rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 .footer-col ul { list-style: none; padding: 0; margin: 0; }
 .footer-col li { margin-bottom: 0.55rem; }
 .footer-col a {
-  color: var(--text);
+  color: rgba(235,224,203,0.8);
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.18s ease;
   position: relative;
 }
-.footer-col a:hover { color: var(--accent); }
+.footer-col a:hover { color: #ffffff; }
 
 .footer-bottom {
   max-width: 1100px;
   margin: 3.5rem auto 0;
   padding-top: 1.75rem;
-  border-top: 1px solid var(--green-border);
+  border-top: 1px solid rgba(235,224,203,0.16);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: rgba(235,224,203,0.5);
   letter-spacing: 0.02em;
 }
 .footer-bottom .footer-meta {
-  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--text-muted);
-  opacity: 0.7;
+  color: rgba(235,224,203,0.5);
 }
 
 @media (max-width: 800px) {

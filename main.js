@@ -1,3 +1,28 @@
+// Always open the landing page at the top — don't let the browser restore a
+// mid-page scroll on reload (it also pre-triggers on-scroll reveals), and
+// don't let a leftover #section hash (from in-page nav) jump us back there.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (window.location.hash) {
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+{
+  // The browser can (re)apply its remembered/fragment scroll position after
+  // this script runs — once webfonts swap, or once the Plant Library's 3D
+  // models load and settle the layout — so keep pinning to the top for a
+  // few seconds, until the visitor scrolls on their own.
+  let settled = false;
+  const stop = () => { settled = true; };
+  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(type =>
+    window.addEventListener(type, stop, { once: true, passive: true }));
+  const start = performance.now();
+  const poll = () => {
+    if (settled) return;
+    if (window.scrollY > 0) window.scrollTo(0, 0);
+    if (performance.now() - start < 4000) requestAnimationFrame(poll);
+  };
+  poll();
+}
+
 // ── Mobile nav toggle ──
 (() => {
   const nav = document.querySelector('nav');
@@ -227,92 +252,9 @@ if (reduceMotion) {
 }
 
 
-// ── Cursor-tracking glow for feature cards ──
-document.querySelectorAll('.feature-card').forEach((card) => {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    card.style.setProperty('--mx', `${x}%`);
-    card.style.setProperty('--my', `${y}%`);
-  });
-});
-
-
-// ── Mobile scroll spotlight for feature cards ──
-// Only ONE card is "active" at a time: whichever's center is closest
-// to viewport center while at least partially on screen. As the user
-// scrolls down, the active class hops from card to card; scrolling
-// past the last card drops all of them back to the dim baseline.
-// Gated to ≤900px so pointer-device users keep the desktop hover UX.
-(() => {
-  const mq = window.matchMedia('(max-width: 900px)');
-  const cards = document.querySelectorAll('.feature-card');
-  if (!cards.length) return;
-
-  let rafId = null;
-  let attached = false;
-
-  const setActive = (card) => {
-    cards.forEach((c) => {
-      if (c === card) c.classList.add('is-active-mobile');
-      else c.classList.remove('is-active-mobile');
-    });
-  };
-
-  const pick = () => {
-    const vh = window.innerHeight;
-    const viewportCenter = vh / 2;
-    // A card must overlap the viewport's middle band to be eligible —
-    // outside of that band the section gets no spotlight (so scrolling
-    // past the last card lets it fade back to baseline).
-    const bandTop = vh * 0.15;
-    const bandBot = vh * 0.85;
-    let best = null;
-    let bestDist = Infinity;
-    cards.forEach((c) => {
-      const r = c.getBoundingClientRect();
-      if (r.bottom < bandTop || r.top > bandBot) return;
-      const center = r.top + r.height / 2;
-      const dist = Math.abs(center - viewportCenter);
-      if (dist < bestDist) { bestDist = dist; best = c; }
-    });
-    setActive(best);
-    rafId = null;
-  };
-
-  const onScroll = () => {
-    if (rafId == null) rafId = requestAnimationFrame(pick);
-  };
-
-  const enable = () => {
-    if (attached) return;
-    if (reduceMotion) {
-      // Without motion preference, just spotlight the first card so
-      // descriptions remain readable.
-      setActive(cards[0]);
-      return;
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    attached = true;
-    pick();
-  };
-
-  const disable = () => {
-    if (attached) {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      attached = false;
-    }
-    if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
-    cards.forEach((c) => c.classList.remove('is-active-mobile'));
-  };
-
-  const sync = () => (mq.matches ? enable() : disable());
-  sync();
-  mq.addEventListener('change', sync);
-})();
+// Feature rows reveal via CSS scroll-driven animations (animation-timeline:
+// view()) so they rise in tandem with the palm fronds as the section scrolls
+// through — see styles.css. No IntersectionObserver needed.
 
 
 // ── Demo video: mute / restart / timecode / scrubber ──
@@ -443,6 +385,7 @@ const bookingConf = document.getElementById('booking-confirmation');
 const confirmDetails = document.getElementById('confirm-details');
 
 function init() {
+  if (!calDays || !calLabel) return; // page without the booking widget
   const now = new Date();
   currentYear  = now.getFullYear();
   currentMonth = now.getMonth();
@@ -529,7 +472,7 @@ function updateConfirmButton() {
 // 3. Paste your endpoint here (e.g. https://formspree.io/f/xxxxxxxx)
 const FORMSPREE_URL = 'https://formspree.io/f/xnjlkzde';
 
-demoForm.addEventListener('submit', async (e) => {
+demoForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const name  = document.getElementById('form-name').value.trim();
@@ -566,13 +509,13 @@ demoForm.addEventListener('submit', async (e) => {
   }
 });
 
-calPrev.addEventListener('click', () => {
+calPrev?.addEventListener('click', () => {
   currentMonth--;
   if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   renderCalendar();
 });
 
-calNext.addEventListener('click', () => {
+calNext?.addEventListener('click', () => {
   currentMonth++;
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
   renderCalendar();
@@ -580,555 +523,231 @@ calNext.addEventListener('click', () => {
 
 init();
 
-// ── Hero halo breath ──
-// A tight green halo wraps the AVP silhouette and slow-breathes. Dots
-// closest to the headset rim are the brightest; intensity fades outward
-// only. The halo lights the underlying grid dots; its center anchors to
-// the headset's bounding rect, recomputed each frame so it tracks scroll.
-(() => {
-  const canvas = document.querySelector('.grid-lines');
-  if (!canvas) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  const headsetEl = document.querySelector('.headset-core');
-  if (!headsetEl) return;
-
+// ── WHY IT WINS — an interactive topographic field ──
+// A dense contour map (value-noise + marching squares) fills the section.
+// The cursor raises a soft dome under the pointer; each bubble raises a much
+// larger one as it grows on hover/focus, so the contours visibly bulge
+// outward around an expanding bubble. The render loop only runs while
+// something is moving — the cursor lerping toward its target, or a bubble
+// mid CSS-transition (sampled live via getBoundingClientRect, so JS never
+// has to duplicate the easing curve).
+(function whyTopo() {
+  const why = document.getElementById('why');
+  const canvas = document.getElementById('why-topo');
+  if (!why || !canvas) return;
   const ctx = canvas.getContext('2d');
-  const TILE = 28;
-  const DOT_OFFSET = 14;
-  // The PNG has transparent padding around the AVP silhouette, so the
-  // bounding rect is wider/taller than the visible headset. These scales
-  // shrink the halo ellipse to hug the actual silhouette edge.
-  const SHAPE_SCALE_X = 0.78;
-  const SHAPE_SCALE_Y = 0.58;
-  const SIGMA_PX = 32;         // halo extent in PIXELS — uniform thickness around the rim
-  const PERIOD_MS = 5000;      // slow breath cadence
-  const BREATH_MIN = 0.55;     // halo never fades below this fraction of peak
-  const PEAK_RADIUS = 1.8;     // dot radius at full intensity (CSS base ~0.9px)
-  const BASE_RADIUS = 0.7;
-  const PEAK_ALPHA = 0.45;
-  const MIN_INTENSITY = 0.05;
-  // Vertical mask in normalized-y space: ny is +down. Side halo stays full;
-  // the lower portion (where the AVP shadow sits and reflection begins) fades out.
-  const MASK_TOP_NY = 0.55;    // above this ny: full intensity
-  const MASK_BOT_NY = 1.00;    // below this ny: zero
-  const ACCENT = '31, 196, 144';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let dpr = 1, cols = 0, viewW = 0, viewH = 0;
+  // deterministic value-noise, smoothed with a fade curve
+  const hash = (x, y) => {
+    const s = Math.sin(x * 127.1 + y * 311.7 + 17) * 43758.5453;
+    return s - Math.floor(s);
+  };
+  const fade = (t) => t * t * (3 - 2 * t);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function noise(x, y) {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+    const u = fade(xf), v = fade(yf);
+    return lerp(
+      lerp(hash(xi, yi), hash(xi + 1, yi), u),
+      lerp(hash(xi, yi + 1), hash(xi + 1, yi + 1), u),
+      v
+    );
+  }
+  // three octaves of noise → a varied but smooth elevation field
+  function elevation(x, y) {
+    return noise(x * 0.0035, y * 0.0035) * 1.0
+         + noise(x * 0.009 + 90, y * 0.009 + 90) * 0.5
+         + noise(x * 0.022 + 180, y * 0.022 + 180) * 0.25;
+  }
+
+  let w = 0, h = 0, cell = 16, cols = 0, rows = 0, field = null;
+  const bubbles = Array.from(why.querySelectorAll('.why-bubble')).map((el) => ({
+    el, cx: 0, cy: 0, r: 0, base: el.getBoundingClientRect().width / 2, growth: 0
+  }));
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0, on: 0, target: 0 };
+
+  function measure() {
+    const r = why.getBoundingClientRect();
+    bubbles.forEach((b) => {
+      const br = b.el.getBoundingClientRect();
+      b.cx = br.left + br.width / 2 - r.left;
+      b.cy = br.top + br.height / 2 - r.top;
+      b.r = br.width / 2;
+      b.growth = Math.max(0, b.r - b.base);
+    });
+  }
 
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    viewW = window.innerWidth;
-    viewH = window.innerHeight;
-    canvas.width = Math.floor(viewW * dpr);
-    canvas.height = Math.floor(viewH * dpr);
-    canvas.style.width = viewW + 'px';
-    canvas.style.height = viewH + 'px';
+    const r = why.getBoundingClientRect();
+    w = r.width; h = r.height;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cols = Math.floor((viewW - DOT_OFFSET) / TILE);
+    cell = w < 720 ? 22 : 16;
+    cols = Math.ceil(w / cell) + 1;
+    rows = Math.ceil(h / cell) + 1;
+    field = new Float32Array(cols * rows);
+    mouse.x = mouse.tx = w / 2;
+    mouse.y = mouse.ty = h / 2;
+    bubbles.forEach((b) => { b.base = b.el.getBoundingClientRect().width / 2; });
+    measure();
+    computeField();
+    draw();
   }
 
-  function frame(now) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const rect = headsetEl.getBoundingClientRect();
-    const scrollY = window.scrollY;
-    const cxDoc = rect.left + rect.width / 2;
-    const cyDoc = rect.top + scrollY + rect.height / 2;
-
-    // Ellipse semi-axes that hug the AVP silhouette inside the PNG's
-    // transparent padding (separate X/Y because the asset isn't square).
-    const a = (rect.width * 0.5) * SHAPE_SCALE_X;
-    const b = (rect.height * 0.5) * SHAPE_SCALE_Y;
-    if (a <= 0 || b <= 0) {
-      requestAnimationFrame(frame);
-      return;
-    }
-
-    // Halo extends ~3.5σ in pixels past the silhouette in every direction.
-    // For cull tests, expand the bounding box uniformly by that pixel pad.
-    const HALO_PAD = 3.5 * SIGMA_PX;
-    const maxAxis = Math.max(a, b) + HALO_PAD;
-
-    const screenCY = cyDoc - scrollY;
-    if (screenCY < -maxAxis || screenCY > viewH + maxAxis) {
-      requestAnimationFrame(frame);
-      return;
-    }
-
-    // Symmetric breathing: brightness oscillates smoothly between BREATH_MIN and 1.
-    const phase = (((now / PERIOD_MS)) % 1 + 1) % 1;
-    const breath = BREATH_MIN + (1 - BREATH_MIN) * (0.5 - 0.5 * Math.cos(phase * Math.PI * 2));
-
-    const yTop = cyDoc - maxAxis;
-    const yBot = cyDoc + maxAxis;
-    const jMin = Math.max(0, Math.floor((Math.max(scrollY, yTop) - DOT_OFFSET) / TILE) - 1);
-    const jMax = Math.floor((Math.min(scrollY + viewH, yBot) - DOT_OFFSET) / TILE) + 1;
-
-    const xLeft = cxDoc - maxAxis;
-    const xRight = cxDoc + maxAxis;
-    const iMin = Math.max(0, Math.floor((xLeft - DOT_OFFSET) / TILE) - 1);
-    const iMax = Math.min(cols, Math.floor((xRight - DOT_OFFSET) / TILE) + 1);
-
-    const invA = 1 / a;
-    const invB = 1 / b;
-    const inv2sigPxSq = 1 / (2 * SIGMA_PX * SIGMA_PX);
-    // Per-direction outer cutoff in normalized space (depends on local axis).
-    const outerDeltaX = HALO_PAD / a;
-    const outerDeltaY = HALO_PAD / b;
-    const maskRange = MASK_BOT_NY - MASK_TOP_NY;
-
-    for (let j = jMin; j <= jMax; j++) {
-      const docY = DOT_OFFSET + j * TILE;
-      const screenY = docY - scrollY;
-      if (screenY < -8 || screenY > viewH + 8) continue;
-      const ny = (docY - cyDoc) * invB;
-      const ny2 = ny * ny;
-
-      // Vertical mask: fade out below the AVP so the halo doesn't paint the reflection.
-      let vMask;
-      if (ny <= MASK_TOP_NY) vMask = 1;
-      else if (ny >= MASK_BOT_NY) continue;
-      else {
-        const t = (ny - MASK_TOP_NY) / maskRange;
-        vMask = 1 - t * t * (3 - 2 * t); // smoothstep
-      }
-
-      for (let i = iMin; i <= iMax; i++) {
-        const docX = DOT_OFFSET + i * TILE;
-        const nx = (docX - cxDoc) * invA;
-        const nr2 = nx * nx + ny2;
-        // Conservative cull using the larger per-direction outer delta.
-        const maxOuter = 1 + Math.max(outerDeltaX, outerDeltaY);
-        if (nr2 > maxOuter * maxOuter) continue;
-        const nr = Math.sqrt(nr2);
-
-        // Halo falloff in PIXEL space so the band has uniform thickness around
-        // the rim, contouring the silhouette evenly. Peak inside the ellipse;
-        // outside, fade with perpendicular pixel distance to the boundary.
-        // (Inner dots are hidden behind the headset image.)
-        let halo;
-        if (nr > 1) {
-          // Local radius along the (nx, ny) direction = distance from center
-          // to the ellipse boundary in this direction, in pixels.
-          const cosT = nx / nr;
-          const sinT = ny / nr;
-          const localR = Math.sqrt((cosT * a) * (cosT * a) + (sinT * b) * (sinT * b));
-          const pixelDist = (nr - 1) * localR;
-          halo = Math.exp(-pixelDist * pixelDist * inv2sigPxSq);
-        } else {
-          halo = 1;
+  // ── elevation field: base terrain + a dome under the cursor + a much
+  //    larger dome under any bubble currently mid-expansion ──
+  function computeField() {
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const x = i * cell, y = j * cell;
+        let e = elevation(x, y);
+        if (mouse.on > 0.01) {
+          const dx = x - mouse.x, dy = y - mouse.y;
+          e += mouse.on * 0.8 * Math.exp(-(dx * dx + dy * dy) / (2 * 120 * 120));
         }
-        const intensity = halo * breath * vMask;
-        if (intensity < MIN_INTENSITY) continue;
-
-        const r = BASE_RADIUS + (PEAK_RADIUS - BASE_RADIUS) * intensity;
-        const al = PEAK_ALPHA * intensity;
-        ctx.fillStyle = `rgba(${ACCENT}, ${al})`;
-        ctx.beginPath();
-        ctx.arc(docX, screenY, r, 0, Math.PI * 2);
-        ctx.fill();
+        for (const b of bubbles) {
+          if (b.growth < 1) continue;
+          const dx = x - b.cx, dy = y - b.cy;
+          const radius = b.r * 1.1;
+          e += b.growth * 0.013 * Math.exp(-(dx * dx + dy * dy) / (2 * radius * radius));
+        }
+        field[j * cols + i] = e;
       }
     }
-
-    requestAnimationFrame(frame);
   }
+
+  // marching-squares: for each 4-bit corner case, which edges (T,R,B,L = 0..3)
+  // the contour crosses (saddle cases 5/10 draw both diagonals)
+  const EDGES = [
+    null, [3, 2], [2, 1], [3, 1], [0, 1], [3, 0, 2, 1], [0, 2], [3, 0],
+    [3, 0], [0, 2], [3, 0, 2, 1], [0, 1], [3, 1], [2, 1], [3, 2], null
+  ];
+  const LEVELS = (() => {
+    const out = [];
+    for (let v = -1.9; v <= 2.6; v += 0.16) out.push(v);
+    return out;
+  })();
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    // ink darkens toward the cursor — a radial gradient centred on it,
+    // fading out to the base opacity; mouse.on scales it to 0 when idle
+    const glowRadius = 220;
+    const glow = 0.4 * mouse.on;
+    const majorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
+    majorGrad.addColorStop(0, `rgba(46,93,67,${(0.32 + glow).toFixed(3)})`);
+    majorGrad.addColorStop(1, 'rgba(46,93,67,0.32)');
+    const minorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
+    minorGrad.addColorStop(0, `rgba(46,93,67,${(0.18 + glow * 0.7).toFixed(3)})`);
+    minorGrad.addColorStop(1, 'rgba(46,93,67,0.18)');
+    LEVELS.forEach((level, li) => {
+      const path = new Path2D();
+      for (let j = 0; j < rows - 1; j++) {
+        for (let i = 0; i < cols - 1; i++) {
+          const tl = field[j * cols + i], tr = field[j * cols + i + 1];
+          const bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
+          let c = 0;
+          if (tl > level) c |= 8;
+          if (tr > level) c |= 4;
+          if (br > level) c |= 2;
+          if (bl > level) c |= 1;
+          const edges = EDGES[c];
+          if (!edges) continue;
+          const x = i * cell, y = j * cell;
+          const pt = (edge) => {
+            switch (edge) {
+              case 0: return [x + cell * (level - tl) / (tr - tl), y];
+              case 1: return [x + cell, y + cell * (level - tr) / (br - tr)];
+              case 2: return [x + cell * (level - bl) / (br - bl), y + cell];
+              default: return [x, y + cell * (level - tl) / (bl - tl)];
+            }
+          };
+          for (let k = 0; k < edges.length; k += 2) {
+            const a = pt(edges[k]), bp = pt(edges[k + 1]);
+            path.moveTo(a[0], a[1]);
+            path.lineTo(bp[0], bp[1]);
+          }
+        }
+      }
+      ctx.lineWidth = li % 5 === 0 ? 1.1 : 0.7;
+      ctx.strokeStyle = li % 5 === 0 ? majorGrad : minorGrad;
+      ctx.stroke(path);
+    });
+  }
+
+  let raf = null;
+  function loop() {
+    mouse.x += (mouse.tx - mouse.x) * 0.12;
+    mouse.y += (mouse.ty - mouse.y) * 0.12;
+    mouse.on += (mouse.target - mouse.on) * 0.08;
+    measure();
+    let moving = Math.abs(mouse.tx - mouse.x) > 0.2 || Math.abs(mouse.ty - mouse.y) > 0.2
+      || Math.abs(mouse.target - mouse.on) > 0.003;
+    bubbles.forEach((b) => { if (b.growth > 0.5) moving = true; });
+    computeField();
+    draw();
+    raf = moving ? requestAnimationFrame(loop) : null;
+  }
+  function wake() { if (!raf) raf = requestAnimationFrame(loop); }
 
   resize();
-  window.addEventListener('resize', resize);
-  requestAnimationFrame(frame);
-})();
+  if (reduce) return;
 
-// ── CTA oak tree — grid-snapped silhouette that grows on first reveal ──
-(function ctaOakTree() {
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-  const cta = document.querySelector('.cta');
-  const svg = document.getElementById('cta-tree');
-  if (!cta || !svg) return;
+  why.addEventListener('pointermove', (e) => {
+    const r = why.getBoundingClientRect();
+    mouse.tx = e.clientX - r.left;
+    mouse.ty = e.clientY - r.top;
+    mouse.target = 1;
+    wake();
+  });
+  why.addEventListener('pointerleave', () => { mouse.target = 0; wake(); });
 
-  const dotsG     = svg.querySelector('.cta-tree-dots');
-  const branchesG = svg.querySelector('.cta-tree-branches');
-  const leavesG   = svg.querySelector('.cta-tree-leaves');
-
-  // Seeded PRNG so the silhouette is consistent run-to-run.
-  function makeRand(seed) {
-    let s = seed >>> 0;
-    return () => {
-      s = (s + 0x6D2B79F5) >>> 0;
-      let t = s;
-      t = Math.imul(t ^ (t >>> 15), 1 | t);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  // Generate an oak: trunk + spreading limbs + sub-branches that dissolve into
-  // foliage clusters at the tips. Each step lands on an adjacent grid cell so
-  // paths always trace dot-to-dot. Outer canopy is allowed to droop downward.
-  function buildOak(cols, rows) {
-    const rand = makeRand(0xC0FFEE);
-    const cx = Math.floor(cols / 2);
-    const trunkBase = rows - 1;
-    const trunkTop = Math.max(3, rows - Math.max(5, Math.floor(rows * 0.26)));
-    const droopFloor = Math.min(rows - 2, trunkTop + Math.max(2, Math.floor(rows * 0.10)));
-
-    const branches = []; // { points: [[c,r]...], depth }
-    const tips = [];     // [{ x, y, depth }]
-
-    // Trunk
-    const trunk = [];
-    for (let y = trunkBase; y >= trunkTop; y--) trunk.push([cx, y]);
-    branches.push({ points: trunk, depth: 0 });
-
-    function inBounds(x, y) { return x >= 1 && x <= cols - 2 && y >= 1 && y <= droopFloor; }
-
-    // Walk a branch outward, possibly upward and (later) drooping back down,
-    // possibly forking. dirBias in roughly [-1.6, 1.6]; positive = right.
-    function walk(x, y, dirBias, life, depth) {
-      const pts = [[x, y]];
-      const sgn = Math.sign(dirBias) || (rand() < 0.5 ? -1 : 1);
-      const absB = Math.abs(dirBias);
-      // Outer/horizontal limbs spend more steps moving sideways.
-      const horizChance = Math.min(0.55, 0.18 + absB * 0.22) * (depth === 0 ? 1 : depth === 1 ? 0.85 : 0.7);
-
-      for (let i = 0; i < life; i++) {
-        const progress = i / life;
-        const r = rand();
-        let dx, dy;
-        // Drooping: only outer (|bias|>0.3), only at later half of the walk,
-        // and only after the limb has climbed away from the trunk crotch.
-        const canDroop = depth >= 1 && absB > 0.3 && progress > 0.55 && y < trunkTop - 1;
-        if (canDroop && r < 0.22) {
-          dx = sgn; dy = 1;
-        } else if (r < horizChance + 0.05 && absB > 0.25) {
-          dx = sgn; dy = 0;
-        } else {
-          dy = -1;
-          // Probability of stepping right / left / straight up.
-          let pR = 0.30 + dirBias * 0.32;
-          let pL = 0.30 - dirBias * 0.32;
-          pR = Math.max(0.02, Math.min(0.88, pR));
-          pL = Math.max(0.02, Math.min(0.88, pL));
-          const pS = Math.max(0.05, 1 - pR - pL);
-          const total = pR + pL + pS;
-          const lean = rand() * total;
-          if (lean < pL) dx = -1;
-          else if (lean < pL + pS) dx = 0;
-          else dx = 1;
-        }
-
-        const nx = x + dx, ny = y + dy;
-        if (!inBounds(nx, ny)) break;
-        x = nx; y = ny;
-        pts.push([x, y]);
-
-        // Forks split the branch into multiple twigs — denser at lower depths
-        // so the silhouette feels articulated, not just a bunch of straight lines.
-        const forkChance = depth === 0 ? 0.36 : depth === 1 ? 0.32 : depth === 2 ? 0.24 : 0.14;
-        if (depth < 4 && i > 1 && i < life - 2 && rand() < forkChance) {
-          const childBias = Math.max(-1.6, Math.min(1.6, dirBias + (rand() - 0.5) * 1.4));
-          const childLife = Math.max(2, Math.floor((life - i) * (0.45 + rand() * 0.4)));
-          walk(x, y, childBias, childLife, depth + 1);
-        }
-      }
-
-      branches.push({ points: pts, depth });
-      const tip = pts[pts.length - 1];
-      tips.push({ x: tip[0], y: tip[1], depth });
-    }
-
-    // Major limbs from trunk top — symmetric spread for an oak silhouette.
-    const canopyLife = Math.max(8, Math.floor(trunkTop * 1.05));
-    const limbs = [
-      { dir: -1.5, life: canopyLife,     from: trunkTop },
-      { dir: -1.0, life: canopyLife + 1, from: trunkTop },
-      { dir: -0.5, life: canopyLife + 2, from: trunkTop },
-      { dir:  0.0, life: canopyLife + 3, from: trunkTop },
-      { dir:  0.5, life: canopyLife + 2, from: trunkTop },
-      { dir:  1.0, life: canopyLife + 1, from: trunkTop },
-      { dir:  1.5, life: canopyLife,     from: trunkTop },
-    ];
-    limbs.forEach(l => walk(cx, l.from, l.dir, l.life, 0));
-
-    // Low-trunk limbs split off a bit below the crown for the classic spreading
-    // oak look — the wide, almost horizontal limbs carry most of the canopy.
-    walk(cx, trunkTop + 1, -1.4, Math.max(7, canopyLife - 1), 0);
-    walk(cx, trunkTop + 1,  1.4, Math.max(7, canopyLife - 1), 0);
-    walk(cx, trunkTop + 2, -1.5, Math.max(6, canopyLife - 2), 0);
-    walk(cx, trunkTop + 2,  1.5, Math.max(6, canopyLife - 2), 0);
-
-    return { branches, tips, cols, rows };
-  }
-
-  // Build a foliage cluster around a tip cell. Outer/deeper tips get a bigger,
-  // looser cloud; inner tips get a small puff. Cells are picked by walking from
-  // existing cluster cells to neighbors, so the cloud feels organic.
-  function buildLeafCluster(tip, depth, occupied, cols, rows, rand) {
-    const radius = depth >= 3 ? 4 : depth === 2 ? 3 : 2;
-    const target = depth >= 3 ? 7 + Math.floor(rand() * 4)
-                  : depth === 2 ? 5 + Math.floor(rand() * 3)
-                  : 3 + Math.floor(rand() * 2);
-    const cells = [];
-    const seen = new Set();
-    const tryAdd = (x, y) => {
-      if (x < 1 || x > cols - 2 || y < 1 || y > rows - 1) return false;
-      const k = x + ',' + y;
-      if (seen.has(k) || occupied.has(k)) return false;
-      seen.add(k); occupied.add(k); cells.push([x, y]);
-      return true;
-    };
-    tryAdd(tip.x, tip.y);
-    let guard = 0;
-    while (cells.length < target && guard++ < 80) {
-      const seed = cells[Math.floor(rand() * cells.length)] || [tip.x, tip.y];
-      // Bias placement within `radius` of the original tip.
-      const dx = Math.floor((rand() - 0.5) * 2 * radius * 0.7);
-      const dy = Math.floor((rand() - 0.5) * 2 * radius * 0.7);
-      const nx = seed[0] + Math.sign(dx) * (Math.abs(dx) > 0 ? 1 : 0);
-      const ny = seed[1] + Math.sign(dy) * (Math.abs(dy) > 0 ? 1 : 0);
-      // Must stay within the original radius around the tip itself.
-      if (Math.abs(nx - tip.x) <= radius && Math.abs(ny - tip.y) <= radius) {
-        tryAdd(nx, ny);
-      }
-    }
-    return cells;
-  }
-
-  // Convert a centerline into two parallel offset polylines (left and right
-  // edges of a thick branch). For very thin twigs we just return the centerline
-  // as a single line.
-  function offsetPair(pointsPx, w) {
-    if (w < 1.2 || pointsPx.length < 2) return { single: pointsPx };
-    const left = [], right = [];
-    for (let i = 0; i < pointsPx.length; i++) {
-      const p = pointsPx[i];
-      const prev = i > 0 ? pointsPx[i - 1] : null;
-      const next = i < pointsPx.length - 1 ? pointsPx[i + 1] : null;
-      let tx, ty;
-      if (prev && next) {
-        const ax = p[0] - prev[0], ay = p[1] - prev[1];
-        const bx = next[0] - p[0], by = next[1] - p[1];
-        const la = Math.hypot(ax, ay) || 1;
-        const lb = Math.hypot(bx, by) || 1;
-        tx = ax / la + bx / lb;
-        ty = ay / la + by / lb;
-      } else if (next) {
-        tx = next[0] - p[0]; ty = next[1] - p[1];
-      } else {
-        tx = p[0] - prev[0]; ty = p[1] - prev[1];
-      }
-      const tl = Math.hypot(tx, ty) || 1;
-      const nx = -ty / tl, ny = tx / tl;
-      left.push([p[0] + nx * w / 2, p[1] + ny * w / 2]);
-      right.push([p[0] - nx * w / 2, p[1] - ny * w / 2]);
-    }
-    return { left, right };
-  }
-
-  function pathD(pts) {
-    let s = '';
-    for (let i = 0; i < pts.length; i++) {
-      s += (i === 0 ? 'M ' : ' L ') + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1);
-    }
-    return s;
-  }
-
-  function pathLength(pts) {
-    let l = 0;
-    for (let i = 1; i < pts.length; i++) {
-      l += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-    }
-    return l;
-  }
-
-  let mounted = false;
-  function render() {
-    const rect = cta.getBoundingClientRect();
-    const W = Math.max(320, Math.round(rect.width));
-    const H = Math.max(240, Math.round(rect.height));
-    // Denser grid than the body's 28px dots — gives the canopy more resolution.
-    const CELL = 22;
-    const COLS = Math.max(14, Math.floor(W / CELL));
-    const ROWS = Math.max(10, Math.floor(H / CELL));
-    const ox = (W - (COLS - 1) * CELL) / 2;
-    const oy = H - (ROWS - 1) * CELL - 10;
-
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-
-    dotsG.replaceChildren();
-    branchesG.replaceChildren();
-    leavesG.replaceChildren();
-
-    const rand = makeRand(0xC0FFEE ^ 0xA17);
-    const spec = buildOak(COLS, ROWS);
-
-    // Build leaf clusters around each tip. Track occupied cells so neighbouring
-    // tips don't overlap their clusters into mush.
-    const occupied = new Set();
-    const leafCells = [];
-    spec.tips.forEach(t => {
-      const cells = buildLeafCluster(t, t.depth, occupied, COLS, ROWS, rand);
-      cells.forEach(([c, r]) => leafCells.push({ c, r, depth: t.depth }));
+  bubbles.forEach((b) => {
+    ['pointerenter', 'pointerleave', 'focus', 'blur'].forEach((ev) => b.el.addEventListener(ev, wake));
+    b.el.addEventListener('click', () => {
+      const willActivate = !b.el.classList.contains('is-active');
+      bubbles.forEach((o) => o.el.classList.remove('is-active'));
+      if (willActivate) b.el.classList.add('is-active');
+      wake();
     });
-    const leafKeySet = new Set(leafCells.map(({ c, r }) => c + ',' + r));
-
-    // Background dot grid — leaf positions are skipped so leaf circles can
-    // replace them with brighter, animated dots.
-    for (let cy = 0; cy < ROWS; cy++) {
-      for (let cxg = 0; cxg < COLS; cxg++) {
-        if (leafKeySet.has(cxg + ',' + cy)) continue;
-        const c = document.createElementNS(SVG_NS, 'circle');
-        c.setAttribute('cx', ox + cxg * CELL);
-        c.setAttribute('cy', oy + cy * CELL);
-        c.setAttribute('r', 1.0);
-        dotsG.appendChild(c);
-      }
-    }
-
-    // Branches: each is rendered as TWO parallel offset polylines so it reads
-    // like a hollow stroked tube rather than a single funky line.
-    const TOTAL = 5.5;
-    const depthDelay = [0.00, 0.85, 1.95, 2.85, 3.55];
-    const depthDur   = [0.95, 1.35, 1.10, 0.80, 0.55];
-    const widthByDepth = [6.0, 4.2, 3.0, 2.0, 1.4];
-
-    spec.branches.forEach((b, idx) => {
-      const isTrunk = idx === 0;
-      const depthRaw = isTrunk ? -1 : (b.depth ?? 0);
-      const depthIdx = isTrunk ? 0 : Math.min(4, depthRaw + 1);
-      const w = widthByDepth[Math.min(widthByDepth.length - 1, depthIdx)];
-      const ptsPx = b.points.map(([c, r]) => [ox + c * CELL, oy + r * CELL]);
-      const pair = offsetPair(ptsPx, w);
-      const sides = pair.single ? [pair.single] : [pair.left, pair.right];
-      const delay = isTrunk ? 0 : depthDelay[depthIdx] + Math.random() * 0.22;
-      const dur   = isTrunk ? depthDur[0] : depthDur[depthIdx];
-
-      sides.forEach(side => {
-        const d = pathD(side);
-        const len = pathLength(side);
-        const path = document.createElementNS(SVG_NS, 'path');
-        path.setAttribute('d', d);
-        path.style.setProperty('--len', len);
-        path.style.setProperty('--delay', delay + 's');
-        path.style.setProperty('--dur', dur + 's');
-        path.style.strokeDasharray = len;
-        path.style.strokeDashoffset = len;
-        branchesG.appendChild(path);
-      });
-    });
-
-    // Foliage: clusters bloom from the perimeter inward. Outer (deeper) tips
-    // start a touch earlier than inner ones so the canopy fills in like leaves
-    // catching sunlight.
-    leafCells.forEach(({ c, r, depth }) => {
-      const lateral = Math.abs(c - (COLS - 1) / 2) / Math.max(1, (COLS - 1) / 2);
-      const depthBoost = depth >= 3 ? 0 : depth === 2 ? 0.10 : 0.20;
-      const delay = TOTAL - 1.30 + lateral * -0.25 + depthBoost + Math.random() * 0.20;
-      const radius = depth >= 3 ? 2.6 : depth === 2 ? 2.4 : 2.2;
-      const node = document.createElementNS(SVG_NS, 'circle');
-      node.setAttribute('cx', ox + c * CELL);
-      node.setAttribute('cy', oy + r * CELL);
-      node.setAttribute('r', radius);
-      node.style.setProperty('--delay', Math.max(0, delay) + 's');
-      leavesG.appendChild(node);
-    });
-
-    mounted = true;
-  }
-
-  function ensureMounted() { if (!mounted) render(); }
-  ensureMounted();
-
-  // Re-render on resize only if the section hasn't started growing yet —
-  // once the animation begins, freeze geometry so we don't snap mid-grow.
-  let started = false;
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    if (started) return;
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(render, 150);
   });
 
+  let resizeRaf = null;
+  addEventListener('resize', () => {
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resize(); });
+  });
+})();
+
+// ── CREDIBILITY BAR — duplicate the ticker for a seamless -50% loop ──
+// The CSS marquee translates the track by -50%; that's only seamless if the
+// track holds two identical halves. We clone the authored items once here so
+// the markup stays single-source. (No JS → the single set just sits static.)
+(function credMarquee() {
+  const track = document.getElementById('cred-track');
+  if (!track) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const originals = Array.from(track.children);
+  originals.forEach((node) => {
+    const clone = node.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    track.appendChild(clone);
+  });
+  // Pause the animation while the bar is off-screen so it isn't churning the
+  // compositor as you read the rest of the page.
+  const bar = track.closest('.cred-bar') || track;
   const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting && !started) {
-        started = true;
-        ensureMounted();
-        // Next frame so the dasharray styles are committed before the class flip.
-        requestAnimationFrame(() => svg.classList.add('is-growing'));
-        io.disconnect();
-      }
-    });
-  }, { threshold: 0.25 });
-  io.observe(cta);
+    track.style.animationPlayState = entries[0].isIntersecting ? 'running' : 'paused';
+  });
+  io.observe(bar);
 })();
 
-
-// ── WHY IT WINS — the line draws from confidence to revenue as you scroll ──
-(function () {
-  const why = document.getElementById('why');
-  const pin = why && why.querySelector('.why-pin');
-  const core = document.getElementById('why-line-core');
-  if (!why || !pin || !core) return;
-
-  const glowLine = document.getElementById('why-line-glow');
-  const tip = document.getElementById('why-tip');
-  const stops = Array.from(why.querySelectorAll('.why-stop'));
-  const svg = why.querySelector('.why-line');
-  const photo = why.querySelector('.why-photo');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const len = core.getTotalLength();
-
-  [core, glowLine].forEach((p) => { p.style.strokeDashoffset = len; p.style.strokeDasharray = len; });
-
-  // position each milestone exactly onto the path via the SVG's screen transform
-  function placeStops() {
-    const ctm = svg.getScreenCTM();
-    if (!ctm) return;
-    // stops live inside .why-stage (which is translated), so measure against the
-    // svg's own box — NOT the pin — or they pick up the translateX twice.
-    const baseR = svg.getBoundingClientRect();
-    const pt = svg.createSVGPoint();
-    stops.forEach((s) => {
-      const onPath = core.getPointAtLength(len * parseFloat(s.dataset.frac));
-      pt.x = onPath.x; pt.y = onPath.y;
-      const sp = pt.matrixTransform(ctm);
-      s.style.left = (sp.x - baseR.left) + 'px';
-      s.style.top = (sp.y - baseR.top) + 'px';
-    });
-  }
-  placeStops();
-  requestAnimationFrame(placeStops);
-  addEventListener('resize', placeStops);
-  if (photo) photo.addEventListener('load', placeStops);
-
-  // reduced motion: show the finished line + all milestones, no scrub
-  if (reduce) {
-    [core, glowLine].forEach((p) => { p.style.strokeDashoffset = 0; });
-    pin.style.setProperty('--prog', 1);
-    stops.forEach((s) => s.classList.add('on'));
-    return;
-  }
-
-  const THRESH = [0.0, 0.446, 0.595, 0.746, 0.97];
-  function tick() {
-    const r = why.getBoundingClientRect();
-    const total = r.height - window.innerHeight;
-    let p = total > 0 ? (-r.top) / total : (r.top < 0 ? 1 : 0);
-    p = Math.max(0, Math.min(1, p));
-    const off = len * (1 - p);
-    core.style.strokeDashoffset = off;
-    glowLine.style.strokeDashoffset = off;
-    pin.style.setProperty('--prog', p);
-    if (tip) {
-      const pt = core.getPointAtLength(len * p);
-      tip.setAttribute('cx', pt.x);
-      tip.setAttribute('cy', pt.y);
-      tip.style.opacity = (p > 0.015 && p < 0.99) ? '1' : '0';
-    }
-    stops.forEach((s, i) => s.classList.toggle('on', p >= THRESH[i]));
-  }
-  addEventListener('scroll', tick, { passive: true });
-  addEventListener('resize', tick);
-  tick();
-})();
+// FEATURES — the palm fronds (grow) and the feature text (rise) are now driven
+// entirely by CSS scroll-driven animations (animation-timeline: view()), so they
+// animate continuously with scroll position regardless of where the page loads.
+// No JS observer needed; see styles.css.
