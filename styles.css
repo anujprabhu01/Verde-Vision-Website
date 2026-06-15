@@ -2006,13 +2006,15 @@ h2 em {
   }
 }
 
-/* the five bubbles — resting state: small circles bearing a "problem" */
-.why-bubbles { position: absolute; inset: 0; z-index: 3; }
+/* the five bubbles — resting state: small numbered circles bearing a
+   "problem"; the numbering echoes the "Five familiar problems" framing */
+.why-bubbles { position: absolute; inset: 0; z-index: 3; counter-reset: why-bubble; }
 .why-bubble {
+  counter-increment: why-bubble;
   position: absolute; left: var(--bx); top: var(--by);
   width: var(--bd); height: var(--bd);
   transform: translate(-50%, -50%);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
   text-align: center; padding: 1rem;
   border-radius: 50%; border: 1.5px solid rgba(46, 93, 67, 0.3);
   background: var(--green-card); color: var(--white);
@@ -2023,9 +2025,15 @@ h2 em {
               height 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
               border-color 0.6s ease, box-shadow 0.6s ease;
 }
-/* expanded state — the problem shrinks away and the solution fills the bubble */
+.why-bubble::before {
+  content: counter(why-bubble, decimal-leading-zero);
+  font-family: var(--font-serif); font-style: italic; font-size: 0.7rem;
+  letter-spacing: 0.16em; color: var(--clay); opacity: 0.6;
+}
+/* expanded state — only the hovered/active bubble grows, and the solution
+   settles in underneath the (now smaller) problem, so both stay readable */
 .why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
-  width: clamp(230px, 30vw, 360px); height: clamp(230px, 30vw, 360px);
+  width: clamp(190px, 24vw, 290px); height: clamp(190px, 24vw, 290px);
   border-color: var(--clay);
   box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
               0 18px 36px -16px rgba(28,42,33,0.3);
@@ -2033,30 +2041,27 @@ h2 em {
 }
 .why-bubble-problem {
   font-family: var(--font-serif); font-style: italic; font-weight: 500; font-size: 1.25rem; line-height: 1.3;
-  opacity: 1;
-  transition: opacity 0s linear; /* leaving: snap back the instant the hover ends */
+  transition: font-size 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.4s ease;
 }
 .why-bubble-solution {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  padding: 2rem 2.2rem; text-align: center;
-  font-family: var(--font-serif); font-weight: 600; font-size: 1.4rem; line-height: 1.3;
+  font-family: var(--font-serif); font-weight: 600; font-size: 1.3rem; line-height: 1.3;
   color: var(--accent);
-  opacity: 0;
-  transition: opacity 0s linear; /* leaving: snap back the instant the hover ends */
+  max-height: 0; opacity: 0; overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.6s ease;
 }
-/* entering: keep the problem text on screen until the bubble has fully
-   grown, then swap to the solution text instantly — no gap with no text */
+/* entering: the bubble grows first, then the problem steps back to make
+   room for the solution settling in below it */
 .why-bubble:hover .why-bubble-problem,
 .why-bubble:focus-visible .why-bubble-problem,
-.why-bubble.is-active .why-bubble-problem { opacity: 0; transition-delay: 0.6s; }
+.why-bubble.is-active .why-bubble-problem { font-size: 1rem; opacity: 0.65; transition-delay: 0.15s; }
 .why-bubble:hover .why-bubble-solution,
 .why-bubble:focus-visible .why-bubble-solution,
-.why-bubble.is-active .why-bubble-solution { opacity: 1; transition-delay: 0.6s; }
+.why-bubble.is-active .why-bubble-solution { max-height: 8rem; opacity: 1; transition-delay: 0.35s; }
 
 /* base positions + sizes — desktop arranges the five in a ring around the
    centred headline, clear of it and of each other at max expansion
-   (clamp(...,...,360px) → 180px radius) */
-.why-b1 { --bx: 44%; --by: 20%; --bd: 116px; }
+   (clamp(...,...,290px) → 145px radius) */
+.why-b1 { --bx: 44%; --by: 20%; --bd: 128px; }
 .why-b2 { --bx: 84%; --by: 30%; --bd: 164px; }
 .why-b3 { --bx: 76%; --by: 80%; --bd: 122px; }
 .why-b4 { --bx: 31%; --by: 78%; --bd: 124px; }
@@ -2066,14 +2071,21 @@ h2 em {
   .why { min-height: 0; padding: 5rem 0 6rem; }
   .why-head h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
   .why-bubbles { position: relative; inset: auto; height: 86vh; min-height: 560px; margin-top: 3rem; }
-  .why-bubble { padding: 0.5rem; transition-property: width, height, left, top, border-color, box-shadow; }
+  .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, left, top, border-color, box-shadow; }
   .why-bubble-problem { font-size: 1.05rem; line-height: 1.25; }
+  .why-bubble-solution { font-size: 1.05rem; }
+  .why-bubble:hover .why-bubble-problem,
+  .why-bubble:focus-visible .why-bubble-problem,
+  .why-bubble.is-active .why-bubble-problem { font-size: 0.85rem; }
+  .why-bubble:hover .why-bubble-solution,
+  .why-bubble:focus-visible .why-bubble-solution,
+  .why-bubble.is-active .why-bubble-solution { max-height: 6.5rem; }
   /* expand toward the centre of the field, so a bubble near an edge never
      grows past the viewport — only the size + position change, both still
      percentages of .why-bubbles, so the move stays smooth */
   .why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
     left: 50%; top: 50%;
-    width: min(78vw, 280px); height: min(78vw, 280px);
+    width: min(70vw, 230px); height: min(70vw, 230px);
   }
   .why-b1 { --bx: 76%; --by: 14%; --bd: 100px; }
   .why-b2 { --bx: 26%; --by: 34%; --bd: 114px; }

@@ -635,6 +635,16 @@ init();
 
   function draw() {
     ctx.clearRect(0, 0, w, h);
+    // ink darkens toward the cursor — a radial gradient centred on it,
+    // fading out to the base opacity; mouse.on scales it to 0 when idle
+    const glowRadius = 220;
+    const glow = 0.4 * mouse.on;
+    const majorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
+    majorGrad.addColorStop(0, `rgba(46,93,67,${(0.32 + glow).toFixed(3)})`);
+    majorGrad.addColorStop(1, 'rgba(46,93,67,0.32)');
+    const minorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
+    minorGrad.addColorStop(0, `rgba(46,93,67,${(0.18 + glow * 0.7).toFixed(3)})`);
+    minorGrad.addColorStop(1, 'rgba(46,93,67,0.18)');
     LEVELS.forEach((level, li) => {
       const path = new Path2D();
       for (let j = 0; j < rows - 1; j++) {
@@ -665,7 +675,7 @@ init();
         }
       }
       ctx.lineWidth = li % 5 === 0 ? 1.1 : 0.7;
-      ctx.strokeStyle = li % 5 === 0 ? 'rgba(46,93,67,0.22)' : 'rgba(46,93,67,0.11)';
+      ctx.strokeStyle = li % 5 === 0 ? majorGrad : minorGrad;
       ctx.stroke(path);
     });
   }
