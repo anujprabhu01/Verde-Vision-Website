@@ -717,6 +717,13 @@ init();
     });
   });
 
+  why.addEventListener('click', (e) => {
+    if (!e.target.closest('.why-bubble')) {
+      bubbles.forEach((b) => b.el.classList.remove('is-active'));
+      wake();
+    }
+  });
+
   let resizeRaf = null;
   addEventListener('resize', () => {
     if (resizeRaf) return;
