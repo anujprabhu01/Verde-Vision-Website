@@ -1739,87 +1739,36 @@ h2 em {
    the headline with no dead space. */
 .ia-stage {
   position: relative;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  margin-top: 1rem;
+  width: 100%;
+  margin-top: 2.5rem;
   isolation: isolate;
-  padding-top: 0;
-  overflow: hidden;
 }
 
-.ia-stage-glow { display: none; }
-
-/* Headset wrapper — overflows the viewport edges so the PNG's
-   transparent padding gets cropped off, and the actual device fills
-   nearly the full screen. Negative margin-top pulls the empty top
-   of the PNG up above the stage, where it's clipped by stage's
-   overflow:hidden. Negative margin-bottom does the same below. */
-.ia-headset {
-  position: relative;
-  width: 124vw;
-  max-width: none;
-  margin-top: -16vw;
-  margin-bottom: -6vw;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
-}
-.ia-headset-core {
+/* Clean rectangular video container — replaces the Vision Pro framing.
+   Centered, rounded, with a subtle accent glow under it. */
+.ia-video-frame {
   position: relative;
   width: 100%;
-  /* No external halos or floor shadow — the device sits cleanly on
-     black. The inner lens fade (lens-mask on .ia-lens-feather + rim
-     vignette on .ia-lens-glare) does all the edge-softening work. */
-}
-.ia-headset-img {
-  position: relative;
-  width: 100%;
-  display: block;
-  pointer-events: none;
-  z-index: 1;
-  user-select: none;
-}
-
-/* The lens stage — clipped to the same lens silhouette the hero uses.
-   Stacked ABOVE the headset png because the png's lens region is dark
-   glass, not transparent. A dark backdrop sits beneath the soft mask
-   so the video edges fade into the glass instead of butting hard. */
-.ia-lens-stage {
-  position: absolute;
-  top: 26%; bottom: 32%;
-  left: 21%; right: 21%;
-  clip-path: url(#lens-clip);
-  -webkit-clip-path: url(#lens-clip);
-  z-index: 2;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 30%, #1a1a1a 0%, #0a0a0a 60%, #050505 100%);
+  max-width: 1200px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
   overflow: hidden;
-  cursor: pointer;
+  background: #000;
+  border: 1px solid var(--green-border);
+  box-shadow:
+    0 40px 80px -30px rgba(0,0,0,0.8),
+    0 0 60px -20px rgba(31,196,144,0.25);
 }
 
-/* Soft-feathered inner stage. Mirrors hero's .ba-stage — uses the same
-   #lens-mask SVG to fade the video's outer pixels into the dark glass,
-   so the footage doesn't have a hard rectangular cut against the lens. */
-.ia-lens-feather {
-  position: absolute;
-  inset: 0;
-  -webkit-mask: url(#lens-mask);
-          mask: url(#lens-mask);
-}
 .ia-video {
   position: absolute;
   inset: 0;
   width: 100%; height: 100%;
-  /* cover so the video fills its bounding box edge-to-edge (no
-     letterbox bars). The bounding box itself is scaled down so it
-     inscribes the curved lens silhouette — and the soft #lens-mask
-     feathers any remaining edge contact into the dark glass. */
   object-fit: cover;
   object-position: center;
   display: block;
-  transform: scale(0.9);
-  transform-origin: center center;
+  cursor: pointer;
 }
 
 /* Soft inner vignette + a top-left arc glare to suggest curved glass.
@@ -1845,12 +1794,12 @@ h2 em {
 /* Meta strip below the headset — a quiet editorial caption with a slim
    scrubber in the center column and controls on the right. */
 .ia-bar {
-  margin: -7rem auto 0;
-  max-width: 1480px;
+  margin: 1.25rem auto 0;
+  max-width: 1200px;
   position: relative;
   z-index: 5;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   align-items: center;
   gap: 1.6rem;
 }

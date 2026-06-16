@@ -436,29 +436,16 @@
     </div>
 
     <div class="ia-stage reveal reveal-4">
-      <div class="ia-stage-glow" aria-hidden="true"></div>
-      <div class="ia-headset">
-        <div class="ia-headset-core">
-          <img class="ia-headset-img" src="HeadsetTransparent.png" alt="Apple Vision Pro" />
-          <div class="ia-lens-stage">
-            <div class="ia-lens-feather">
-              <video class="ia-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
-                <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_compressed.mp4" type="video/mp4" />
-                Your browser doesn't support embedded video.
-              </video>
-            </div>
-            <span class="ia-lens-glare" aria-hidden="true"></span>
-          </div>
-        </div>
+      <div class="ia-video-frame">
+        <video class="ia-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
+          <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_v2.mp4" type="video/mp4" />
+          Your browser doesn't support embedded video.
+        </video>
       </div>
     </div>
 
     <div class="container">
       <div class="ia-bar">
-        <div class="ia-meta-l">
-          <span class="ia-place">A live session, captured in Tucson, Arizona</span>
-        </div>
-
         <div class="action-progress" id="action-progress" role="slider" aria-label="Seek video" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div class="action-progress-track" aria-hidden="true"></div>
           <div class="action-progress-bar" id="action-progress-bar"></div>
