@@ -731,6 +731,176 @@ init();
   });
 })();
 
+// ── FOOTER — the same topographic contour field as "why it wins", but static
+// (no cursor dome) and inked in cream for the dark earth block. The canvas is
+// pulled up over the arch and masked to its curve in CSS, so the contours fill
+// the curved brown cap rather than starting straight across below it. ──
+(function footerTopo() {
+  const footer = document.querySelector('footer');
+  const canvas = document.getElementById('footer-topo');
+  if (!footer || !canvas) return;
+  const ctx = canvas.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ARCH_H = 140; // matches .cta-footer-arch height / the CSS top offset
+
+  // identical value-noise → identical contour character to the why section
+  const hash = (x, y) => {
+    const s = Math.sin(x * 127.1 + y * 311.7 + 17) * 43758.5453;
+    return s - Math.floor(s);
+  };
+  const fade = (t) => t * t * (3 - 2 * t);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function noise(x, y) {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+    const u = fade(xf), v = fade(yf);
+    return lerp(
+      lerp(hash(xi, yi), hash(xi + 1, yi), u),
+      lerp(hash(xi, yi + 1), hash(xi + 1, yi + 1), u),
+      v
+    );
+  }
+  function elevation(x, y) {
+    return noise(x * 0.0035, y * 0.0035) * 1.0
+         + noise(x * 0.009 + 90, y * 0.009 + 90) * 0.5
+         + noise(x * 0.022 + 180, y * 0.022 + 180) * 0.25;
+  }
+
+  const EDGES = [
+    null, [3, 2], [2, 1], [3, 1], [0, 1], [3, 0, 2, 1], [0, 2], [3, 0],
+    [3, 0], [0, 2], [3, 0, 2, 1], [0, 1], [3, 1], [2, 1], [3, 2], null
+  ];
+  const LEVELS = (() => {
+    const out = [];
+    for (let v = -1.9; v <= 2.6; v += 0.16) out.push(v);
+    return out;
+  })();
+
+  let w = 0, h = 0, cell = 16, cols = 0, rows = 0, field = null;
+  // cursor in canvas space; .on eases 0→1 so the dome fades in/out
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0, on: 0, target: 0 };
+
+  function resize() {
+    const r = footer.getBoundingClientRect();
+    w = r.width; h = r.height + ARCH_H; // reach up over the arch cap
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cell = w < 720 ? 22 : 16;
+    cols = Math.ceil(w / cell) + 1;
+    rows = Math.ceil(h / cell) + 1;
+    field = new Float32Array(cols * rows);
+    mouse.x = mouse.tx = w / 2;
+    mouse.y = mouse.ty = h / 2;
+    computeField();
+    draw();
+  }
+
+  // base terrain + a soft dome lifted under the cursor (same as why it wins)
+  function computeField() {
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const x = i * cell, y = j * cell;
+        let e = elevation(x, y);
+        if (mouse.on > 0.01) {
+          const dx = x - mouse.x, dy = y - mouse.y;
+          e += mouse.on * 0.8 * Math.exp(-(dx * dx + dy * dy) / (2 * 120 * 120));
+        }
+        field[j * cols + i] = e;
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    // cream ink brightens toward the cursor, fading to the resting alpha
+    const glowRadius = 240;
+    const glow = mouse.on;
+    const majorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
+    majorGrad.addColorStop(0, `rgba(235,224,203,${(0.085 + 0.16 * glow).toFixed(3)})`);
+    majorGrad.addColorStop(1, 'rgba(235,224,203,0.085)');
+    const minorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
+    minorGrad.addColorStop(0, `rgba(235,224,203,${(0.05 + 0.11 * glow).toFixed(3)})`);
+    minorGrad.addColorStop(1, 'rgba(235,224,203,0.05)');
+    LEVELS.forEach((level, li) => {
+      const path = new Path2D();
+      for (let j = 0; j < rows - 1; j++) {
+        for (let i = 0; i < cols - 1; i++) {
+          const tl = field[j * cols + i], tr = field[j * cols + i + 1];
+          const bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
+          let c = 0;
+          if (tl > level) c |= 8;
+          if (tr > level) c |= 4;
+          if (br > level) c |= 2;
+          if (bl > level) c |= 1;
+          const edges = EDGES[c];
+          if (!edges) continue;
+          const x = i * cell, y = j * cell;
+          const pt = (edge) => {
+            switch (edge) {
+              case 0: return [x + cell * (level - tl) / (tr - tl), y];
+              case 1: return [x + cell, y + cell * (level - tr) / (br - tr)];
+              case 2: return [x + cell * (level - bl) / (br - bl), y + cell];
+              default: return [x, y + cell * (level - tl) / (bl - tl)];
+            }
+          };
+          for (let k = 0; k < edges.length; k += 2) {
+            const a = pt(edges[k]), bp = pt(edges[k + 1]);
+            path.moveTo(a[0], a[1]);
+            path.lineTo(bp[0], bp[1]);
+          }
+        }
+      }
+      const major = li % 5 === 0;
+      ctx.lineWidth = major ? 1.0 : 0.7;
+      ctx.strokeStyle = major ? majorGrad : minorGrad;
+      ctx.stroke(path);
+    });
+  }
+
+  // render loop runs only while the cursor (or its fade) is still moving
+  let raf = null;
+  function loop() {
+    mouse.x += (mouse.tx - mouse.x) * 0.12;
+    mouse.y += (mouse.ty - mouse.y) * 0.12;
+    mouse.on += (mouse.target - mouse.on) * 0.08;
+    const moving = Math.abs(mouse.tx - mouse.x) > 0.2 || Math.abs(mouse.ty - mouse.y) > 0.2
+      || Math.abs(mouse.target - mouse.on) > 0.003;
+    computeField();
+    draw();
+    raf = moving ? requestAnimationFrame(loop) : null;
+  }
+  function wake() { if (!raf) raf = requestAnimationFrame(loop); }
+
+  resize();
+
+  let resizeRaf = null;
+  addEventListener('resize', () => {
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resize(); });
+  });
+  // re-render once more after web fonts settle (footer height can shift)
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
+
+  if (reduce) return; // honor reduced-motion: stay static
+
+  footer.addEventListener('pointermove', (e) => {
+    const r = footer.getBoundingClientRect();
+    mouse.tx = e.clientX - r.left;
+    mouse.ty = e.clientY - r.top + ARCH_H; // canvas sits ARCH_H px above footer
+    mouse.target = 1;
+    wake();
+  }, { passive: true });
+  // mouse leaves, or a touch lifts/cancels (pointerleave isn't reliable on
+  // touch) → ease the dome back to flat so it never sticks on mobile
+  const release = () => { mouse.target = 0; wake(); };
+  footer.addEventListener('pointerleave', release);
+  footer.addEventListener('pointerup', release);
+  footer.addEventListener('pointercancel', release);
+})();
+
 // ── CREDIBILITY BAR — duplicate the ticker for a seamless -50% loop ──
 // The CSS marquee translates the track by -50%; that's only seamless if the
 // track holds two identical halves. We clone the authored items once here so

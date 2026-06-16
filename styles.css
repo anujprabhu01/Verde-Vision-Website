@@ -2233,29 +2233,46 @@ h2 em {
   text-align: center;
   position: relative;
   isolation: isolate;
-  background-color: var(--green-mid);
+  background-color: #cfc3a3;
   border-top: 1px solid var(--rule);
-  padding-top: 10rem; padding-bottom: 11rem;
+  padding: 0;
   overflow: hidden;
+  min-height: 680px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
-.cta::after {
-  content: "";
+.cta .container { position: relative; z-index: 2; padding-bottom: 9rem; padding-top: 4rem; }
+
+/* ── CTA DESERT LANDSCAPE — real Arizona photo fills the bottom of the section.
+   Sepia filter pulls it into the paper/ink palette; the mask fades it in from
+   the top so the headline text stays readable on the clean sand background. */
+.cta-landscape {
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    /* warm ground light along the bottom */
-    radial-gradient(ellipse 70% 32% at 50% 108%,
-      rgba(208,182,130,0.34) 0%,
-      rgba(208,182,130,0.12) 55%,
-      transparent 85%),
-    /* a breath of green from below */
-    radial-gradient(ellipse 38% 10% at 50% 102%,
-      rgba(46,93,67,0.12) 0%,
-      transparent 85%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+  z-index: 1;
+  display: block;
+  filter: sepia(0.72) saturate(0.62) brightness(0.72) contrast(1.08) hue-rotate(-8deg);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 30%, black 60%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 30%, black 60%);
 }
-.cta .container { position: relative; z-index: 2; }
+
+/* ── CTA → FOOTER ARCH — SVG arch in the footer's earth-tan color bridges the
+   desert landscape into the dark footer, mimicking an archway or horizon. */
+.cta-footer-arch {
+  position: relative;
+  margin-top: -140px;
+  z-index: 20;
+  line-height: 0;
+  pointer-events: none;
+}
+.cta-footer-arch svg { display: block; width: 100%; height: 140px; }
 
 .cta h2 {
   font-family: var(--font-serif);
@@ -2279,9 +2296,37 @@ footer {
   padding: 5rem 5vw 2.5rem;
   font-size: 0.85rem;
   color: rgba(235,224,203,0.6);
-  background: #22382b;
+  background: #271f13;
   position: relative;
 }
+
+/* Static contour canvas (drawn in main.js). It is pulled up 140px to cover the
+   arch cap and masked to the arch curve on top + solid below, so the contours
+   fill the curved brown shape instead of a straight band. Sits above the arch
+   (z 20) but below the footer content (z 22). */
+.footer-topo {
+  position: absolute;
+  top: -140px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 21;
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 140' preserveAspectRatio='none'%3E%3Cpath d='M0,140 L0,30 C360,120 1080,120 1440,30 L1440,140 Z' fill='white'/%3E%3C/svg%3E"),
+    linear-gradient(#fff, #fff);
+  -webkit-mask-size: 100% 140px, 100% calc(100% - 140px);
+  -webkit-mask-position: left top, left 140px;
+  -webkit-mask-repeat: no-repeat, no-repeat;
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 140' preserveAspectRatio='none'%3E%3Cpath d='M0,140 L0,30 C360,120 1080,120 1440,30 L1440,140 Z' fill='white'/%3E%3C/svg%3E"),
+    linear-gradient(#fff, #fff);
+  mask-size: 100% 140px, 100% calc(100% - 140px);
+  mask-position: left top, left 140px;
+  mask-repeat: no-repeat, no-repeat;
+}
+
 .footer-grid {
   max-width: 1100px;
   margin: 0 auto;
@@ -2289,19 +2334,27 @@ footer {
   grid-template-columns: 1.6fr 1fr 1fr;
   gap: 3rem 2rem;
   align-items: start;
+  position: relative;
+  z-index: 22;
 }
 .footer-brand .footer-logo {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.55rem;
-  letter-spacing: -0.025em;
-  color: #ebe0cb;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   margin-bottom: 0.85rem;
+  line-height: 1;
+}
+.footer-logo-img {
+  height: 1.75em;
+  width: auto;
+  display: block;
 }
 .footer-brand .footer-logo span {
-  color: #9dc3a9;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.18em;
+  color: #ebe0cb;
 }
 .footer-tagline {
   color: rgba(235,224,203,0.55);
@@ -2314,7 +2367,7 @@ footer {
   font-size: 0.68rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #9dc3a9;
+  color: rgba(255,255,255,0.85);
   margin-bottom: 1rem;
   font-weight: 600;
 }
@@ -2333,6 +2386,8 @@ footer {
   max-width: 1100px;
   margin: 3.5rem auto 0;
   padding-top: 1.75rem;
+  position: relative;
+  z-index: 22;
   border-top: 1px solid rgba(235,224,203,0.16);
   display: flex;
   justify-content: space-between;

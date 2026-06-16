@@ -542,20 +542,28 @@
   <section class="cta" data-reveal-section>
     <div class="container">
       <h2 class="reveal">Your yard won't <em>design</em> itself.</h2>
-      <p class="reveal reveal-2">Ready to see your landscape before you build it? Book a live demo and experience VerdeVision on Apple Vision Pro.</p>
       <div class="cta-actions reveal reveal-3">
         <a href="#booking" class="btn-primary">Book a Demo</a>
         <a href="mailto:demos@useverdevision.com" class="btn-secondary">Contact Us</a>
       </div>
     </div>
+    <img class="cta-landscape" src="assets/arizona-desert.jpg" alt="" aria-hidden="true" decoding="async">
   </section>
+  <div class="cta-footer-arch" aria-hidden="true">
+    <svg viewBox="0 0 1440 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,140 L0,30 C360,120 1080,120 1440,30 L1440,140 Z" fill="#271f13"/>
+    </svg>
+  </div>
 
   <!-- FOOTER -->
   <footer>
+    <canvas class="footer-topo" id="footer-topo" aria-hidden="true"></canvas>
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="footer-logo">Verde<span>Vision</span></div>
-        <p class="footer-tagline">Spatial landscape design for Apple Vision Pro. Designed in California.</p>
+        <div class="footer-logo">
+          <span>VERDE VISION</span>
+        </div>
+        <p class="footer-tagline">Spatial landscape design for Apple Vision Pro. Designed in Arizona.</p>
       </div>
       <div class="footer-col">
         <p class="footer-col-title">Product</p>
@@ -580,7 +588,7 @@
     </div>
   </footer>
 
-  <script src="main.js?v=56"></script>
+  <script src="main.js?v=60"></script>
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
