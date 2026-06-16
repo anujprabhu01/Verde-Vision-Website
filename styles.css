@@ -1761,33 +1761,6 @@ h2 em {
   will-change: transform;
 }
 
-/* macOS-style title bar */
-.ia-window-chrome {
-  background: #c4b49a;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  border-bottom: 1px solid rgba(0,0,0,0.10);
-  flex-shrink: 0;
-  position: relative;
-  user-select: none;
-}
-.ia-window-dots { display: flex; align-items: center; gap: 6px; }
-.ia-dot { width: 12px; height: 12px; border-radius: 50%; display: block; }
-.ia-dot-red    { background: #FF5F57; }
-.ia-dot-yellow { background: #FFBC2E; }
-.ia-dot-green  { background: #28C840; }
-.ia-window-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.28);
-  letter-spacing: 0.06em;
-  pointer-events: none;
-  white-space: nowrap;
-}
 
 .ia-video-frame {
   position: relative;
@@ -1953,8 +1926,7 @@ h2 em {
     transform: none;
     border-radius: 10px;
   }
-  .ia-window-title { display: none; }
-  .ia-video-frame { aspect-ratio: 1; }
+.ia-video-frame { aspect-ratio: 1; }
   .ia-bar {
     margin-top: 2rem;
     font-size: 0.62rem;
