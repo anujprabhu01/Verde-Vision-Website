@@ -2300,31 +2300,18 @@ footer {
   position: relative;
 }
 
-/* Static contour canvas (drawn in main.js). It is pulled up 140px to cover the
-   arch cap and masked to the arch curve on top + solid below, so the contours
-   fill the curved brown shape instead of a straight band. Sits above the arch
-   (z 20) but below the footer content (z 22). */
+/* Static contour canvas (drawn in main.js). Sits flush inside the footer with a
+   flat top edge, so the brown topo block reads as a clean straight band with the
+   desert photo sitting directly on top of it. Below the footer content (z 22). */
 .footer-topo {
   position: absolute;
-  top: -140px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   width: 100%;
   pointer-events: none;
   z-index: 21;
-  -webkit-mask-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 140' preserveAspectRatio='none'%3E%3Cpath d='M0,140 L0,30 C360,120 1080,120 1440,30 L1440,140 Z' fill='white'/%3E%3C/svg%3E"),
-    linear-gradient(#fff, #fff);
-  -webkit-mask-size: 100% 140px, 100% calc(100% - 140px);
-  -webkit-mask-position: left top, left 140px;
-  -webkit-mask-repeat: no-repeat, no-repeat;
-  mask-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 140' preserveAspectRatio='none'%3E%3Cpath d='M0,140 L0,30 C360,120 1080,120 1440,30 L1440,140 Z' fill='white'/%3E%3C/svg%3E"),
-    linear-gradient(#fff, #fff);
-  mask-size: 100% 140px, 100% calc(100% - 140px);
-  mask-position: left top, left 140px;
-  mask-repeat: no-repeat, no-repeat;
 }
 
 .footer-grid {

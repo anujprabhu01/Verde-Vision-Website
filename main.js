@@ -741,7 +741,7 @@ init();
   if (!footer || !canvas) return;
   const ctx = canvas.getContext('2d');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const ARCH_H = 140; // matches .cta-footer-arch height / the CSS top offset
+  const ARCH_H = 0; // footer now has a flat top edge; canvas fills it exactly
 
   // identical value-noise → identical contour character to the why section
   const hash = (x, y) => {
