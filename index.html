@@ -89,15 +89,20 @@
       display: grid; place-items: center; align-content: center;
       background: #ebe0cb;
       --iris: 0%;
-      /* Feather trails BEHIND the opening edge (inner stop) so the overlay
-         is fully opaque at --iris: 0% and irises open from the center. */
+      transition: --iris 1.05s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.9s ease 0.25s, visibility 0s linear 1.3s;
+    }
+    /* CRITICAL: the iris mask is applied ONLY while opening. At rest the
+       loader is a plain opaque rectangle, so iOS Safari composites it on the
+       first frame instead of deferring a full-screen masked layer (which
+       stalled the whole loader off-screen for ~2s, hiding the count).
+       Feather trails BEHIND the opening edge so it's fully opaque at 0%. */
+    .loader.is-opening {
       -webkit-mask-image: radial-gradient(circle at 50% 44%, transparent calc(var(--iris) - 16%), #000 var(--iris));
               mask-image: radial-gradient(circle at 50% 44%, transparent calc(var(--iris) - 16%), #000 var(--iris));
-      transition: --iris 1.05s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.9s ease 0.25s, visibility 0s linear 1.3s;
     }
     .loader.is-done { --iris: 175%; opacity: 0; visibility: hidden; pointer-events: none; }
     .loader-logo {
-      width: 180px; height: auto; display: block;
+      width: 180px; height: 180px; display: block; /* explicit height: no layout wait on decode */
       opacity: 0; transform: scale(0.94);
       animation: loaderLogo 1s ease forwards;
     }
@@ -216,9 +221,18 @@
         if (fired) return;
         fired = true;
         pctEl.textContent = '100%';
-        document.documentElement.classList.remove('is-loading');
-        el.classList.add('is-done');
-        setTimeout(() => el.remove(), 1500);
+        // Apply the mask at --iris:0% (still fully opaque) and force a style
+        // commit, then flip to the open state so the iris animates instead of
+        // jumping. setTimeout (not rAF) drives the flip so a throttled or
+        // backgrounded tab — where rAF is paused — still completes the reveal
+        // rather than sticking on the opaque cover.
+        el.classList.add('is-opening');
+        void el.getBoundingClientRect();
+        setTimeout(() => {
+          document.documentElement.classList.remove('is-loading');
+          el.classList.add('is-done');
+          setTimeout(() => el.remove(), 1500);
+        }, 40);
       };
       Promise.all([ready, swept]).then(done);
       // Wall-clock failsafe: a stalled network — or a background tab where
