@@ -131,8 +131,18 @@
   </style>
   <noscript><style>.loader { display: none; }</style></noscript>
 
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=92" />
+  <!-- Fonts + main stylesheet load NON-render-blocking (media=print → all on
+       load) so the self-contained loader paints on the very first frame
+       instead of waiting out their download behind a blank screen. The iris
+       reveal is JS-gated on styles.css actually applying, so nothing
+       underneath is ever shown unstyled. -->
+  <link id="app-fonts" rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
+  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=92" />
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="styles.css?v=92" />
+  </noscript>
 </head>
 <body>
 
@@ -171,7 +181,15 @@
         im.src = src;
       });
       const fontsReady = document.fonts?.ready || Promise.resolve();
-      const ready = Promise.all([fontsReady, ...HERO_IMGS.map(decode)]);
+      // styles.css now loads non-blocking, so the reveal must wait for it to
+      // apply — otherwise the iris could open onto an unstyled page.
+      const cssReady = new Promise((res) => {
+        const link = document.getElementById('app-css');
+        if (!link || link.sheet) return res();
+        link.addEventListener('load', res, { once: true });
+        link.addEventListener('error', res, { once: true });
+      });
+      const ready = Promise.all([cssReady, fontsReady, ...HERO_IMGS.map(decode)]);
 
       let fired = false;
       // One deliberate 0→99 sweep, clocked from the FIRST rendered frame —
