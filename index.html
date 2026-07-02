@@ -77,30 +77,24 @@
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   </script>
   <style>
-    @property --iris { syntax: '<length-percentage>'; initial-value: 0%; inherits: false; }
     html.is-loading { overflow: hidden; background: #ebe0cb; }
     /* Belt and suspenders: while loading, nothing but the loader may paint,
        so the hero can't flash before the cover on slow mobile paints. */
     html.is-loading body > :not(#loader) { visibility: hidden !important; }
-    /* Hold the hero's staggered entrance until the iris opens. */
+    /* Hold the hero's staggered entrance until the loader dissolves. */
     html.is-loading .hero-anim { animation-play-state: paused !important; }
+    /* A plain opaque cover that dissolves out — no mask. Masks proved
+       unreliable on iOS Safari when toggled by script (deferred paint,
+       reveal flash, vanishing cover); a pure opacity fade can't hit any of
+       that and still reads as a premium Apple-style crossfade. */
     .loader {
       position: fixed; inset: 0; z-index: 10000;
       display: grid; place-items: center; align-content: center;
       background: #ebe0cb;
-      --iris: 0%;
-      transition: --iris 1.05s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.9s ease 0.25s, visibility 0s linear 1.3s;
+      opacity: 1;
+      transition: opacity 0.85s ease;
     }
-    /* CRITICAL: the iris mask is applied ONLY while opening. At rest the
-       loader is a plain opaque rectangle, so iOS Safari composites it on the
-       first frame instead of deferring a full-screen masked layer (which
-       stalled the whole loader off-screen for ~2s, hiding the count).
-       Feather trails BEHIND the opening edge so it's fully opaque at 0%. */
-    .loader.is-opening {
-      -webkit-mask-image: radial-gradient(circle at 50% 44%, transparent calc(var(--iris) - 16%), #000 var(--iris));
-              mask-image: radial-gradient(circle at 50% 44%, transparent calc(var(--iris) - 16%), #000 var(--iris));
-    }
-    .loader.is-done { --iris: 175%; opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader.is-done { opacity: 0; pointer-events: none; }
     .loader-logo {
       width: 180px; height: 180px; display: block; /* explicit height: no layout wait on decode */
       opacity: 0; transform: scale(0.94);
@@ -130,7 +124,7 @@
       .loader-pct { margin-top: 0.9rem; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .loader { transition: opacity 0.35s ease, visibility 0s linear 0.4s; }
+      .loader { transition: opacity 0.35s ease; }
       .loader-logo, .loader-word, .loader-pct { animation: none; opacity: 1; transform: none; }
     }
   </style>
@@ -138,7 +132,7 @@
 
   <!-- Fonts + main stylesheet load NON-render-blocking (media=print → all on
        load) so the self-contained loader paints on the very first frame
-       instead of waiting out their download behind a blank screen. The iris
+       instead of waiting out their download behind a blank screen. The
        reveal is JS-gated on styles.css actually applying, so nothing
        underneath is ever shown unstyled. -->
   <link id="app-fonts" rel="stylesheet" media="print" onload="this.media='all'"
@@ -151,8 +145,8 @@
 </head>
 <body>
 
-  <!-- LOADER — lens iris that opens onto the hero. Critical cover styles are
-       inlined on the element so it is opaque from the instant it parses,
+  <!-- LOADER — opaque cover that dissolves onto the hero. Critical cover
+       styles are inlined on the element so it is opaque from the instant it parses,
        independent of any stylesheet timing. -->
   <div class="loader" id="loader" role="status" aria-label="Loading VerdeVision"
        style="position:fixed;inset:0;z-index:10000;display:grid;place-items:center;align-content:center;background:#ebe0cb">
@@ -170,8 +164,8 @@
       const SWEEP = reduce ? 300 : 2000;
       const MAX = reduce ? 2500 : 6500;
 
-      // The iris may not open until everything visible in the opening hero
-      // frame is actually paintable: webfonts plus these four images. A
+      // The cover may not dissolve until everything visible in the opening
+      // hero frame is actually paintable: webfonts plus these four images. A
       // failed fetch resolves rather than holding the page hostage.
       const HERO_IMGS = [
         'assets/img/logo-512.webp',
@@ -187,7 +181,7 @@
       });
       const fontsReady = document.fonts?.ready || Promise.resolve();
       // styles.css now loads non-blocking, so the reveal must wait for it to
-      // apply — otherwise the iris could open onto an unstyled page.
+      // apply — otherwise the cover could dissolve onto an unstyled page.
       const cssReady = new Promise((res) => {
         const link = document.getElementById('app-css');
         if (!link || link.sheet) return res();
@@ -217,31 +211,15 @@
       };
       requestAnimationFrame(tickPct);
 
-      // Warm the iris mask EARLY — while the cover is still fully opaque
-      // (--iris:0%) and the hero is still hidden behind is-loading. Applying
-      // the mask fresh costs iOS a frame to rasterize, during which the cover
-      // is briefly see-through; doing it now makes that frame land on the tan
-      // background (invisible) instead of at the reveal, where it flashed the
-      // hero through at ~99%. Idempotent with the add in done().
-      const warm = setTimeout(() => el.classList.add('is-opening'),
-                              Math.min(450, SWEEP * 0.4));
-
       const done = () => {
         if (fired) return;
         fired = true;
-        clearTimeout(warm);
         pctEl.textContent = '100%';
-        // Ensure the (warmed) mask is present, force a style commit, then flip
-        // to the open state so the iris animates instead of jumping. setTimeout
-        // (not rAF) drives the flip so a throttled/backgrounded tab — where rAF
-        // is paused — still completes the reveal rather than sticking opaque.
-        el.classList.add('is-opening');
-        void el.getBoundingClientRect();
-        setTimeout(() => {
-          document.documentElement.classList.remove('is-loading');
-          el.classList.add('is-done');
-          setTimeout(() => el.remove(), 1500);
-        }, 40);
+        // Unhide the hero and dissolve the cover over it — a pure opacity
+        // fade, no mask, so nothing iOS-specific can go wrong.
+        document.documentElement.classList.remove('is-loading');
+        el.classList.add('is-done');
+        setTimeout(() => el.remove(), 1100);
       };
       Promise.all([ready, swept]).then(done);
       // Wall-clock failsafe: a stalled network — or a background tab where
