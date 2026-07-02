@@ -157,17 +157,29 @@
         im.src = src;
       });
       const fontsReady = document.fonts?.ready || Promise.resolve();
-      let assetsDone = false;
-      const ready = Promise.all([fontsReady, ...HERO_IMGS.map(decode)])
-        .then(() => { assetsDone = true; });
+      // Each gate that lands raises the dial's ceiling, so the number tracks
+      // real network progress instead of a timer.
+      const gates = [fontsReady, ...HERO_IMGS.map(decode)];
+      let loadedCount = 0;
+      gates.forEach((p) => p.then(() => { loadedCount++; }));
+      const ready = Promise.all(gates);
 
       let fired = false;
-      // Dial paces to 90% over MIN, then holds until the hero assets have
-      // decoded — 100% now means "ready", not just "time elapsed".
-      const tickPct = () => {
+      // The dial chases the ceiling in uneven steps — big leaps early, a
+      // crawl near the top. The ceiling blends asset progress with a slow
+      // time trickle so a stalled network still reads as alive, and caps at
+      // 97 because 100 means "ready", not "time elapsed".
+      let shown = 0;
+      let nextStep = t0;
+      const tickPct = (now) => {
         if (fired) return;
-        const pct = Math.min(90, Math.floor(((performance.now() - t0) / MIN) * 90));
-        pctEl.textContent = (assetsDone ? 90 : pct) + '%';
+        if (now >= nextStep) {
+          const ceiling = Math.min(97, 14 + (loadedCount / gates.length) * 76 + ((now - t0) / MAX) * 18);
+          const gap = ceiling - shown;
+          if (gap > 0) shown = Math.min(ceiling, shown + Math.max(0.4, gap * (0.15 + Math.random() * 0.15)));
+          pctEl.textContent = Math.floor(shown) + '%';
+          nextStep = now + 70 + Math.random() * 100;
+        }
         requestAnimationFrame(tickPct);
       };
       requestAnimationFrame(tickPct);
@@ -175,7 +187,15 @@
       const done = () => {
         if (fired) return;
         fired = true;
-        pctEl.textContent = '100%';
+        // Sprint the last stretch so 100 is arrived at, not teleported to.
+        const from = shown;
+        const t1 = performance.now();
+        const finish = (now) => {
+          const k = Math.min(1, (now - t1) / 300);
+          pctEl.textContent = Math.round(from + (100 - from) * (k * (2 - k))) + '%';
+          if (k < 1) requestAnimationFrame(finish);
+        };
+        requestAnimationFrame(finish);
         document.documentElement.classList.remove('is-loading');
         el.classList.add('is-done');
         setTimeout(() => el.remove(), 1500);
