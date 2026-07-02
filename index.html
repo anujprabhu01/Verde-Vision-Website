@@ -65,15 +65,17 @@
   <link rel="preload" as="image" href="assets/img/after.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=92" />
 
-  <!-- Loader is self-contained (inline styles + script) so it paints on first
-       byte and still dissolves cleanly even if styles.css or main.js stall. -->
+  <!-- Loader gate + styles live BEFORE the render-blocking stylesheets so
+       the cover is styled at the earliest frame the browser can paint —
+       nothing underneath can ever show first. -->
   <script>document.documentElement.classList.add('is-loading');</script>
   <style>
     @property --iris { syntax: '<length-percentage>'; initial-value: 0%; inherits: false; }
-    html.is-loading { overflow: hidden; }
+    html.is-loading { overflow: hidden; background: #ebe0cb; }
+    /* Belt and suspenders: while loading, nothing but the loader may paint,
+       so the hero can't flash before the cover on slow mobile paints. */
+    html.is-loading body > :not(#loader) { visibility: hidden !important; }
     /* Hold the hero's staggered entrance until the iris opens. */
     html.is-loading .hero-anim { animation-play-state: paused !important; }
     .loader {
@@ -122,11 +124,17 @@
     }
   </style>
   <noscript><style>.loader { display: none; }</style></noscript>
+
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=92" />
 </head>
 <body>
 
-  <!-- LOADER — lens iris that opens onto the hero -->
-  <div class="loader" id="loader" role="status" aria-label="Loading VerdeVision">
+  <!-- LOADER — lens iris that opens onto the hero. Critical cover styles are
+       inlined on the element so it is opaque from the instant it parses,
+       independent of any stylesheet timing. -->
+  <div class="loader" id="loader" role="status" aria-label="Loading VerdeVision"
+       style="position:fixed;inset:0;z-index:10000;display:grid;place-items:center;align-content:center;background:#ebe0cb">
     <img class="loader-logo" src="assets/img/logo-512.webp" alt="" aria-hidden="true" />
     <p class="loader-word" aria-hidden="true">Verde<em>Vision</em></p>
     <p class="loader-pct" id="loader-pct" aria-hidden="true">0%</p>
@@ -137,8 +145,9 @@
       const pctEl = document.getElementById('loader-pct');
       const t0 = performance.now();
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      // MIN keeps the reveal from flashing past; MAX caps a stalled network.
-      const MIN = reduce ? 150 : 1150;
+      // SWEEP is the guaranteed 0→99 performance every visit, cache or not;
+      // MAX caps a stalled network so nobody stares at 99% forever.
+      const SWEEP = reduce ? 300 : 2000;
       const MAX = reduce ? 2500 : 6500;
 
       // The iris may not open until everything visible in the opening hero
@@ -157,50 +166,31 @@
         im.src = src;
       });
       const fontsReady = document.fonts?.ready || Promise.resolve();
-      // Each gate that lands raises the dial's ceiling, so the number tracks
-      // real network progress instead of a timer.
-      const gates = [fontsReady, ...HERO_IMGS.map(decode)];
-      let loadedCount = 0;
-      gates.forEach((p) => p.then(() => { loadedCount++; }));
-      const ready = Promise.all(gates);
+      const ready = Promise.all([fontsReady, ...HERO_IMGS.map(decode)]);
 
       let fired = false;
-      // The dial chases the ceiling in uneven steps — big leaps early, a
-      // crawl near the top. The ceiling blends asset progress with a slow
-      // time trickle so a stalled network still reads as alive, and caps at
-      // 97 because 100 means "ready", not "time elapsed".
-      let shown = 0;
-      let nextStep = t0;
+      // One deliberate 0→99 sweep every visit — eased so it departs gently,
+      // gathers speed through the middle, and lands softly. If the page
+      // needs longer than the sweep, the dial holds at 99; 100 is reserved
+      // for "actually ready".
+      const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
       const tickPct = (now) => {
         if (fired) return;
-        if (now >= nextStep) {
-          const ceiling = Math.min(97, 14 + (loadedCount / gates.length) * 76 + ((now - t0) / MAX) * 18);
-          const gap = ceiling - shown;
-          if (gap > 0) shown = Math.min(ceiling, shown + Math.max(0.4, gap * (0.15 + Math.random() * 0.15)));
-          pctEl.textContent = Math.floor(shown) + '%';
-          nextStep = now + 70 + Math.random() * 100;
-        }
-        requestAnimationFrame(tickPct);
+        const t = Math.min(1, (now - t0) / SWEEP);
+        pctEl.textContent = Math.round(ease(t) * 99) + '%';
+        if (t < 1) requestAnimationFrame(tickPct);
       };
       requestAnimationFrame(tickPct);
 
       const done = () => {
         if (fired) return;
         fired = true;
-        // Sprint the last stretch so 100 is arrived at, not teleported to.
-        const from = shown;
-        const t1 = performance.now();
-        const finish = (now) => {
-          const k = Math.min(1, (now - t1) / 300);
-          pctEl.textContent = Math.round(from + (100 - from) * (k * (2 - k))) + '%';
-          if (k < 1) requestAnimationFrame(finish);
-        };
-        requestAnimationFrame(finish);
+        pctEl.textContent = '100%';
         document.documentElement.classList.remove('is-loading');
         el.classList.add('is-done');
         setTimeout(() => el.remove(), 1500);
       };
-      const minWait = new Promise((r) => setTimeout(r, MIN));
+      const minWait = new Promise((r) => setTimeout(r, SWEEP));
       Promise.all([ready, minWait]).then(done);
       setTimeout(done, MAX);
     })();
