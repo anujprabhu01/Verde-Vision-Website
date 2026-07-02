@@ -217,15 +217,24 @@
       };
       requestAnimationFrame(tickPct);
 
+      // Warm the iris mask EARLY — while the cover is still fully opaque
+      // (--iris:0%) and the hero is still hidden behind is-loading. Applying
+      // the mask fresh costs iOS a frame to rasterize, during which the cover
+      // is briefly see-through; doing it now makes that frame land on the tan
+      // background (invisible) instead of at the reveal, where it flashed the
+      // hero through at ~99%. Idempotent with the add in done().
+      const warm = setTimeout(() => el.classList.add('is-opening'),
+                              Math.min(450, SWEEP * 0.4));
+
       const done = () => {
         if (fired) return;
         fired = true;
+        clearTimeout(warm);
         pctEl.textContent = '100%';
-        // Apply the mask at --iris:0% (still fully opaque) and force a style
-        // commit, then flip to the open state so the iris animates instead of
-        // jumping. setTimeout (not rAF) drives the flip so a throttled or
-        // backgrounded tab — where rAF is paused — still completes the reveal
-        // rather than sticking on the opaque cover.
+        // Ensure the (warmed) mask is present, force a style commit, then flip
+        // to the open state so the iris animates instead of jumping. setTimeout
+        // (not rAF) drives the flip so a throttled/backgrounded tab — where rAF
+        // is paused — still completes the reveal rather than sticking opaque.
         el.classList.add('is-opening');
         void el.getBoundingClientRect();
         setTimeout(() => {
