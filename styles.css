@@ -1,13 +1,5 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-@font-face {
-  font-family: 'Departure Mono';
-  src: url('fonts/DepartureMono-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   /* Palette — warm paper + botanical ink. Green is pigment, not light:
      it never glows, it prints. Clay is the warm counterpoint, used
@@ -371,14 +363,21 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   .hero-content { display: contents; }
 
   .hero-eyebrow  { order: 1; margin-bottom: 1rem; }
-  .hero h1        { order: 2; margin-bottom: 1.5rem; }
-  /* Drop the gray subhead on phones — the H1 already carries the message
-     and the mockup's tighter rhythm reads cleaner without it. (The trust
-     line is also a <p>; keep it.) */
-  .hero-content > p:not(.hero-trust) { display: none; }
-  .hero-visual    { order: 3; }
+  .hero h1        { order: 2; margin-bottom: 1rem; }
+  /* Compact one-liner between headline and visor — phones are the only
+     place the value prop would otherwise never appear above the fold.
+     (The trust line is also a <p>; it keeps its own rule below.) */
+  .hero-content > p:not(.hero-trust) {
+    order: 3;
+    font-size: 0.98rem;
+    text-align: center;
+    max-width: 34ch;
+    margin: 0 auto 1.9rem;
+    padding: 0 0.5rem;
+  }
+  .hero-visual    { order: 4; }
   .hero-actions   {
-    order: 4;
+    order: 5;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
@@ -412,7 +411,7 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   }
   /* Trust line sits centered under the CTAs, above the headset reflection. */
   .hero-trust {
-    order: 5;
+    order: 6;
     margin: -1.4rem auto 0;
     position: relative;
     z-index: 2;
@@ -906,6 +905,9 @@ h1 .accent {
   -webkit-clip-path: url(#lens-clip);
   cursor: ew-resize;
   user-select: none;
+  /* Vertical swipes that start on the visor must still scroll the page on
+     touch; only horizontal drags belong to the slider. */
+  touch-action: pan-y;
   z-index: 2;
   /* Lens-color backdrop so images fade into the dark glass */
   background:
@@ -935,7 +937,7 @@ h1 .accent {
 .ba-img { transform: translateZ(0); }
 
 .ba-after {
-  background-image: url('After.png');
+  background-image: url('assets/img/after.webp');
   background-size: cover;
   background-position: center 75%;
 }
@@ -944,7 +946,7 @@ h1 .accent {
    .ba-before AND the mirror reflection's .ba-before track the same var,
    so dragging the slider also moves the reflection in lockstep. */
 .ba-before {
-  background-image: url('Before.png');
+  background-image: url('assets/img/before.webp');
   background-size: cover;
   background-position: center 75%;
   clip-path: inset(0 calc(100% - var(--ba-pct, 50) * 1%) 0 0);
@@ -2109,6 +2111,17 @@ h2 em {
   transition: border-color 0.2s, color 0.2s;
 }
 .cal-nav:hover { border-color: var(--accent); color: var(--accent); }
+.cal-nav:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+/* Timezone note under the time-slot column label */
+.booking-tz {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-transform: none;
+  margin-top: 0.3rem;
+}
 
 .cal-weekdays {
   display: grid; grid-template-columns: repeat(7, 1fr);

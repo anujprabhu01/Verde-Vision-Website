@@ -7,11 +7,16 @@
   <meta name="description" content="VerdeVision is a spatial landscape design app for Apple Vision Pro. Drop life-size virtual plants into your real yard, walk around them, and price the design — all before breaking ground." />
   <meta name="theme-color" content="#ebe0cb" />
 
-  <!-- Open Graph -->
+  <link rel="canonical" href="https://useverdevision.com/" />
+
+  <!-- Open Graph — image/url must be absolute or scrapers ignore them -->
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://useverdevision.com/" />
   <meta property="og:title" content="VerdeVision — See the yard before you build it" />
   <meta property="og:description" content="Design, visualize, and price outdoor spaces in real time with AR — all before breaking ground." />
-  <meta property="og:image" content="After.png" />
+  <meta property="og:image" content="https://useverdevision.com/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="A landscape designed in VerdeVision, shown at full scale in a real yard." />
   <meta property="og:site_name" content="VerdeVision" />
 
@@ -19,15 +24,49 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="VerdeVision — See the yard before you build it" />
   <meta name="twitter:description" content="Spatial landscape design for Apple Vision Pro. Design, visualize, and price outdoor spaces in real time — before breaking ground." />
-  <meta name="twitter:image" content="After.png" />
+  <meta name="twitter:image" content="https://useverdevision.com/og-image.jpg" />
 
   <link rel="icon" href="favicon.ico" sizes="48x48" />
-  <link rel="icon" type="image/png" href="verde_vision_logo.png" />
-  <link rel="apple-touch-icon" href="verde_vision_logo.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://useverdevision.com/#org",
+        "name": "VerdeVision",
+        "url": "https://useverdevision.com/",
+        "logo": "https://useverdevision.com/apple-touch-icon.png",
+        "email": "demos@useverdevision.com",
+        "address": { "@type": "PostalAddress", "addressRegion": "AZ", "addressCountry": "US" }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "VerdeVision",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "visionOS",
+        "description": "Spatial landscape design app for Apple Vision Pro. Drop life-size virtual plants into a real yard, walk around them, and price the design before breaking ground.",
+        "url": "https://useverdevision.com/",
+        "image": "https://useverdevision.com/og-image.jpg",
+        "publisher": { "@id": "https://useverdevision.com/#org" }
+      }
+    ]
+  }
+  </script>
+
+  <!-- The four images visible in the opening hero frame — fetch them before
+       the CSS/JS that references them so the loader's asset gate clears fast. -->
+  <link rel="preload" as="image" href="assets/img/logo-512.webp" />
+  <link rel="preload" as="image" href="assets/img/headset.webp" />
+  <link rel="preload" as="image" href="assets/img/before.webp" />
+  <link rel="preload" as="image" href="assets/img/after.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=91" />
+  <link rel="stylesheet" href="styles.css?v=92" />
 
   <!-- Loader is self-contained (inline styles + script) so it paints on first
        byte and still dissolves cleanly even if styles.css or main.js stall. -->
@@ -88,7 +127,7 @@
 
   <!-- LOADER — lens iris that opens onto the hero -->
   <div class="loader" id="loader" role="status" aria-label="Loading VerdeVision">
-    <img class="loader-logo" src="verde_vision_logo.png" alt="" aria-hidden="true" />
+    <img class="loader-logo" src="assets/img/logo-512.webp" alt="" aria-hidden="true" />
     <p class="loader-word" aria-hidden="true">Verde<em>Vision</em></p>
     <p class="loader-pct" id="loader-pct" aria-hidden="true">0%</p>
   </div>
@@ -98,32 +137,51 @@
       const pctEl = document.getElementById('loader-pct');
       const t0 = performance.now();
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      // Long enough to register as a moment, never a bottleneck: the page
-      // usually wins the race with MIN, and MAX caps a stalled network.
+      // MIN keeps the reveal from flashing past; MAX caps a stalled network.
       const MIN = reduce ? 150 : 1150;
-      const MAX = 3500;
+      const MAX = reduce ? 2500 : 6500;
+
+      // The iris may not open until everything visible in the opening hero
+      // frame is actually paintable: webfonts plus these four images. A
+      // failed fetch resolves rather than holding the page hostage.
+      const HERO_IMGS = [
+        'assets/img/logo-512.webp',
+        'assets/img/headset.webp',
+        'assets/img/before.webp',
+        'assets/img/after.webp',
+      ];
+      const decode = (src) => new Promise((res) => {
+        const im = new Image();
+        im.onload = () => (im.decode ? im.decode().then(res, res) : res());
+        im.onerror = res;
+        im.src = src;
+      });
+      const fontsReady = document.fonts?.ready || Promise.resolve();
+      let assetsDone = false;
+      const ready = Promise.all([fontsReady, ...HERO_IMGS.map(decode)])
+        .then(() => { assetsDone = true; });
+
       let fired = false;
-      // Dials 0 -> 100 over MIN regardless of actual load progress — the
-      // page always finishes well inside MIN, so this is a paced reveal.
+      // Dial paces to 90% over MIN, then holds until the hero assets have
+      // decoded — 100% now means "ready", not just "time elapsed".
       const tickPct = () => {
-        const pct = Math.min(100, Math.floor(((performance.now() - t0) / MIN) * 100));
-        pctEl.textContent = pct + '%';
-        if (pct < 100) requestAnimationFrame(tickPct);
+        if (fired) return;
+        const pct = Math.min(90, Math.floor(((performance.now() - t0) / MIN) * 90));
+        pctEl.textContent = (assetsDone ? 90 : pct) + '%';
+        requestAnimationFrame(tickPct);
       };
       requestAnimationFrame(tickPct);
+
       const done = () => {
         if (fired) return;
         fired = true;
-        const wait = Math.max(0, MIN - (performance.now() - t0));
-        setTimeout(() => {
-          pctEl.textContent = '100%';
-          document.documentElement.classList.remove('is-loading');
-          el.classList.add('is-done');
-          setTimeout(() => el.remove(), 1500);
-        }, wait);
+        pctEl.textContent = '100%';
+        document.documentElement.classList.remove('is-loading');
+        el.classList.add('is-done');
+        setTimeout(() => el.remove(), 1500);
       };
-      if (document.readyState === 'complete') done();
-      else window.addEventListener('load', done);
+      const minWait = new Promise((r) => setTimeout(r, MIN));
+      Promise.all([ready, minWait]).then(done);
       setTimeout(done, MAX);
     })();
   </script>
@@ -134,7 +192,7 @@
   <!-- NAV -->
   <nav>
     <a href="#" class="nav-logo">
-      <img src="verde_vision_logo.png" alt="" class="nav-logo-img" />
+      <img src="assets/img/logo-512.webp" alt="" class="nav-logo-img" />
       <span class="nav-logo-text">VERDE VISION</span>
     </a>
     <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
@@ -233,7 +291,7 @@
                 </div>
               </div>
             </div>
-            <img class="headset-img" src="HeadsetTransparent.png" alt="Apple Vision Pro" />
+            <img class="headset-img" src="assets/img/headset.webp" alt="Apple Vision Pro" />
           </div>
 
           <!-- Mirrored reflection: shows the same scene + headset, flipped + blurred -->
@@ -251,7 +309,7 @@
                 </div>
               </div>
             </div>
-            <img class="headset-img" src="HeadsetTransparent.png" alt="" />
+            <img class="headset-img" src="assets/img/headset.webp" alt="" />
           </div>
         </div>
       </div>
@@ -332,11 +390,11 @@
          in once, one by one, as it scrolls into view (main.js toggles .is-in);
          no idle motion. They bleed off the right and reach toward the copy. -->
     <div class="features-foliage" id="features-foliage" aria-hidden="true">
-      <img class="ff-frond ff-1" src="assets/foliage/frond-real.png" alt="" width="820" height="529" decoding="async" />
-      <img class="ff-frond ff-2" src="assets/foliage/frond-real.png" alt="" width="820" height="529" decoding="async" />
-      <img class="ff-frond ff-3" src="assets/foliage/frond-real.png" alt="" width="820" height="529" decoding="async" />
-      <img class="ff-frond ff-4" src="assets/foliage/frond-real.png" alt="" width="820" height="529" decoding="async" />
-      <img class="ff-frond ff-5" src="assets/foliage/frond-real.png" alt="" width="820" height="529" decoding="async" />
+      <img class="ff-frond ff-1" src="assets/foliage/frond-real.png" alt="" width="820" height="529" loading="lazy" decoding="async" />
+      <img class="ff-frond ff-2" src="assets/foliage/frond-real.png" alt="" width="820" height="529" loading="lazy" decoding="async" />
+      <img class="ff-frond ff-3" src="assets/foliage/frond-real.png" alt="" width="820" height="529" loading="lazy" decoding="async" />
+      <img class="ff-frond ff-4" src="assets/foliage/frond-real.png" alt="" width="820" height="529" loading="lazy" decoding="async" />
+      <img class="ff-frond ff-5" src="assets/foliage/frond-real.png" alt="" width="820" height="529" loading="lazy" decoding="async" />
     </div>
     <div class="container">
       <div class="features-header">
@@ -439,7 +497,9 @@
     <div class="ia-stage reveal reveal-4">
       <div class="ia-window">
 <div class="ia-video-frame">
-          <video class="ia-video" id="demo-video" muted autoplay loop playsinline preload="metadata">
+          <!-- No autoplay/preload: the 34MB file starts downloading only when
+               main.js sees the section scroll into view and calls play(). -->
+          <video class="ia-video" id="demo-video" muted loop playsinline preload="none" poster="assets/img/demo-poster.jpg">
             <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_v2.mp4" type="video/mp4" />
             Your browser doesn't support embedded video.
           </video>
@@ -510,7 +570,8 @@
 
         <!-- Time slots -->
         <div class="booking-col" id="times-col">
-          <p class="booking-col-label">Select a time <span id="selected-date-label"></span></p>
+          <p class="booking-col-label">Select a time <span id="selected-date-label"></span>
+            <span class="booking-tz">All times are Arizona time (MST)</span></p>
           <div class="time-slots" id="time-slots">
             <p class="booking-placeholder">Choose a date to see available times.</p>
           </div>
@@ -520,21 +581,21 @@
         <div class="booking-col" id="form-col">
           <p class="booking-col-label">Your details</p>
           <form class="demo-form" id="demo-form">
-            <input type="text" id="form-name" placeholder="Full name" required />
-            <input type="email" id="form-email" placeholder="Email address" required />
-            <textarea id="form-note" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
-            <button type="submit" class="btn-primary" id="confirm-btn" disabled>Confirm Booking</button>
+            <input type="text" id="form-name" name="name" aria-label="Full name" placeholder="Full name" required />
+            <input type="email" id="form-email" name="email" aria-label="Email address" placeholder="Email address" required />
+            <textarea id="form-note" name="note" aria-label="Anything you'd like us to know? (optional)" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
+            <button type="submit" class="btn-primary" id="confirm-btn" disabled>Request This Time</button>
           </form>
         </div>
 
       </div>
 
-      <!-- Confirmation -->
-      <div class="booking-confirmation" id="booking-confirmation">
+      <!-- Confirmation — tabindex so main.js can move focus here after submit -->
+      <div class="booking-confirmation" id="booking-confirmation" tabindex="-1">
         <div class="confirm-icon">&#10003;</div>
-        <h3>You're booked!</h3>
+        <h3>Request received!</h3>
         <p id="confirm-details"></p>
-        <p class="confirm-sub">We'll be in touch shortly with everything you need.</p>
+        <p class="confirm-sub">We'll confirm your time by email shortly.</p>
       </div>
 
     </div>
@@ -549,7 +610,7 @@
         <a href="mailto:demos@useverdevision.com" class="btn-secondary">Contact Us</a>
       </div>
     </div>
-    <img class="cta-landscape" src="assets/arizona-desert.jpg" alt="" aria-hidden="true" decoding="async">
+    <img class="cta-landscape" src="assets/arizona-desert.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
   </section>
 
   <!-- FOOTER -->
@@ -567,7 +628,7 @@
         <ul>
           <li><a href="#features">Features</a></li>
           <li><a href="#in-action">See it in action</a></li>
-          <li><a href="#why">Why Vision Pro</a></li>
+          <li><a href="#why">Why It Wins</a></li>
           <li><a href="#booking">Book a demo</a></li>
         </ul>
       </div>
@@ -585,7 +646,7 @@
     </div>
   </footer>
 
-  <script src="main.js?v=62"></script>
+  <script src="main.js?v=64"></script>
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",

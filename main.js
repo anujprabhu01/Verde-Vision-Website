@@ -1,26 +1,41 @@
-// Always open the landing page at the top — don't let the browser restore a
-// mid-page scroll on reload (it also pre-triggers on-scroll reveals), and
-// don't let a leftover #section hash (from in-page nav) jump us back there.
+// Open the landing page at the top — don't let the browser restore a
+// mid-page scroll on reload (it also pre-triggers on-scroll reveals).
+// EXCEPT when the URL carries a real #section hash: shared links like
+// /#booking must land on that section, not get stripped.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-if (window.location.hash) {
-  history.replaceState(null, '', window.location.pathname + window.location.search);
-}
 {
-  // The browser can (re)apply its remembered/fragment scroll position after
-  // this script runs — once webfonts swap, or once the Plant Library's 3D
-  // models load and settle the layout — so keep pinning to the top for a
-  // few seconds, until the visitor scrolls on their own.
-  let settled = false;
-  const stop = () => { settled = true; };
-  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(type =>
-    window.addEventListener(type, stop, { once: true, passive: true }));
-  const start = performance.now();
-  const poll = () => {
-    if (settled) return;
-    if (window.scrollY > 0) window.scrollTo(0, 0);
-    if (performance.now() - start < 4000) requestAnimationFrame(poll);
-  };
-  poll();
+  const deepLink = window.location.hash && document.getElementById(window.location.hash.slice(1));
+  if (deepLink) {
+    // Snap to the section once the loader's iris has opened (scrolling is
+    // clamped while html.is-loading holds overflow:hidden), and again after
+    // webfonts/3D models settle the layout beneath it.
+    let tries = 0;
+    const jump = () => {
+      if (document.documentElement.classList.contains('is-loading')) {
+        if (++tries < 100) setTimeout(jump, 80);
+        return;
+      }
+      deepLink.scrollIntoView();
+    };
+    jump();
+    window.addEventListener('load', () => setTimeout(() => deepLink.scrollIntoView(), 250), { once: true });
+  } else {
+    // The browser can (re)apply its remembered scroll position after this
+    // script runs — once webfonts swap, or once the Plant Library's 3D
+    // models load and settle the layout — so keep pinning to the top for a
+    // few seconds, until the visitor scrolls on their own.
+    let settled = false;
+    const stop = () => { settled = true; };
+    ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(type =>
+      window.addEventListener(type, stop, { once: true, passive: true }));
+    const start = performance.now();
+    const poll = () => {
+      if (settled) return;
+      if (window.scrollY > 0) window.scrollTo(0, 0);
+      if (performance.now() - start < 4000) requestAnimationFrame(poll);
+    };
+    poll();
+  }
 }
 
 // ── Mobile nav toggle ──
@@ -75,34 +90,34 @@ if (baSlider) {
   // Initial state: full BEFORE visible, handle on the right — animation starts here.
   setPct(100);
 
+  // Pointer events + CSS touch-action:pan-y (styles.css) let vertical swipes
+  // that start on the visor keep scrolling the page — the browser cancels
+  // the pointer stream (pointercancel) when it claims the gesture, and only
+  // horizontal drags reach onMove. No preventDefault needed.
   const onDown = (e) => {
     dragging = true;
     baSlider.classList.add('is-grabbing');
     cancelAutoplay();
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    baSlider.setPointerCapture?.(e.pointerId);
     const rect = baSlider.getBoundingClientRect();
-    const targetPct = ((x - rect.left) / rect.width) * 100;
+    const targetPct = ((e.clientX - rect.left) / rect.width) * 100;
     // Smoothly glide to where they pressed; if they actually drag, onMove cancels this.
     snapTo(targetPct);
-    e.preventDefault();
   };
   const onMove = (e) => {
     if (!dragging) return;
     cancelSnap();
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    setPosition(x);
+    setPosition(e.clientX);
   };
   const onUp = () => {
     dragging = false;
     baSlider.classList.remove('is-grabbing');
   };
 
-  baSlider.addEventListener('mousedown', onDown);
-  baSlider.addEventListener('touchstart', onDown, { passive: false });
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, { passive: false });
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
+  baSlider.addEventListener('pointerdown', onDown);
+  baSlider.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  baSlider.addEventListener('pointercancel', onUp);
 
   // Smooth animated transition to a target percentage. Duration scales with distance
   // so short hops feel snappy and long sweeps feel deliberate.
@@ -129,8 +144,7 @@ if (baSlider) {
   const stop = (e) => e.stopPropagation();
   [baBtnBefore, baBtnAfter].forEach((btn) => {
     if (!btn) return;
-    btn.addEventListener('mousedown', stop);
-    btn.addEventListener('touchstart', stop);
+    btn.addEventListener('pointerdown', stop);
   });
   baBtnBefore?.addEventListener('click', (e) => { stop(e); snapTo(100); });
   baBtnAfter?.addEventListener('click', (e) => { stop(e); snapTo(0); });
@@ -290,6 +304,29 @@ if (restartBtn && demoVideo) {
 }
 
 if (demoVideo) {
+  // The video has no autoplay and preload="none" — nothing downloads until
+  // the section scrolls into view. Play while visible, pause when it leaves
+  // so it isn't looping (and decoding) off-screen for the whole session.
+  // Entries can arrive batched (oldest first) — only the newest one is the
+  // current state.
+  let videoInView = false;
+  const videoObserver = new IntersectionObserver((entries) => {
+    videoInView = entries[entries.length - 1].isIntersecting;
+    if (videoInView) {
+      const p = demoVideo.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } else {
+      demoVideo.pause();
+    }
+  }, { threshold: 0.25 });
+  videoObserver.observe(demoVideo);
+  // A play() issued while the file is still fetching can start playback
+  // after a later pause() (queued-play race) — re-pause if that happens
+  // while the section is off-screen.
+  demoVideo.addEventListener('playing', () => {
+    if (!videoInView) demoVideo.pause();
+  });
+
   const updateDuration = () => {
     if (actionDuration && isFinite(demoVideo.duration)) {
       actionDuration.textContent = fmtMMSS(demoVideo.duration);
@@ -370,6 +407,28 @@ const TIMES = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
+// "1:30 PM" → minutes since midnight, for filtering slots that already passed.
+const slotMinutes = (t) => {
+  const [time, ap] = t.split(' ');
+  let [h, m] = time.split(':').map(Number);
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h * 60 + m;
+};
+// Same-day requests need at least an hour's notice.
+const LEAD_MINUTES = 60;
+const isToday = (date) => {
+  const now = new Date();
+  return date.getFullYear() === now.getFullYear() &&
+         date.getMonth() === now.getMonth() &&
+         date.getDate() === now.getDate();
+};
+const slotsLeftToday = () => {
+  const now = new Date();
+  const cutoff = now.getHours() * 60 + now.getMinutes() + LEAD_MINUTES;
+  return TIMES.some((t) => slotMinutes(t) >= cutoff);
+};
+
 let currentYear, currentMonth, selectedDate = null, selectedTime = null;
 
 const calDays     = document.getElementById('cal-days');
@@ -414,11 +473,13 @@ function renderCalendar() {
     const date = new Date(currentYear, currentMonth, d);
     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
     const isPast    = date < today;
+    const soldOut   = isToday(date) && !slotsLeftToday();
 
     const btn = document.createElement('button');
     btn.className = 'cal-day';
     btn.textContent = d;
-    btn.disabled = isWeekend || isPast;
+    btn.disabled = isWeekend || isPast || soldOut;
+    btn.setAttribute('aria-label', date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }));
 
     const isSelected = selectedDate &&
       selectedDate.getFullYear() === currentYear &&
@@ -429,6 +490,12 @@ function renderCalendar() {
 
     btn.addEventListener('click', () => selectDate(new Date(currentYear, currentMonth, d)));
     calDays.appendChild(btn);
+  }
+
+  // No navigating back past the current month.
+  if (calPrev) {
+    const now = new Date();
+    calPrev.disabled = currentYear === now.getFullYear() && currentMonth === now.getMonth();
   }
 }
 
@@ -444,8 +511,23 @@ function renderTimeSlots() {
   const label = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   selectedDateLabel.textContent = `— ${label}`;
 
+  // For same-day requests, only offer slots at least LEAD_MINUTES out.
+  let times = TIMES;
+  if (isToday(selectedDate)) {
+    const now = new Date();
+    const cutoff = now.getHours() * 60 + now.getMinutes() + LEAD_MINUTES;
+    times = TIMES.filter((t) => slotMinutes(t) >= cutoff);
+  }
+
   timeSlotsEl.innerHTML = '';
-  TIMES.forEach((t) => {
+  if (!times.length) {
+    const p = document.createElement('p');
+    p.className = 'booking-placeholder';
+    p.textContent = 'No more times today — pick another day.';
+    timeSlotsEl.appendChild(p);
+    return;
+  }
+  times.forEach((t) => {
     const btn = document.createElement('button');
     btn.className = 'time-slot';
     btn.textContent = t;
@@ -491,7 +573,7 @@ demoForm?.addEventListener('submit', async (e) => {
         name,
         email,
         requested_date: label,
-        requested_time: selectedTime,
+        requested_time: `${selectedTime} (Arizona time)`,
         note: note || '—',
         _subject: `Demo request from ${name} — ${label} at ${selectedTime}`,
       }),
@@ -499,12 +581,13 @@ demoForm?.addEventListener('submit', async (e) => {
 
     if (!res.ok) throw new Error('submission failed');
 
-    confirmDetails.textContent = `${name}, we've got you down for ${label} at ${selectedTime}.`;
+    confirmDetails.textContent = `${name}, we've got your request for ${label} at ${selectedTime} (Arizona time).`;
     bookingCard.style.display = 'none';
     bookingConf.classList.add('visible');
+    bookingConf.focus();
   } catch {
     confirmBtn.disabled = false;
-    confirmBtn.textContent = 'Confirm Booking';
+    confirmBtn.textContent = 'Request This Time';
     alert('Something went wrong — please try again or email us at demos@useverdevision.com');
   }
 });
