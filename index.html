@@ -69,7 +69,13 @@
   <!-- Loader gate + styles live BEFORE the render-blocking stylesheets so
        the cover is styled at the earliest frame the browser can paint —
        nothing underneath can ever show first. -->
-  <script>document.documentElement.classList.add('is-loading');</script>
+  <script>
+    document.documentElement.classList.add('is-loading');
+    // Opt out of scroll restoration HERE, not in main.js — on slow mobile
+    // loads the browser restores a mid-page position before main.js runs,
+    // and the later pin-to-top correction shows as a visible jump.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  </script>
   <style>
     @property --iris { syntax: '<length-percentage>'; initial-value: 0%; inherits: false; }
     html.is-loading { overflow: hidden; background: #ebe0cb; }
@@ -143,7 +149,6 @@
     (() => {
       const el = document.getElementById('loader');
       const pctEl = document.getElementById('loader-pct');
-      const t0 = performance.now();
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       // SWEEP is the guaranteed 0→99 performance every visit, cache or not;
       // MAX caps a stalled network so nobody stares at 99% forever.
@@ -169,16 +174,23 @@
       const ready = Promise.all([fontsReady, ...HERO_IMGS.map(decode)]);
 
       let fired = false;
-      // One deliberate 0→99 sweep every visit — eased so it departs gently,
-      // gathers speed through the middle, and lands softly. If the page
-      // needs longer than the sweep, the dial holds at 99; 100 is reserved
-      // for "actually ready".
+      // One deliberate 0→99 sweep, clocked from the FIRST rendered frame —
+      // not from script start. On slow mobile loads the main thread runs
+      // seconds ahead of first paint, and a wall-clock sweep can "finish"
+      // before it was ever visible, flashing 100%. Anchoring to the first
+      // rAF frame and gating the reveal on the sweep itself guarantees the
+      // full 2s performance plays on screen, every device, every time.
       const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      let sweepPlayed;
+      const swept = new Promise((r) => { sweepPlayed = r; });
+      let start = 0;
       const tickPct = (now) => {
         if (fired) return;
-        const t = Math.min(1, (now - t0) / SWEEP);
+        if (!start) start = now;
+        const t = Math.min(1, (now - start) / SWEEP);
         pctEl.textContent = Math.round(ease(t) * 99) + '%';
         if (t < 1) requestAnimationFrame(tickPct);
+        else sweepPlayed();
       };
       requestAnimationFrame(tickPct);
 
@@ -190,8 +202,9 @@
         el.classList.add('is-done');
         setTimeout(() => el.remove(), 1500);
       };
-      const minWait = new Promise((r) => setTimeout(r, SWEEP));
-      Promise.all([ready, minWait]).then(done);
+      Promise.all([ready, swept]).then(done);
+      // Wall-clock failsafe: a stalled network — or a background tab where
+      // rAF never fires — can't hold the page hostage.
       setTimeout(done, MAX);
     })();
   </script>
