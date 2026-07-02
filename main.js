@@ -779,6 +779,23 @@ init();
   function wake() { if (!raf) raf = requestAnimationFrame(loop); }
 
   resize();
+
+  // styles.css loads non-render-blocking (media=print → all onload), so the
+  // first resize() above can run before .why receives its full height — the
+  // section is still collapsed and the canvas gets sized to a thin top band
+  // that then never fills. Re-measure whenever the section's box actually
+  // changes (CSS applying late, web-font swap, any reflow) and once fonts
+  // settle, so the contour field always covers the whole section. (footerTopo
+  // already re-measures on fonts.ready; whyTopo was the one missing it.)
+  let resizeRaf = null;
+  const scheduleResize = () => {
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resize(); });
+  };
+  addEventListener('resize', scheduleResize);
+  if (window.ResizeObserver) new ResizeObserver(scheduleResize).observe(why);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
+
   if (reduce) return;
 
   why.addEventListener('pointermove', (e) => {
@@ -807,11 +824,6 @@ init();
     }
   });
 
-  let resizeRaf = null;
-  addEventListener('resize', () => {
-    if (resizeRaf) return;
-    resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resize(); });
-  });
 })();
 
 // ── FOOTER — the same topographic contour field as "why it wins", but static
