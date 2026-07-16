@@ -51,7 +51,11 @@
         "description": "Spatial landscape design app for Apple Vision Pro. Drop life-size virtual plants into a real yard, walk around them, and price the design before breaking ground.",
         "url": "https://useverdevision.com/",
         "image": "https://useverdevision.com/og-image.jpg",
-        "publisher": { "@id": "https://useverdevision.com/#org" }
+        "publisher": { "@id": "https://useverdevision.com/#org" },
+        "offers": [
+          { "@type": "Offer", "name": "Standard — Monthly", "price": "200", "priceCurrency": "USD", "description": "Up to 3 designer seats. Additional seats $40/mo." },
+          { "@type": "Offer", "name": "Standard — Annual", "price": "2000", "priceCurrency": "USD", "description": "Up to 3 designer seats. Additional seats $40/mo, billed annually." }
+        ]
       }
     ]
   }
@@ -137,10 +141,10 @@
        underneath is ever shown unstyled. -->
   <link id="app-fonts" rel="stylesheet" media="print" onload="this.media='all'"
         href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
-  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=92" />
+  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=93" />
   <noscript>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
-    <link rel="stylesheet" href="styles.css?v=92" />
+    <link rel="stylesheet" href="styles.css?v=93" />
   </noscript>
 </head>
 <body>
@@ -247,7 +251,7 @@
       <a href="#features" class="nav-link">Features</a>
       <a href="#plant-library" class="nav-link">Plant Library</a>
       <a href="https://dashboard.useverdevision.com" class="nav-link">Log In</a>
-      <a href="#booking" class="nav-cta">Book a Demo</a>
+      <a href="#pricing" class="nav-cta">Apply</a>
     </div>
   </nav>
 
@@ -268,7 +272,7 @@
         </p>
 
         <div class="hero-actions hero-anim hero-anim-5">
-          <a href="#booking" class="btn-primary">Book a Demo &rarr;</a>
+          <a href="#pricing" class="btn-primary">See Pricing &rarr;</a>
           <a href="#in-action" class="btn-secondary">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
             Watch It in Action
@@ -585,59 +589,95 @@
     </div>
   </section>
 
-  <!-- BOOK A DEMO -->
-  <section class="booking" id="booking" data-reveal-section>
+  <!-- PRICING + APPLY -->
+  <!-- #booking kept as an alias so old shared links still land here -->
+  <section class="pricing" id="pricing" data-reveal-section>
+    <span id="booking" aria-hidden="true"></span>
     <div class="container">
-      <div class="section-label reveal">book a demo</div>
-      <h2 class="reveal reveal-2">See VerdeVision in <em>action</em></h2>
-      <p class="section-intro reveal reveal-3">Pick a time and we'll walk you through the full spatial experience — live on Apple Vision Pro.</p>
+      <div class="section-label reveal">pricing</div>
+      <h2 class="reveal reveal-2">Pricing that <em>grows</em> with your studio.</h2>
+      <p class="section-intro reveal reveal-3">Every plan includes up to 3 designer seats — the owner's account is one of them — and starts with a free 30-day trial. Cancel anytime.</p>
 
-      <div class="booking-card reveal reveal-4" id="booking-card">
+      <div class="billing-toggle reveal reveal-3" role="group" aria-label="Billing period">
+        <button type="button" class="bt-opt selected" id="bt-monthly" aria-pressed="true">Monthly</button>
+        <button type="button" class="bt-opt" id="bt-annual" aria-pressed="false">Annual <span class="bt-save">2 months free</span></button>
+      </div>
 
-        <!-- Calendar -->
-        <div class="booking-col">
-          <p class="booking-col-label">Select a date</p>
-          <div class="calendar">
-            <div class="cal-header">
-              <button class="cal-nav" id="cal-prev">&#8592;</button>
-              <span class="cal-month-label" id="cal-month-label"></span>
-              <button class="cal-nav" id="cal-next">&#8594;</button>
-            </div>
-            <div class="cal-weekdays">
-              <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-            </div>
-            <div class="cal-days" id="cal-days"></div>
+      <div class="pricing-cards reveal reveal-4">
+
+        <!-- Founding Partner -->
+        <article class="price-card featured">
+          <div class="price-badge">Anaheim 2026 &middot; 40% off</div>
+          <h3 class="price-name">Founding Partner</h3>
+          <p class="price-desc">A limited first cohort of studios, working directly with us through year one.</p>
+          <div class="price-amount">
+            <span class="price-currency">$</span><span class="price-num" data-monthly="120" data-annual="1,200">120</span>
+            <span class="price-period" data-monthly="/month" data-annual="/year">/month</span>
           </div>
-        </div>
+          <p class="price-seat" data-monthly="+ $24/mo per additional seat" data-annual="+ $24/mo per additional seat, billed annually">+ $24/mo per additional seat</p>
+          <ul class="price-features">
+            <li>Everything in Standard</li>
+            <li>40% off locked in for your first year</li>
+            <li>Direct line to the founders — your feedback shapes the app</li>
+            <li>Priority onboarding &amp; support</li>
+          </ul>
+          <button type="button" class="btn-primary price-cta" data-plan="Founding Partner">Apply</button>
+          <p class="price-fine">Applications close 2 weeks after the expo.</p>
+        </article>
 
-        <!-- Time slots -->
-        <div class="booking-col" id="times-col">
-          <p class="booking-col-label">Select a time <span id="selected-date-label"></span>
-            <span class="booking-tz">All times are Arizona time (MST)</span></p>
-          <div class="time-slots" id="time-slots">
-            <p class="booking-placeholder">Choose a date to see available times.</p>
+        <!-- Standard -->
+        <article class="price-card">
+          <h3 class="price-name">Standard</h3>
+          <p class="price-desc">The full spatial design studio, for teams of any size.</p>
+          <div class="price-amount">
+            <span class="price-currency">$</span><span class="price-num" data-monthly="200" data-annual="2,000">200</span>
+            <span class="price-period" data-monthly="/month" data-annual="/year">/month</span>
           </div>
-        </div>
-
-        <!-- Contact form -->
-        <div class="booking-col" id="form-col">
-          <p class="booking-col-label">Your details</p>
-          <form class="demo-form" id="demo-form">
-            <input type="text" id="form-name" name="name" aria-label="Full name" placeholder="Full name" required />
-            <input type="email" id="form-email" name="email" aria-label="Email address" placeholder="Email address" required />
-            <textarea id="form-note" name="note" aria-label="Anything you'd like us to know? (optional)" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
-            <button type="submit" class="btn-primary" id="confirm-btn" disabled>Request This Time</button>
-          </form>
-        </div>
+          <p class="price-seat" data-monthly="+ $40/mo per additional seat" data-annual="+ $40/mo per additional seat, billed annually">+ $40/mo per additional seat</p>
+          <ul class="price-features">
+            <li>Up to 3 designer seats — owner's seat included</li>
+            <li>Unlimited projects &amp; client presentations</li>
+            <li>Life-size, photoreal plant library</li>
+            <li>PDF blueprints &amp; instant estimates</li>
+            <li>Client dashboard with shareable 3D blueprints</li>
+          </ul>
+          <button type="button" class="btn-secondary price-cta" data-plan="Standard">Start Free Trial</button>
+          <p class="price-fine">Free for 30 days. Cancel anytime.</p>
+        </article>
 
       </div>
 
+      <!-- Application form -->
+      <div class="apply-wrap reveal reveal-5" id="apply">
+        <p class="booking-col-label">Apply <span id="apply-plan-label">— Founding Partner</span></p>
+        <form class="apply-form" id="apply-form">
+          <input type="text" id="form-name" name="name" aria-label="Full name" placeholder="Full name" required />
+          <input type="text" id="form-company" name="company" aria-label="Company" placeholder="Company" required />
+          <input type="email" id="form-email" name="email" aria-label="Email address" placeholder="Email address" required />
+          <select id="form-designers" name="designers" aria-label="How many designers?" required>
+            <option value="" disabled selected>How many designers?</option>
+            <option>Just me</option>
+            <option>2&ndash;3</option>
+            <option>4&ndash;6</option>
+            <option>7+</option>
+          </select>
+          <select id="form-headset" name="headset" aria-label="Do you have an Apple Vision Pro?" required>
+            <option value="" disabled selected>Do you have an Apple Vision Pro?</option>
+            <option>Yes</option>
+            <option>Not yet</option>
+          </select>
+          <textarea id="form-note" name="note" aria-label="Anything you'd like us to know? (optional)" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
+          <button type="submit" class="btn-primary" id="confirm-btn">Submit Application</button>
+        </form>
+        <p class="apply-demo-note">Rather see it running first? <a href="mailto:demos@useverdevision.com">Book a live demo</a> — we'll bring the headset.</p>
+      </div>
+
       <!-- Confirmation — tabindex so main.js can move focus here after submit -->
-      <div class="booking-confirmation" id="booking-confirmation" tabindex="-1">
+      <div class="booking-confirmation" id="apply-confirmation" tabindex="-1">
         <div class="confirm-icon">&#10003;</div>
-        <h3>Request received!</h3>
+        <h3>Application received!</h3>
         <p id="confirm-details"></p>
-        <p class="confirm-sub">We'll confirm your time by email shortly.</p>
+        <p class="confirm-sub">We'll be in touch by email shortly.</p>
       </div>
 
     </div>
@@ -648,7 +688,7 @@
     <div class="container">
       <h2 class="reveal">Your yard won't <em>design</em> itself.</h2>
       <div class="cta-actions reveal reveal-3">
-        <a href="#booking" class="btn-primary">Book a Demo</a>
+        <a href="#pricing" class="btn-primary">Apply Now</a>
         <a href="mailto:demos@useverdevision.com" class="btn-secondary">Contact Us</a>
       </div>
     </div>
@@ -671,14 +711,14 @@
           <li><a href="#features">Features</a></li>
           <li><a href="#in-action">See it in action</a></li>
           <li><a href="#why">Why It Wins</a></li>
-          <li><a href="#booking">Book a demo</a></li>
+          <li><a href="#pricing">Pricing &amp; apply</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <p class="footer-col-title">Contact</p>
         <ul>
           <li><a href="mailto:demos@useverdevision.com">Email us</a></li>
-          <li><a href="#booking">Schedule a call</a></li>
+          <li><a href="mailto:demos@useverdevision.com?subject=Live%20demo%20request">Book a live demo</a></li>
         </ul>
       </div>
     </div>
@@ -688,7 +728,7 @@
     </div>
   </footer>
 
-  <script src="main.js?v=64"></script>
+  <script src="main.js?v=65"></script>
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",

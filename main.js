@@ -402,151 +402,46 @@ const navObserver = new IntersectionObserver(
 sections.forEach((s) => navObserver.observe(s));
 
 
-// ── Demo booking calendar ──
-const TIMES = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-
-// "1:30 PM" → minutes since midnight, for filtering slots that already passed.
-const slotMinutes = (t) => {
-  const [time, ap] = t.split(' ');
-  let [h, m] = time.split(':').map(Number);
-  if (ap === 'PM' && h !== 12) h += 12;
-  if (ap === 'AM' && h === 12) h = 0;
-  return h * 60 + m;
-};
-// Same-day requests need at least an hour's notice.
-const LEAD_MINUTES = 60;
-const isToday = (date) => {
-  const now = new Date();
-  return date.getFullYear() === now.getFullYear() &&
-         date.getMonth() === now.getMonth() &&
-         date.getDate() === now.getDate();
-};
-const slotsLeftToday = () => {
-  const now = new Date();
-  const cutoff = now.getHours() * 60 + now.getMinutes() + LEAD_MINUTES;
-  return TIMES.some((t) => slotMinutes(t) >= cutoff);
-};
-
-let currentYear, currentMonth, selectedDate = null, selectedTime = null;
-
-const calDays     = document.getElementById('cal-days');
-const calLabel    = document.getElementById('cal-month-label');
-const calPrev     = document.getElementById('cal-prev');
-const calNext     = document.getElementById('cal-next');
-const timeSlotsEl = document.getElementById('time-slots');
-const selectedDateLabel = document.getElementById('selected-date-label');
-const confirmBtn  = document.getElementById('confirm-btn');
-const demoForm    = document.getElementById('demo-form');
-const bookingCard = document.getElementById('booking-card');
-const bookingConf = document.getElementById('booking-confirmation');
+// ── Pricing — billing toggle + application form ──
+const btMonthly      = document.getElementById('bt-monthly');
+const btAnnual       = document.getElementById('bt-annual');
+const applyForm      = document.getElementById('apply-form');
+const applyWrap      = document.getElementById('apply');
+const applyPlanLabel = document.getElementById('apply-plan-label');
+const confirmBtn     = document.getElementById('confirm-btn');
+const applyConf      = document.getElementById('apply-confirmation');
 const confirmDetails = document.getElementById('confirm-details');
 
-function init() {
-  if (!calDays || !calLabel) return; // page without the booking widget
-  const now = new Date();
-  currentYear  = now.getFullYear();
-  currentMonth = now.getMonth();
-  renderCalendar();
-}
+let billing = 'monthly';
+let selectedPlan = 'Founding Partner';
 
-function renderCalendar() {
-  calLabel.textContent = `${MONTHS[currentMonth]} ${currentYear}`;
-
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  calDays.innerHTML = '';
-
-  // Empty cells before the 1st
-  for (let i = 0; i < firstDay; i++) {
-    const empty = document.createElement('button');
-    empty.className = 'cal-day empty';
-    empty.disabled = true;
-    calDays.appendChild(empty);
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(currentYear, currentMonth, d);
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    const isPast    = date < today;
-    const soldOut   = isToday(date) && !slotsLeftToday();
-
-    const btn = document.createElement('button');
-    btn.className = 'cal-day';
-    btn.textContent = d;
-    btn.disabled = isWeekend || isPast || soldOut;
-    btn.setAttribute('aria-label', date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }));
-
-    const isSelected = selectedDate &&
-      selectedDate.getFullYear() === currentYear &&
-      selectedDate.getMonth()    === currentMonth &&
-      selectedDate.getDate()     === d;
-
-    if (isSelected) btn.classList.add('selected');
-
-    btn.addEventListener('click', () => selectDate(new Date(currentYear, currentMonth, d)));
-    calDays.appendChild(btn);
-  }
-
-  // No navigating back past the current month.
-  if (calPrev) {
-    const now = new Date();
-    calPrev.disabled = currentYear === now.getFullYear() && currentMonth === now.getMonth();
-  }
-}
-
-function selectDate(date) {
-  selectedDate = date;
-  selectedTime = null;
-  renderCalendar();
-  renderTimeSlots();
-  updateConfirmButton();
-}
-
-function renderTimeSlots() {
-  const label = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  selectedDateLabel.textContent = `— ${label}`;
-
-  // For same-day requests, only offer slots at least LEAD_MINUTES out.
-  let times = TIMES;
-  if (isToday(selectedDate)) {
-    const now = new Date();
-    const cutoff = now.getHours() * 60 + now.getMinutes() + LEAD_MINUTES;
-    times = TIMES.filter((t) => slotMinutes(t) >= cutoff);
-  }
-
-  timeSlotsEl.innerHTML = '';
-  if (!times.length) {
-    const p = document.createElement('p');
-    p.className = 'booking-placeholder';
-    p.textContent = 'No more times today — pick another day.';
-    timeSlotsEl.appendChild(p);
-    return;
-  }
-  times.forEach((t) => {
-    const btn = document.createElement('button');
-    btn.className = 'time-slot';
-    btn.textContent = t;
-    btn.addEventListener('click', () => selectTime(t));
-    timeSlotsEl.appendChild(btn);
+function setBilling(period) {
+  billing = period;
+  document.querySelectorAll('[data-monthly]').forEach((el) => {
+    el.textContent = el.dataset[period];
   });
+  btMonthly?.classList.toggle('selected', period === 'monthly');
+  btAnnual?.classList.toggle('selected', period === 'annual');
+  btMonthly?.setAttribute('aria-pressed', String(period === 'monthly'));
+  btAnnual?.setAttribute('aria-pressed', String(period === 'annual'));
 }
 
-function selectTime(time) {
-  selectedTime = time;
-  document.querySelectorAll('.time-slot').forEach((btn) => {
-    btn.classList.toggle('selected', btn.textContent === time);
+btMonthly?.addEventListener('click', () => setBilling('monthly'));
+btAnnual?.addEventListener('click', () => setBilling('annual'));
+
+// Card CTAs pick the plan, then hand off to the form below.
+document.querySelectorAll('.price-cta').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    selectedPlan = btn.dataset.plan;
+    if (applyPlanLabel) applyPlanLabel.textContent = `— ${selectedPlan}`;
+    if (confirmBtn) {
+      confirmBtn.textContent = selectedPlan === 'Standard' ? 'Request Free Trial' : 'Submit Application';
+    }
+    applyWrap?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Focus after the smooth scroll settles; preventScroll so focus doesn't yank the page.
+    setTimeout(() => document.getElementById('form-name')?.focus({ preventScroll: true }), 500);
   });
-  updateConfirmButton();
-}
-
-function updateConfirmButton() {
-  confirmBtn.disabled = !(selectedDate && selectedTime);
-}
+});
 
 // ── Replace this URL with your Formspree endpoint ──
 // 1. Sign up free at formspree.io
@@ -554,14 +449,17 @@ function updateConfirmButton() {
 // 3. Paste your endpoint here (e.g. https://formspree.io/f/xxxxxxxx)
 const FORMSPREE_URL = 'https://formspree.io/f/xnjlkzde';
 
-demoForm?.addEventListener('submit', async (e) => {
+applyForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const name  = document.getElementById('form-name').value.trim();
-  const email = document.getElementById('form-email').value.trim();
-  const note  = document.getElementById('form-note').value.trim();
-  const label = selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const name      = document.getElementById('form-name').value.trim();
+  const company   = document.getElementById('form-company').value.trim();
+  const email     = document.getElementById('form-email').value.trim();
+  const designers = document.getElementById('form-designers').value;
+  const headset   = document.getElementById('form-headset').value;
+  const note      = document.getElementById('form-note').value.trim();
 
+  const submitLabel = confirmBtn.textContent;
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Sending…';
 
@@ -570,41 +468,30 @@ demoForm?.addEventListener('submit', async (e) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
+        plan: selectedPlan,
+        billing,
         name,
+        company,
         email,
-        requested_date: label,
-        requested_time: `${selectedTime} (Arizona time)`,
+        designers,
+        vision_pro: headset,
         note: note || '—',
-        _subject: `Demo request from ${name} — ${label} at ${selectedTime}`,
+        _subject: `${selectedPlan} application from ${name} — ${company}`,
       }),
     });
 
     if (!res.ok) throw new Error('submission failed');
 
-    confirmDetails.textContent = `${name}, we've got your request for ${label} at ${selectedTime} (Arizona time).`;
-    bookingCard.style.display = 'none';
-    bookingConf.classList.add('visible');
-    bookingConf.focus();
+    confirmDetails.textContent = `${name}, your ${selectedPlan} application for ${company} is in.`;
+    applyWrap.style.display = 'none';
+    applyConf.classList.add('visible');
+    applyConf.focus();
   } catch {
     confirmBtn.disabled = false;
-    confirmBtn.textContent = 'Request This Time';
+    confirmBtn.textContent = submitLabel;
     alert('Something went wrong — please try again or email us at demos@useverdevision.com');
   }
 });
-
-calPrev?.addEventListener('click', () => {
-  currentMonth--;
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  renderCalendar();
-});
-
-calNext?.addEventListener('click', () => {
-  currentMonth++;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderCalendar();
-});
-
-init();
 
 // ── WHY IT WINS — an interactive topographic field ──
 // A dense contour map (value-noise + marching squares) fills the section.
