@@ -141,10 +141,10 @@
        underneath is ever shown unstyled. -->
   <link id="app-fonts" rel="stylesheet" media="print" onload="this.media='all'"
         href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
-  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=94" />
+  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=95" />
   <noscript>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
-    <link rel="stylesheet" href="styles.css?v=94" />
+    <link rel="stylesheet" href="styles.css?v=95" />
   </noscript>
 </head>
 <body>
@@ -235,7 +235,10 @@
   <!-- ANNOUNCEMENT BANNER — dismissal lasts for the current page view only;
        every fresh load shows the banner again. -->
   <div class="site-banner" id="site-banner">
-    <p class="site-banner-text"><strong>We're launching at Anaheim 2026</strong> — November 4.<span class="banner-more"> Come see VerdeVision live.</span></p>
+    <p class="site-banner-text">
+      <span class="banner-full"><strong>We're launching at The Landscape Expo</strong> — Anaheim, November 4.<span class="banner-more"> Come see VerdeVision live.</span></span>
+      <span class="banner-short"><strong>The Landscape Expo</strong> — Anaheim, Nov 4</span>
+    </p>
     <button class="banner-close" id="banner-close" aria-label="Dismiss announcement" type="button">&times;</button>
   </div>
 
@@ -614,7 +617,7 @@
 
         <!-- Founding Partner -->
         <article class="price-card featured">
-          <div class="price-badge">Launching at Anaheim 2026 &middot; Nov 4</div>
+          <div class="price-badge">The Landscape Expo &middot; Nov 4</div>
           <h3 class="price-name">Founding Partner</h3>
           <p class="price-desc">A limited first cohort of studios, working directly with us through year one.</p>
           <div class="price-amount">
