@@ -402,10 +402,8 @@ const navObserver = new IntersectionObserver(
 sections.forEach((s) => navObserver.observe(s));
 
 
-// ── Announcement banner — dismissal persists via localStorage; the inline
-// <head>-side check hides it pre-paint on return visits.
+// ── Announcement banner — dismissal is per page view; a refresh brings it back.
 document.getElementById('banner-close')?.addEventListener('click', () => {
-  localStorage.setItem('vvBannerDismissed', '1');
   document.documentElement.classList.add('banner-dismissed');
 });
 

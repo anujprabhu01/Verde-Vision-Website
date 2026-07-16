@@ -232,14 +232,8 @@
     })();
   </script>
 
-  <!-- ANNOUNCEMENT BANNER — dismissal is remembered in localStorage; the
-       inline check runs before first paint so returning visitors never see
-       a flash of the dismissed banner. -->
-  <script>
-    if (localStorage.getItem('vvBannerDismissed') === '1') {
-      document.documentElement.classList.add('banner-dismissed');
-    }
-  </script>
+  <!-- ANNOUNCEMENT BANNER — dismissal lasts for the current page view only;
+       every fresh load shows the banner again. -->
   <div class="site-banner" id="site-banner">
     <p class="site-banner-text"><strong>We're launching at Anaheim 2026</strong> — November 4.<span class="banner-more"> Come see VerdeVision live.</span></p>
     <button class="banner-close" id="banner-close" aria-label="Dismiss announcement" type="button">&times;</button>
@@ -767,7 +761,7 @@
     </div>
   </footer>
 
-  <script src="main.js?v=66"></script>
+  <script src="main.js?v=67"></script>
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
