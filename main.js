@@ -220,6 +220,29 @@ if (baSlider) {
     }, { threshold: 0.4 });
     autoplayObserver.observe(baSlider);
   }
+
+  // ── iOS layer-eviction guard ──
+  // Scrolling the hero far off-screen lets iOS evict the visor's composited,
+  // SVG-masked image layers; on return it sometimes fails to re-rasterize
+  // them and paints the black lens backdrop instead. When the hero re-enters
+  // the viewport, hold a nudged transform on the image layers for a couple of
+  // painted frames, then release — forcing a fresh rasterization pass.
+  const visorLayers = document.querySelectorAll('.ba-stage, .ba-img');
+  const heroVisual = document.querySelector('.hero-visual');
+  if (heroVisual && visorLayers.length) {
+    let wasOffscreen = false;
+    const repaintObserver = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      if (!entry.isIntersecting) { wasOffscreen = true; return; }
+      if (!wasOffscreen) return; // initial load — nothing evicted yet
+      wasOffscreen = false;
+      visorLayers.forEach((el) => { el.style.transform = 'translateZ(0) scale(1.002)'; });
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        visorLayers.forEach((el) => { el.style.transform = ''; });
+      }));
+    });
+    repaintObserver.observe(heroVisual);
+  }
 }
 
 

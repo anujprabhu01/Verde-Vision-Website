@@ -979,12 +979,18 @@ h1 .accent {
   padding: 1.5rem;
 }
 
-/* Promote the slider image layers to their own composited layers so the
-   browser doesn't re-rasterize them through .headset's scale transform plus
-   the SVG clip/mask on every sweep/drag frame — smooths the animation and
-   avoids intermittent black flashes on weaker GPUs (was mobile-only). */
-.ba-stage,
-.ba-img { transform: translateZ(0); }
+/* Promote the LIVE slider's image layers to their own composited layers so
+   the browser doesn't re-rasterize them through .headset's scale transform
+   plus the SVG clip/mask on every sweep/drag frame — smooths the animation
+   and avoids intermittent black flashes on weaker GPUs (was mobile-only).
+   Deliberately NOT applied to the mirror reflection: pinning a second full
+   copy of both photos doubles GPU texture memory, and on iOS that pressure
+   is what got the visor's layers evicted (black lens) after scrolling away
+   and back. The mirror is 80% masked away at 0.2 opacity — cheap to
+   re-rasterize on demand. main.js adds a repaint nudge when the hero
+   re-enters the viewport as the second half of this fix. */
+#ba-slider .ba-stage,
+#ba-slider .ba-img { transform: translateZ(0); }
 
 .ba-after {
   background-image: url('assets/img/after.webp');
