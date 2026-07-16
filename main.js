@@ -482,8 +482,8 @@ applyForm?.addEventListener('submit', async (e) => {
         email,
         designers,
         vision_pro: headset,
-        note: note || '—',
-        _subject: `Founding pricing request from ${name} — ${company}`,
+        note: note || '-',
+        _subject: `Founding pricing request from ${name} - ${company}`,
       }),
     });
 
@@ -496,7 +496,7 @@ applyForm?.addEventListener('submit', async (e) => {
   } catch {
     confirmBtn.disabled = false;
     confirmBtn.textContent = submitLabel;
-    alert('Something went wrong — please try again or email us at demos@useverdevision.com');
+    alert('Something went wrong - please try again or email us at demos@useverdevision.com');
   }
 });
 

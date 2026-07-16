@@ -2212,6 +2212,54 @@ h2 em {
   border-radius: 999px;
 }
 
+/* Sticker-style "40% off" callout — deliberately loud, since a quiet
+   percentage buried in a bullet list is easy to skim past. */
+.price-discount-badge {
+  position: absolute;
+  top: -18px; right: 1.7rem;
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--clay);
+  color: #f5eeda;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transform: rotate(9deg);
+  box-shadow: 0 10px 20px -8px rgba(176,85,47,0.6);
+  line-height: 1;
+}
+.pdb-pct { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+.pdb-label {
+  font-size: 0.58rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 640px) {
+  /* The corner sticker collides with the event pill on narrow cards —
+     drop it into flow as a plain chip instead. */
+  .price-discount-badge {
+    position: static;
+    align-self: flex-start;
+    width: auto; height: auto;
+    flex-direction: row; gap: 0.35rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    transform: none;
+    box-shadow: none;
+    margin-bottom: 0.7rem;
+  }
+  .pdb-label { margin-top: 0; }
+}
+
+/* Eyebrow — frames each card as a TIME PERIOD of the same plan, not a
+   separate tier: one rate is temporary, the other is what it becomes. */
+.price-eyebrow {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.price-eyebrow--limited { color: var(--clay); }
+.price-eyebrow--regular { color: var(--text-faint); }
+
 .price-name {
   font-family: var(--font-serif);
   font-size: 1.5rem; font-weight: 500;
@@ -2227,6 +2275,17 @@ h2 em {
   display: flex; align-items: baseline; gap: 0.1rem;
   font-family: var(--font-serif);
   color: var(--white);
+}
+/* Original rate, struck through — ties the founding price back to the
+   standard one so it reads as a discount, not a different product. */
+.price-was {
+  font-family: var(--font-body);
+  font-size: 1.2rem; font-weight: 500;
+  color: var(--text-faint);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  align-self: center;
+  margin-right: 0.5rem;
 }
 .price-currency { font-size: 1.4rem; }
 .price-num {
@@ -2261,6 +2320,27 @@ h2 em {
   content: "\2713";
   position: absolute; left: 0;
   color: var(--accent); font-weight: 700;
+}
+
+/* Trial reassurance — a green pill, deliberately louder than the faint
+   .price-fine print, right at the point of commitment. */
+.price-trial {
+  display: flex; align-items: center; gap: 0.55rem;
+  font-size: 0.86rem; font-weight: 600;
+  color: var(--accent-dim);
+  background: rgba(46,93,67,0.09);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1.1rem;
+}
+.pt-check {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #ebe0cb;
+  font-size: 0.62rem; font-weight: 700;
 }
 
 .price-cta { width: 100%; text-align: center; justify-content: center; }
