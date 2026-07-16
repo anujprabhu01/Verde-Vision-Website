@@ -402,18 +402,23 @@ const navObserver = new IntersectionObserver(
 sections.forEach((s) => navObserver.observe(s));
 
 
-// ── Pricing — billing toggle + application form ──
+// ── Announcement banner — dismissal persists via localStorage; the inline
+// <head>-side check hides it pre-paint on return visits.
+document.getElementById('banner-close')?.addEventListener('click', () => {
+  localStorage.setItem('vvBannerDismissed', '1');
+  document.documentElement.classList.add('banner-dismissed');
+});
+
+// ── Pricing — billing toggle, card detail expanders, founding-pricing form ──
 const btMonthly      = document.getElementById('bt-monthly');
 const btAnnual       = document.getElementById('bt-annual');
 const applyForm      = document.getElementById('apply-form');
 const applyWrap      = document.getElementById('apply');
-const applyPlanLabel = document.getElementById('apply-plan-label');
 const confirmBtn     = document.getElementById('confirm-btn');
 const applyConf      = document.getElementById('apply-confirmation');
 const confirmDetails = document.getElementById('confirm-details');
 
 let billing = 'monthly';
-let selectedPlan = 'Founding Partner';
 
 function setBilling(period) {
   billing = period;
@@ -429,14 +434,18 @@ function setBilling(period) {
 btMonthly?.addEventListener('click', () => setBilling('monthly'));
 btAnnual?.addEventListener('click', () => setBilling('annual'));
 
-// Card CTAs pick the plan, then hand off to the form below.
+// "Full plan details" — expands the card in place.
+document.querySelectorAll('.price-details-toggle').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const panel = document.getElementById(btn.getAttribute('aria-controls'));
+    const open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(open));
+  });
+});
+
+// The founding card's CTA hands off to the form below.
 document.querySelectorAll('.price-cta').forEach((btn) => {
   btn.addEventListener('click', () => {
-    selectedPlan = btn.dataset.plan;
-    if (applyPlanLabel) applyPlanLabel.textContent = `— ${selectedPlan}`;
-    if (confirmBtn) {
-      confirmBtn.textContent = selectedPlan === 'Standard' ? 'Request Free Trial' : 'Submit Application';
-    }
     applyWrap?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     // Focus after the smooth scroll settles; preventScroll so focus doesn't yank the page.
     setTimeout(() => document.getElementById('form-name')?.focus({ preventScroll: true }), 500);
@@ -468,7 +477,7 @@ applyForm?.addEventListener('submit', async (e) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
-        plan: selectedPlan,
+        plan: 'Founding Partner',
         billing,
         name,
         company,
@@ -476,13 +485,13 @@ applyForm?.addEventListener('submit', async (e) => {
         designers,
         vision_pro: headset,
         note: note || '—',
-        _subject: `${selectedPlan} application from ${name} — ${company}`,
+        _subject: `Founding pricing request from ${name} — ${company}`,
       }),
     });
 
     if (!res.ok) throw new Error('submission failed');
 
-    confirmDetails.textContent = `${name}, your ${selectedPlan} application for ${company} is in.`;
+    confirmDetails.textContent = `${name}, your founding pricing request for ${company} is in.`;
     applyWrap.style.display = 'none';
     applyConf.classList.add('visible');
     applyConf.focus();

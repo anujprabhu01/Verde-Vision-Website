@@ -141,10 +141,10 @@
        underneath is ever shown unstyled. -->
   <link id="app-fonts" rel="stylesheet" media="print" onload="this.media='all'"
         href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
-  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=93" />
+  <link id="app-css" rel="stylesheet" media="print" onload="this.media='all'" href="styles.css?v=94" />
   <noscript>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Geist+Mono:wght@400;500;600&display=swap" />
-    <link rel="stylesheet" href="styles.css?v=93" />
+    <link rel="stylesheet" href="styles.css?v=94" />
   </noscript>
 </head>
 <body>
@@ -232,6 +232,19 @@
     })();
   </script>
 
+  <!-- ANNOUNCEMENT BANNER — dismissal is remembered in localStorage; the
+       inline check runs before first paint so returning visitors never see
+       a flash of the dismissed banner. -->
+  <script>
+    if (localStorage.getItem('vvBannerDismissed') === '1') {
+      document.documentElement.classList.add('banner-dismissed');
+    }
+  </script>
+  <div class="site-banner" id="site-banner">
+    <p class="site-banner-text"><strong>We're launching at Anaheim 2026</strong> — November 4.<span class="banner-more"> Come see VerdeVision live.</span></p>
+    <button class="banner-close" id="banner-close" aria-label="Dismiss announcement" type="button">&times;</button>
+  </div>
+
   <!-- SCROLL PROGRESS -->
   <div class="scroll-progress" aria-hidden="true"></div>
 
@@ -251,7 +264,7 @@
       <a href="#features" class="nav-link">Features</a>
       <a href="#plant-library" class="nav-link">Plant Library</a>
       <a href="https://dashboard.useverdevision.com" class="nav-link">Log In</a>
-      <a href="#pricing" class="nav-cta">Apply</a>
+      <a href="#pricing" class="nav-cta">Founding Pricing</a>
     </div>
   </nav>
 
@@ -607,7 +620,7 @@
 
         <!-- Founding Partner -->
         <article class="price-card featured">
-          <div class="price-badge">Anaheim 2026 &middot; 40% off</div>
+          <div class="price-badge">Launching at Anaheim 2026 &middot; Nov 4</div>
           <h3 class="price-name">Founding Partner</h3>
           <p class="price-desc">A limited first cohort of studios, working directly with us through year one.</p>
           <div class="price-amount">
@@ -621,8 +634,21 @@
             <li>Direct line to the founders — your feedback shapes the app</li>
             <li>Priority onboarding &amp; support</li>
           </ul>
-          <button type="button" class="btn-primary price-cta" data-plan="Founding Partner">Apply</button>
-          <p class="price-fine">Applications close 2 weeks after the expo.</p>
+          <button type="button" class="btn-primary price-cta">Get Founding Pricing</button>
+          <p class="price-fine">Founding applications close December 2, 2026.</p>
+          <button type="button" class="price-details-toggle" aria-expanded="false" aria-controls="pd-founding">Full plan details <span class="pdt-chevron" aria-hidden="true"></span></button>
+          <div class="price-details" id="pd-founding">
+            <div class="pd-inner">
+              <h4>What's a designer seat?</h4>
+              <p>One seat is one designer's login — the Vision Pro app plus the client dashboard. Every plan includes up to 3 seats, and the owner's account is one of them.</p>
+              <h4>Additional seats</h4>
+              <p>$24/mo each at the founding rate — 40% off the standard $40.</p>
+              <h4>After your first year</h4>
+              <p>Your plan rolls to the standard rate ($200/mo or $2,000/yr). You keep your seats, projects, and clients — nothing else changes.</p>
+              <h4>How to claim it</h4>
+              <p>Request founding pricing before December 2, 2026, then start your free 30-day trial to lock in the rate.</p>
+            </div>
+          </div>
         </article>
 
         <!-- Standard -->
@@ -641,15 +667,28 @@
             <li>PDF blueprints &amp; instant estimates</li>
             <li>Client dashboard with shareable 3D blueprints</li>
           </ul>
-          <button type="button" class="btn-secondary price-cta" data-plan="Standard">Start Free Trial</button>
-          <p class="price-fine">Free for 30 days. Cancel anytime.</p>
+          <p class="price-note">Standard signup opens after the founding window closes — Dec 2, 2026.</p>
+          <button type="button" class="price-details-toggle" aria-expanded="false" aria-controls="pd-standard">Full plan details <span class="pdt-chevron" aria-hidden="true"></span></button>
+          <div class="price-details" id="pd-standard">
+            <div class="pd-inner">
+              <h4>What's a designer seat?</h4>
+              <p>One seat is one designer's login — the Vision Pro app plus the client dashboard. Every plan includes up to 3 seats, and the owner's account is one of them.</p>
+              <h4>Additional seats</h4>
+              <p>$40/mo each. On monthly plans, add or drop seats anytime. On annual plans, seats added mid-year are prorated for the months left on your term.</p>
+              <h4>Billing</h4>
+              <p>Monthly, or annual at $2,000/yr — two months free. Managed on the web dashboard.</p>
+              <h4>Trial</h4>
+              <p>Every plan starts with a free 30-day trial. Cancel anytime.</p>
+            </div>
+          </div>
         </article>
 
       </div>
 
       <!-- Application form -->
       <div class="apply-wrap reveal reveal-5" id="apply">
-        <p class="booking-col-label">Apply <span id="apply-plan-label">— Founding Partner</span></p>
+        <p class="booking-col-label">Founding Partner <span>Program</span></p>
+        <p class="apply-sub">Tell us about your studio and we'll confirm your founding rate by email — then your free 30-day trial locks it in.</p>
         <form class="apply-form" id="apply-form">
           <input type="text" id="form-name" name="name" aria-label="Full name" placeholder="Full name" required />
           <input type="text" id="form-company" name="company" aria-label="Company" placeholder="Company" required />
@@ -667,7 +706,7 @@
             <option>Not yet</option>
           </select>
           <textarea id="form-note" name="note" aria-label="Anything you'd like us to know? (optional)" placeholder="Anything you'd like us to know? (optional)" rows="3"></textarea>
-          <button type="submit" class="btn-primary" id="confirm-btn">Submit Application</button>
+          <button type="submit" class="btn-primary" id="confirm-btn">Request Founding Pricing</button>
         </form>
         <p class="apply-demo-note">Rather see it running first? <a href="mailto:demos@useverdevision.com">Book a live demo</a> — we'll bring the headset.</p>
       </div>
@@ -675,7 +714,7 @@
       <!-- Confirmation — tabindex so main.js can move focus here after submit -->
       <div class="booking-confirmation" id="apply-confirmation" tabindex="-1">
         <div class="confirm-icon">&#10003;</div>
-        <h3>Application received!</h3>
+        <h3>Request received!</h3>
         <p id="confirm-details"></p>
         <p class="confirm-sub">We'll be in touch by email shortly.</p>
       </div>
@@ -688,7 +727,7 @@
     <div class="container">
       <h2 class="reveal">Your yard won't <em>design</em> itself.</h2>
       <div class="cta-actions reveal reveal-3">
-        <a href="#pricing" class="btn-primary">Apply Now</a>
+        <a href="#pricing" class="btn-primary">Get Founding Pricing</a>
         <a href="mailto:demos@useverdevision.com" class="btn-secondary">Contact Us</a>
       </div>
     </div>
@@ -711,7 +750,7 @@
           <li><a href="#features">Features</a></li>
           <li><a href="#in-action">See it in action</a></li>
           <li><a href="#why">Why It Wins</a></li>
-          <li><a href="#pricing">Pricing &amp; apply</a></li>
+          <li><a href="#pricing">Founding pricing</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -728,7 +767,7 @@
     </div>
   </footer>
 
-  <script src="main.js?v=65"></script>
+  <script src="main.js?v=66"></script>
   <script type="importmap">
     { "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
