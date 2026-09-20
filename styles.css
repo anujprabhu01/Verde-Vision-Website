@@ -2987,13 +2987,15 @@ h2 em {
 }
 .night-scene {
   position: relative;
-  aspect-ratio: 1920 / 933;   /* the capture's own ratio, so nothing is cropped */
+  aspect-ratio: 16 / 10;
   overflow: hidden;
 }
 .night-frame {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover; object-position: center 50%;
+  /* the capture is wider than the window: fill it and crop a little off the
+     sides, centred so the agave and the lit plants stay in frame */
+  object-fit: cover; object-position: 50% 50%;
   opacity: 0;
   transition: opacity 1.3s ease;
 }
@@ -3016,8 +3018,8 @@ h2 em {
   .night-grid { grid-template-columns: 1fr; row-gap: 2rem; }
   .night-copy h2 { max-width: 18ch; }
   .night-figure { order: -1; }            /* the yard first on phones, then the copy */
-  .night-scene { aspect-ratio: 3 / 2; }
-  .night-frame { object-position: 40% 50%; }
+  .night-scene { aspect-ratio: 4 / 3; }
+  .night-frame { object-position: 42% 50%; }
 }
 @media (max-width: 480px) {
   .night-toggle { display: flex; }
