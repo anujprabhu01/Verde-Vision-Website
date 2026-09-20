@@ -42,7 +42,7 @@
 
 html {
   scroll-behavior: smooth;
-  /* Anchor jumps (#why, #features, #plant-library…) clear the fixed nav
+  /* Anchor jumps (#why, #features, #catalog…) clear the fixed nav
      (and the announcement banner while it's up) instead of tucking the
      section eyebrow behind them. */
   scroll-padding-top: calc(5rem + var(--banner-h, 0px));
@@ -158,7 +158,23 @@ nav {
   backdrop-filter: blur(14px) saturate(1.1);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
   border-bottom: 1px solid var(--rule);
+  transition: top 0.3s ease, background 0.55s ease, border-color 0.55s ease;
 }
+/* over an ink region (night mode in Night, the closing block) the bar
+   smokes over instead of floating as a paper strip — main.js sets the class */
+html.nav-on-ink nav {
+  background: rgba(9,13,26,0.74);
+  border-bottom-color: rgba(235,224,203,0.14);
+}
+html.nav-on-ink .nav-logo-text,
+html.nav-on-ink nav a.nav-link:hover { color: #ebe0cb; }
+html.nav-on-ink nav a.nav-link { color: rgba(235,224,203,0.72); }
+html.nav-on-ink .nav-toggle-bar { background: #ebe0cb; }
+/* over the night sky specifically, the CTA takes the fixtures' amber */
+html.nav-on-night .nav-cta { background: #c9d8f4; color: #0b1020; }
+html.nav-on-night .nav-cta:hover { background: #dde7fa; }
+.nav-cta { transition: background 0.55s ease, color 0.55s ease, transform 0.15s; }
+.nav-logo-text, nav a.nav-link, .nav-toggle-bar { transition: color 0.55s ease, background 0.55s ease; }
 
 .nav-logo {
   display: inline-flex; align-items: center; gap: 0.6rem;
@@ -1307,8 +1323,10 @@ h2 em {
    WITHOUT becoming a scroll container — otherwise it would capture the fronds'
    view() scroll-timeline and pin their grow animation. */
 .features { background: transparent; position: relative; overflow: clip; }
-/* keep the editorial content above the foliage rail */
-.features > .container { position: relative; z-index: 1; }
+/* the container follows the foliage rail in the DOM, so its copy already
+   paints over the fronds; no z-index here, so the plate in row 06 can drop
+   beneath the rail with z-index -1 */
+.features > .container { position: relative; }
 
 /* ── LUSH PALM FRONDS — real cutouts down the RIGHT edge ──
    Each frond pops in once as it scrolls into view (.is-in, set by main.js):
@@ -1342,8 +1360,8 @@ h2 em {
 .ff-1 { top: 20%;  right: -16%; width: 62%; --rot: 2deg;   --flip: -1; } /* angled up, dropped enough to clear the header */
 .ff-2 { top: 31%;  right: -24%; width: 80%; --rot: 16deg;  --flip: 1;  z-index: 2; } /* horizontal (frond's natural angle is ~17° down, so +16 levels it) */
 .ff-3 { top: 46%;  right: -14%; width: 57%; --rot: 7deg;   --flip: 1; } /* slightly bigger, eased up to ~10° down (less down) */
-.ff-4 { top: 61%;  right: -27%; width: 86%; --rot: 4deg;   --flip: -1; }
-.ff-5 { top: 76%;  right: -17%; width: 68%; --rot: -13deg; --flip: 1; z-index: 2; }
+.ff-4 { top: 59%;  right: -27%; width: 86%; --rot: 4deg;   --flip: -1; }
+.ff-5 { top: auto; bottom: 13%; right: -17%; width: 68%; --rot: -13deg; --flip: 1; z-index: 2; } /* anchored to the section's foot so it never crosses into the night fade below */
 
 /* The grow itself: a scroll-driven animation tied to each frond's own position
    in the viewport, so it scales up from the stem as it scrolls into view —
@@ -1482,6 +1500,54 @@ h2 em {
 
 .feature-row-body { max-width: 52ch; }
 
+/* ── row 06 — the one row that carries an image: the plate itself, sitting
+   in the open ground to the right of the copy (not flush right — the frond
+   rail keeps the far edge). Two equal columns after the number, the plate
+   at the start of the second. ── */
+.feature-row--plates {
+  grid-template-columns: minmax(3.5rem, auto) minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+.plate-figure {
+  position: relative;
+  margin: clamp(1rem, 2.4vw, 3rem) 0 0;   /* sits a touch below the title, as sketched */
+  justify-self: start;
+  width: clamp(220px, 21vw, 380px);
+  /* zero height: the plate hangs out of the row without making the section
+     taller (the frond rail is positioned in % of section height, and must
+     not move) — and z-index -1 puts it UNDER the frond rail, so the frond
+     covers its top-right corner */
+  height: 0;
+  z-index: -1;
+}
+.plate-img {
+  display: block; width: 100%; height: auto;
+  border-radius: 3px;
+  /* a contact shadow, a mid shadow and a long soft one, so the plate reads
+     as a card lying on the page rather than floating over it */
+  box-shadow:
+    0 0 0 1px rgba(28,42,33,0.10),
+    0 2px 4px rgba(28,42,33,0.22),
+    0 14px 26px -10px rgba(28,42,33,0.42),
+    0 44px 80px -32px rgba(28,42,33,0.6);
+}
+/* rises into place with the scroll, like the row's copy (same keyframe,
+   a little more travel); base state above is the resting state */
+@supports (animation-timeline: view()) {
+  @keyframes plate-rise { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: translateY(0); } }
+  .plate-img { animation: plate-rise both; animation-timeline: view(); animation-range: cover 6% cover 38%; }
+}
+@media (prefers-reduced-motion: reduce) { .plate-img { animation: none; } }
+@media (max-width: 900px) {
+  .feature-row--plates { grid-template-columns: minmax(3.5rem, auto) 1fr; }
+  .plate-figure { grid-column: 2; width: min(60vw, 300px); margin-top: 1.75rem; height: auto; z-index: auto; }
+}
+@media (max-width: 640px) {
+  .feature-row--plates { grid-template-columns: 1fr; }
+  .plate-figure { grid-column: 1; }
+}
+
 /* line-mask reveal: the title wipes up from behind its own clip */
 .feature-row-title {
   font-family: var(--font-serif);
@@ -1542,209 +1608,98 @@ h2 em {
   .feature-row-num { padding-top: 0; }
 }
 
-/* ── PLANT LIBRARY — the desert catalog carousel ──
-   The selected specimen stands large and centered, rendered in botanical
-   ink; a placard carries its real horticultural specs; the filmstrip
-   below changes it. */
-.library {
+/* ── CATALOG — three slow shelves of real renders on the sand band.
+   Each shelf is a marquee (track duplicated by main.js, speed set from
+   the track's own width so every shelf moves at the same pace). ── */
+.catalog {
   background: var(--green-mid);
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
   overflow: hidden;
+  padding-bottom: clamp(5rem, 8vw, 7rem);
 }
-.library-header { text-align: center; max-width: 720px; margin: 0 auto; }
-.library-header .section-label { justify-content: center; }
-.library-header .section-label::after { display: none; }
-.library-header .section-intro { margin: 1.1rem auto 0; }
-
-.library-stage {
-  position: relative;
-  width: 100%;
-  height: clamp(380px, 56vh, 620px);
-  margin-top: clamp(2rem, 4vw, 3.5rem);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* warm daylight wash + grounded shadow behind the specimen */
-.library-stage::before {
+.catalog-header { max-width: 780px; margin: 0 auto; text-align: center; }
+.catalog-header .section-label { margin-bottom: 1.25rem; }
+.catalog-header .section-label::before {
   content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: min(760px, 86vw); height: 100%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 34% 4% at 50% 84%,
-      rgba(28,42,33,0.12) 0%, rgba(28,42,33,0.05) 50%, transparent 100%),
-    radial-gradient(ellipse 40% 30% at 50% 50%,
-      rgba(208,182,130,0.16) 0%, rgba(208,182,130,0.05) 55%, transparent 100%);
+  width: 76px;
+  height: 1px;
+  background: linear-gradient(270deg, rgba(28,42,33,0.40), rgba(28,42,33,0.18) 55%, transparent);
 }
-.library-canvas-wrap {
-  position: relative;
-  z-index: 1;
-  width: min(640px, 84vw);
-  height: 100%;
-  cursor: grab;
-}
-.library-canvas-wrap:active { cursor: grabbing; }
-.library-canvas-wrap canvas { display: block; }
+.catalog-header h2 { margin-bottom: 1.2rem; }
+.catalog-header .section-intro { margin: 0 auto 2rem; max-width: 56ch; }
 
-/* museum placard, lower-left of the stage */
-.library-placard {
-  position: absolute;
-  left: clamp(1.2rem, 5vw, 5rem);
-  bottom: clamp(1rem, 4vh, 2.5rem);
-  z-index: 3;
-  max-width: 16rem;
-  pointer-events: none;
+.catalog-cats {
+  list-style: none; margin: 0 auto clamp(2.5rem, 4vw, 3.5rem); padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 0.55rem;
 }
-.library-common {
-  font-family: var(--font-serif);
-  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
-  font-weight: 400;
-  letter-spacing: -0.015em;
-  color: var(--white);
-  line-height: 1.05;
-}
-.library-latin {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1rem;
-  color: var(--accent);
-  margin-top: 0.15rem;
-}
-.library-specs {
-  margin-top: 1.1rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.7rem 1.4rem;
-}
-.library-specs div { display: flex; flex-direction: column; gap: 0.1rem; }
-.library-specs dt {
-  font-family: var(--font-display);
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-.library-specs dd {
-  font-size: 0.92rem;
-  color: var(--text);
-  font-variant-numeric: tabular-nums;
+.catalog-cats li {
+  font-family: var(--font-display); font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text);
+  border: 1px solid var(--rule-strong); border-radius: 999px;
+  padding: 0.42rem 0.9rem; line-height: 1;
 }
 
-.library-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  border: 1px solid var(--rule-strong);
+/* full-bleed shelves — the section keeps its 5vw side padding for the copy */
+.catalog-rows {
+  display: grid; gap: 1.1rem;
+  width: 100vw; margin-left: calc(50% - 50vw);
+}
+.catalog-row {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+}
+.catalog-track {
+  display: flex; gap: 1.1rem; width: max-content;
+  list-style: none; margin: 0; padding: 0.35rem 0;
+  animation: catScrollLeft var(--dur, 90s) linear infinite;
+  will-change: transform;
+}
+.catalog-row[data-dir="right"] .catalog-track { animation-name: catScrollRight; }
+.catalog-row:hover .catalog-track { animation-play-state: paused; }
+@keyframes catScrollLeft  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
+@keyframes catScrollRight { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+
+.cat-tile {
+  flex: none;
+  width: clamp(142px, 13vw, 178px);
+  display: flex; flex-direction: column; gap: 0.12rem;
+  padding: 0.75rem 0.85rem 0.9rem;
   background: var(--green-card);
-  color: var(--text);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, transform 0.2s, background 0.2s;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  box-shadow: 0 16px 30px -24px rgba(28,42,33,0.55);
 }
-.library-arrow:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-50%) scale(1.06);
+.cat-tile img {
+  width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; display: block;
+  border-radius: 8px; margin-bottom: 0.6rem;
 }
-.library-arrow svg { width: 22px; height: 22px; }
-.library-prev { left: clamp(0.5rem, 3vw, 3rem); }
-.library-next { right: clamp(0.5rem, 3vw, 3rem); }
-
-.library-hint {
-  position: absolute;
-  right: clamp(1.2rem, 5vw, 5rem);
-  bottom: clamp(1rem, 4vh, 2.5rem);
-  z-index: 3;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.85rem;
-  color: var(--text-faint);
-  pointer-events: none;
-  transition: opacity 0.6s ease;
+.cat-tile--photo img { object-fit: cover; }
+.cat-name {
+  font-family: var(--font-serif); font-size: 1.02rem; font-weight: 500;
+  line-height: 1.2; color: var(--white);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.library-hint.is-hidden { opacity: 0; }
-
-/* filmstrip — scrollable row of plant names; active is highlighted */
-.library-strip {
-  display: flex;
-  gap: 0.4rem;
-  margin-top: clamp(1.5rem, 3vw, 2.5rem);
-  padding: 0 5vw 0.4rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  scroll-snap-type: x proximity;
-  scroll-padding-inline: 42%;   /* lets the active thumb settle near center */
-  justify-content: flex-start;
+.cat-kind {
+  font-family: var(--font-display); font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint);
 }
-.library-strip::-webkit-scrollbar { display: none; }
-/* center only when the whole catalog fits without overflow (no clipped ends) */
-@media (min-width: 1340px) { .library-strip { justify-content: safe center; } }
-
-.library-thumb {
-  flex: 0 0 auto;
-  scroll-snap-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.7rem 1.1rem;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
-  cursor: pointer;
-  font-family: inherit;
-  text-align: left;
-  transition: background 0.25s, border-color 0.25s;
-}
-.library-thumb:hover { background: rgba(28,42,33,0.04); }
-.library-thumb.is-active {
-  background: var(--green-card);
-  border-color: var(--green-border);
-}
-.library-thumb-common {
-  font-family: var(--font-serif);
-  font-size: 1rem;
+.catalog-foot {
+  margin: clamp(2rem, 4vw, 3rem) auto 0; text-align: center;
+  font-family: var(--font-serif); font-style: italic; font-size: 1.05rem;
   color: var(--text-muted);
-  white-space: nowrap;
-  transition: color 0.25s;
 }
-.library-thumb-latin {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.78rem;
-  color: var(--text-faint);
-  white-space: nowrap;
-  transition: color 0.25s;
-}
-.library-thumb.is-active .library-thumb-common { color: var(--white); }
-.library-thumb.is-active .library-thumb-latin { color: var(--accent); }
-
-.library-no3d .library-canvas-wrap,
-.library-no3d .library-arrow,
-.library-no3d .library-hint { display: none; }
-.library-no3d .library-placard { position: static; margin: 0 auto; text-align: center; }
-
 @media (max-width: 640px) {
-  .library-placard {
-    position: static;
-    margin: 0 auto;
-    max-width: none;
-    text-align: center;
-    padding: 0 5vw;
-  }
-  .library-specs { max-width: 18rem; margin-left: auto; margin-right: auto; }
-  .library-stage { flex-direction: column; height: auto; }
-  .library-canvas-wrap { height: min(78vw, 360px); }
-  .library-hint { display: none; }
-  .library-arrow { top: min(39vw, 180px); }
+  .catalog-header h2 { font-size: clamp(2rem, 8.4vw, 2.6rem); }
+  .catalog-rows { gap: 0.8rem; }
+  .catalog-track { gap: 0.8rem; }
+  .cat-tile { width: 132px; padding: 0.6rem 0.65rem 0.7rem; border-radius: 12px; }
+  .cat-name { font-size: 0.94rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-track { animation: none; }
+  .catalog-row { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
 }
 
 /* ── SEE IT IN ACTION — through the lens of a Vision Pro ──────────
@@ -2550,181 +2505,164 @@ h2 em {
 .booking-confirmation p { color: var(--text-muted); font-size: 1rem; }
 .confirm-sub { margin-top: 0.5rem; font-size: 0.9rem !important; }
 
-/* ── CTA — the closing spread: late-afternoon light on paper, a thin
-   engraved horizon at the bottom edge. The warm wash answers the
-   hero's daylight. */
-.cta {
-  text-align: center;
+/* ── CLOSING — the CTA and the footer share one block of botanical ink.
+   A low green warmth at the top edge answers the hero's daylight; the
+   logo mark sits engraved in the corner; the paper grain still presses
+   through. No photo, no second topo. ── */
+.closing {
   position: relative;
   isolation: isolate;
-  background-color: #cfc3a3;
-  border-top: 1px solid var(--rule);
-  padding: 0;
   overflow: hidden;
-  min-height: 680px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  padding: 0;
+  background: var(--white);
+  color: #ebe0cb;
 }
-.cta .container { position: relative; z-index: 2; padding-bottom: 9rem; padding-top: 4rem; }
-
-/* ── CTA DESERT LANDSCAPE — real Arizona photo fills the bottom of the section.
-   Sepia filter pulls it into the paper/ink palette; the mask fades it in from
-   the top so the headline text stays readable on the clean sand background. */
-.cta-landscape {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 48%;
-  z-index: 1;
-  display: block;
-  filter: sepia(0.72) saturate(0.62) brightness(0.72) contrast(1.08) hue-rotate(-8deg);
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 30%, black 60%);
-  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.6) 30%, black 60%);
-}
-
-/* ── CTA → FOOTER ARCH — SVG arch in the footer's earth-tan color bridges the
-   desert landscape into the dark footer, mimicking an archway or horizon. */
-.cta-footer-arch {
-  position: relative;
-  margin-top: -140px;
-  z-index: 20;
-  line-height: 0;
+.closing.closing::before {
+  content: "";
+  position: absolute; inset: 0; left: 0; right: 0; height: auto;
+  background:
+    radial-gradient(70% 55% at 50% 0%, rgba(60,120,87,0.34), transparent 70%),
+    radial-gradient(40% 30% at 92% 100%, rgba(60,120,87,0.16), transparent 70%);
   pointer-events: none;
+  z-index: 0;
 }
-.cta-footer-arch svg { display: block; width: 100%; height: 140px; }
-
-.cta h2 {
-  font-family: var(--font-serif);
-  font-weight: 400;
+.closing-mark {
+  position: absolute; right: -4vw; bottom: -6vw;
+  width: clamp(380px, 44vw, 680px); height: auto;
+  opacity: 0.075;
+  filter: grayscale(1) brightness(2.4);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 0;
+}
+.closing-top {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: clamp(7rem, 12vw, 10.5rem) 5vw clamp(5rem, 8vw, 7rem);
+}
+.closing-top .section-label { color: #9fcfb1; margin-bottom: 1.4rem; }
+.closing-top .section-label::before,
+.closing-top .section-label::after {
+  content: "";
+  width: 76px; height: 1px;
+  background: linear-gradient(90deg, rgba(235,224,203,0.45), rgba(235,224,203,0.18) 55%, transparent);
+}
+.closing-top .section-label::before {
+  background: linear-gradient(270deg, rgba(235,224,203,0.45), rgba(235,224,203,0.18) 55%, transparent);
+}
+.closing-top h2 {
+  color: #ebe0cb;
   font-size: clamp(2.6rem, 7vw, 5.2rem);
   line-height: 1.02;
   letter-spacing: -0.015em;
   max-width: 14ch;
-  margin: 0 auto 1.6rem;
+  margin: 0 auto 1.4rem;
 }
-.cta p {
-  color: var(--text-muted);
-  max-width: 540px;
-  margin: 0 auto 2.75rem;
+.closing-top h2 em { color: #9fcfb1; }
+.closing-sub {
+  color: rgba(235,224,203,0.68);
+  max-width: 46ch;
+  margin: 0 auto 2.6rem;
   font-size: 1.08rem;
 }
-.cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.closing-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-/* ── FOOTER — a deep botanical green block grounds the page ── */
-footer {
-  padding: 5rem 5vw 2.5rem;
+.btn-paper {
+  display: inline-flex; align-items: center;
+  background: #ebe0cb; color: var(--white);
+  padding: 0.9rem 2.2rem; border-radius: 8px;
+  font-size: 1rem; font-weight: 600; text-decoration: none;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 14px 30px -14px rgba(0,0,0,0.6);
+}
+.btn-paper:hover { background: #fbf6ea; transform: translateY(-2px); }
+.btn-ghost {
+  display: inline-flex; align-items: center;
+  border: 1px solid rgba(235,224,203,0.38); color: #ebe0cb;
+  padding: 0.9rem 2.2rem; border-radius: 8px;
+  font-size: 1rem; font-weight: 500; text-decoration: none;
+  background: transparent;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn-ghost:hover { background: rgba(235,224,203,0.07); border-color: rgba(235,224,203,0.7); }
+
+/* footer — inside the same ink block, separated by one hairline */
+.footer {
+  position: relative; z-index: 1;
+  padding: 3.5rem 5vw 2.25rem;
+  border-top: 1px solid rgba(235,224,203,0.14);
   font-size: 0.85rem;
   color: rgba(235,224,203,0.6);
-  background: #271f13;
-  position: relative;
 }
-
-/* Static contour canvas (drawn in main.js). Sits flush inside the footer with a
-   flat top edge, so the brown topo block reads as a clean straight band with the
-   desert photo sitting directly on top of it. Below the footer content (z 22). */
-.footer-topo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  pointer-events: none;
-  z-index: 21;
-}
-
 .footer-grid {
   max-width: 1100px;
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1fr 1.15fr;
   gap: 3rem 2rem;
   align-items: start;
-  position: relative;
-  z-index: 22;
 }
-.footer-brand .footer-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  margin-bottom: 0.85rem;
-  line-height: 1;
+.footer-logo {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  margin-bottom: 0.85rem; line-height: 1; text-decoration: none;
 }
-.footer-logo-img {
-  height: 1.75em;
-  width: auto;
-  display: block;
-}
-.footer-brand .footer-logo span {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: 0.18em;
-  color: #ebe0cb;
+.footer-logo-img { height: 1.75em; width: auto; display: block; }
+.footer-logo span {
+  font-family: var(--font-display); font-weight: 600; font-size: 1.05rem;
+  letter-spacing: 0.18em; color: #ebe0cb;
 }
 .footer-tagline {
-  color: rgba(235,224,203,0.55);
-  font-size: 0.92rem;
-  max-width: 28ch;
-  line-height: 1.55;
+  color: rgba(235,224,203,0.6);
+  font-size: 0.92rem; max-width: 30ch; line-height: 1.55;
+  margin-bottom: 1.4rem;
 }
+/* placeholder until the app is live — same footprint as Apple's badge */
+.store-badge {
+  display: inline-grid; grid-template-columns: auto; row-gap: 0.05rem;
+  padding: 0.55rem 1rem 0.6rem;
+  border: 1px solid rgba(235,224,203,0.42); border-radius: 10px;
+  color: #ebe0cb; line-height: 1.1;
+}
+.store-badge-top {
+  font-family: var(--font-display); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase; color: rgba(235,224,203,0.62);
+}
+.store-badge-main { font-family: var(--font-serif); font-size: 1.15rem; font-weight: 500; }
+.store-badge-when { font-family: var(--font-display); font-size: 0.72rem; color: rgba(235,224,203,0.62); }
+
 .footer-col-title {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.85);
-  margin-bottom: 1rem;
-  font-weight: 600;
+  font-family: var(--font-display); font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(235,224,203,0.9); margin-bottom: 1rem;
 }
 .footer-col ul { list-style: none; padding: 0; margin: 0; }
 .footer-col li { margin-bottom: 0.55rem; }
 .footer-col a {
-  color: rgba(235,224,203,0.8);
-  text-decoration: none;
-  font-size: 0.9rem;
+  color: rgba(235,224,203,0.78); text-decoration: none; font-size: 0.9rem;
   transition: color 0.18s ease;
-  position: relative;
 }
 .footer-col a:hover { color: #ffffff; }
+.footer-expo-name { font-family: var(--font-serif); font-size: 1.15rem; color: #ebe0cb; margin-bottom: 0.3rem; }
+.footer-expo-meta { font-size: 0.9rem; line-height: 1.5; color: rgba(235,224,203,0.68); }
 
 .footer-bottom {
   max-width: 1100px;
-  margin: 3.5rem auto 0;
-  padding-top: 1.75rem;
-  position: relative;
-  z-index: 22;
-  border-top: 1px solid rgba(235,224,203,0.16);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  font-size: 0.78rem;
-  color: rgba(235,224,203,0.5);
-  letter-spacing: 0.02em;
+  margin: 3rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(235,224,203,0.14);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+  font-size: 0.78rem; color: rgba(235,224,203,0.5); letter-spacing: 0.02em;
 }
 .footer-bottom .footer-meta {
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(235,224,203,0.5);
+  font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
 }
-
-@media (max-width: 800px) {
-  .footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2.5rem 1.5rem;
-  }
+@media (max-width: 900px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2.5rem 1.5rem; }
   .footer-brand { grid-column: 1 / -1; }
+  .closing-mark { right: -18vw; bottom: -10vw; width: 70vw; }
 }
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .footer-grid { grid-template-columns: 1fr; }
+  .closing-actions .btn-paper, .closing-actions .btn-ghost { width: 100%; justify-content: center; }
 }
 
 /* ── UTILITIES ── */
@@ -2767,4 +2705,326 @@ footer {
      under the nav instead. Trimmed 1rem to fund the headline→goggles
      breathing room (hero-visual margin-top) without moving the bottom. */
   .hero { padding-top: 7rem; }
+}
+
+/* hero trust line — platform on one line, App Store timing on the next */
+.hero-trust { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+@media (max-width: 900px) { .hero-trust { align-items: center; text-align: center; } }
+
+/* the demo now sits directly under the credibility band — its raised
+   shadow already draws the line, so skip the section hairline */
+.in-action.in-action::before { display: none; }
+
+/* ── LEGAL PAGES — privacy + terms share the paper, one column ── */
+.legal-page { min-height: 100vh; display: flex; flex-direction: column; }
+.legal-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.15rem 5vw;
+  border-bottom: 1px solid var(--rule);
+}
+.legal-header .nav-logo-img { height: 2em; }
+.legal-back {
+  color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+  transition: color 0.2s;
+}
+.legal-back:hover { color: var(--white); }
+.legal {
+  flex: 1;
+  width: 100%; max-width: 720px; margin: 0 auto;
+  padding: clamp(3.5rem, 7vw, 6rem) 5vw 5rem;
+}
+.legal h1 {
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -0.015em;
+  color: var(--white); margin: 0.3rem 0 1rem;
+}
+.legal-updated {
+  font-family: var(--font-display); font-size: 0.74rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint);
+  margin-bottom: 2.5rem;
+}
+.legal-lede { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.6; }
+.legal h2 { font-size: clamp(1.55rem, 2.6vw, 1.95rem); margin: 2.8rem 0 0.9rem; line-height: 1.15; }
+.legal h3 { font-family: var(--font-serif); font-weight: 500; font-size: 1.2rem; margin: 1.6rem 0 0.5rem; color: var(--white); }
+.legal p, .legal li { font-size: 1.02rem; line-height: 1.7; color: var(--text); }
+.legal p { margin-bottom: 1rem; }
+.legal ul { padding-left: 1.25rem; margin-bottom: 1.1rem; }
+.legal li { margin-bottom: 0.4rem; }
+.legal li strong { color: var(--white); }
+.legal a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.legal a:hover { color: var(--accent-bright); }
+.legal-note {
+  background: rgba(46,93,67,0.09); border-radius: 10px;
+  padding: 1rem 1.2rem; margin: 1.25rem 0 1.5rem;
+  font-size: 0.95rem;
+}
+.legal-foot {
+  border-top: 1px solid var(--rule);
+  padding: 1.75rem 5vw;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem 1.5rem;
+  font-size: 0.8rem; color: var(--text-muted);
+}
+.legal-foot a { color: var(--text-muted); text-decoration: none; margin-left: 1.25rem; }
+.legal-foot a:hover { color: var(--white); }
+
+/* ── NIGHT — the closing spread of "what it does". Same two-column grid as
+   the features header; the yard sits in the demo video's rounded window.
+   Two frames stack; data-state on the scene picks which shows. Night is one
+   slow crossfade from daylight straight to the lit yard — and night falls on
+   the section with it: an ink layer under the content whose opacity follows
+   the state, with soft gradient edges (never a line) and a scroll-driven
+   ramp so it gathers as the section enters and lifts as it leaves. ── */
+.night {
+  background: transparent;
+  position: relative;
+  isolation: isolate;
+  padding-top: clamp(15rem, 22vw, 22rem);     /* room for a long, eased fade in */
+  padding-bottom: clamp(14rem, 20vw, 20rem);  /* and out */
+}
+.night.night::before { display: none; }   /* continues the features section, no hairline */
+.night-grid {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr);
+  column-gap: clamp(2.5rem, 5vw, 5.5rem);
+  row-gap: 2.5rem;
+  align-items: center;
+}
+
+/* the ink — reaches a little above and below the section's box, into the
+   neighbours' empty padding, and fades to nothing at both ends */
+.night-ink {
+  position: absolute; left: 0; right: 0;
+  top: -6rem; bottom: -4rem;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.3s ease;
+}
+.night.is-night .night-ink { opacity: 1; }
+.night-ink-in, .night-ink-out { position: absolute; inset: 0; }
+.night-ink-out {
+  /* a deep desert-night sky, darkest overhead: indigo where the darkness
+     first appears, deepening to near-black through the middle of the
+     section, then back to indigo at the foot — with the SAME eased alpha
+     mask over the sky, the stars and the breathers, so nothing ever shows
+     over paper */
+  background: linear-gradient(to bottom,
+    #121a33 0%,
+    #0e1428 16%,
+    #090d1c 32%,
+    #050711 46%,
+    #05060e 54%,
+    #090d1c 68%,
+    #0e1428 84%,
+    #121a33 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    rgba(0,0,0,0.000) 0.0%,
+    rgba(0,0,0,0.020) 1.8%,
+    rgba(0,0,0,0.074) 3.7%,
+    rgba(0,0,0,0.156) 5.5%,
+    rgba(0,0,0,0.259) 7.3%,
+    rgba(0,0,0,0.376) 9.2%,
+    rgba(0,0,0,0.500) 11.0%,
+    rgba(0,0,0,0.624) 12.8%,
+    rgba(0,0,0,0.741) 14.7%,
+    rgba(0,0,0,0.844) 16.5%,
+    rgba(0,0,0,0.926) 18.3%,
+    rgba(0,0,0,0.980) 20.2%,
+    rgba(0,0,0,1.000) 22.0%,
+    rgba(0,0,0,1) 79%,
+    rgba(0,0,0,0.980) 80.8%,
+    rgba(0,0,0,0.926) 82.5%,
+    rgba(0,0,0,0.844) 84.2%,
+    rgba(0,0,0,0.741) 86.0%,
+    rgba(0,0,0,0.624) 87.8%,
+    rgba(0,0,0,0.500) 89.5%,
+    rgba(0,0,0,0.376) 91.2%,
+    rgba(0,0,0,0.259) 93.0%,
+    rgba(0,0,0,0.156) 94.8%,
+    rgba(0,0,0,0.074) 96.5%,
+    rgba(0,0,0,0.020) 98.2%,
+    rgba(0,0,0,0.000) 100.0%);
+          mask-image: linear-gradient(to bottom,
+    rgba(0,0,0,0.000) 0.0%,
+    rgba(0,0,0,0.020) 1.8%,
+    rgba(0,0,0,0.074) 3.7%,
+    rgba(0,0,0,0.156) 5.5%,
+    rgba(0,0,0,0.259) 7.3%,
+    rgba(0,0,0,0.376) 9.2%,
+    rgba(0,0,0,0.500) 11.0%,
+    rgba(0,0,0,0.624) 12.8%,
+    rgba(0,0,0,0.741) 14.7%,
+    rgba(0,0,0,0.844) 16.5%,
+    rgba(0,0,0,0.926) 18.3%,
+    rgba(0,0,0,0.980) 20.2%,
+    rgba(0,0,0,1.000) 22.0%,
+    rgba(0,0,0,1) 79%,
+    rgba(0,0,0,0.980) 80.8%,
+    rgba(0,0,0,0.926) 82.5%,
+    rgba(0,0,0,0.844) 84.2%,
+    rgba(0,0,0,0.741) 86.0%,
+    rgba(0,0,0,0.624) 87.8%,
+    rgba(0,0,0,0.500) 89.5%,
+    rgba(0,0,0,0.376) 91.2%,
+    rgba(0,0,0,0.259) 93.0%,
+    rgba(0,0,0,0.156) 94.8%,
+    rgba(0,0,0,0.074) 96.5%,
+    rgba(0,0,0,0.020) 98.2%,
+    rgba(0,0,0,0.000) 100.0%);
+}
+/* the sky: two star layers at different depths plus the breathers. The
+   canvases are taller than the layer so the parallax never shows an edge. */
+.night-sky { position: absolute; inset: 0; }
+.night-stars { position: absolute; left: 0; width: 100%; top: -12%; height: 124%; display: block; will-change: transform; }
+.night-breathers { position: absolute; inset: 0; will-change: transform; }
+.night-breather {
+  position: absolute; width: 3px; height: 3px; border-radius: 50%;
+  background: #fff8ea;
+  box-shadow: 0 0 6px 1px rgba(255,246,225,0.55), 0 0 14px 3px rgba(255,246,225,0.18);
+  animation: starBreathe var(--dur, 6s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes starBreathe { from { opacity: 0.25; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+
+/* scroll-driven: the ink ramps in over the entry and out over the exit; the
+   stars come up a beat after the dark (eyes adjusting) and the two layers
+   slip past each other at different rates so the sky has depth; the window
+   settles into place and the copy rises as the section enters. Browsers
+   without view timelines keep the state fade and the soft edges. */
+@supports (animation-timeline: view()) {
+  @keyframes nightRampIn  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes nightRampOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes skyIn        { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes starsFar     { from { transform: translateY(-8.5%); } to { transform: translateY(8.5%); } }
+  @keyframes starsNear    { from { transform: translateY(-3.5%); } to { transform: translateY(3.5%); } }
+  @keyframes windowSettle { from { transform: translateY(64px) scale(0.96); } to { transform: none; } }
+  @keyframes copyRise     { from { transform: translateY(36px); } to { transform: none; } }
+  .night-ink-in  { animation: nightRampIn  ease-out both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+  .night-ink-out { animation: nightRampOut ease-in  both; animation-timeline: view(); animation-range: exit 20% exit 100%; }
+  .night-sky        { animation: skyIn ease-out both;    animation-timeline: view(); animation-range: entry 35% entry 110%; }
+  .night-stars-far  { animation: starsFar linear both;   animation-timeline: view(); animation-range: cover 0% cover 100%; }
+  .night-stars-near,
+  .night-breathers  { animation: starsNear linear both;  animation-timeline: view(); animation-range: cover 0% cover 100%; }
+  .night-window     { animation: windowSettle ease-out both; animation-timeline: view(); animation-range: entry 0% entry 95%; }
+  .night-copy       { animation: copyRise ease-out both;     animation-timeline: view(); animation-range: entry 0% entry 100%; }
+}
+
+/* type — paper by day, cream by night, on the same 1.3 s clock as the yard */
+.night-copy .section-label,
+.night-copy h2, .night-copy h2 em,
+.night-sub, .night-gesture,
+.night-caption, .night-caption-time { transition: color 1.3s ease; }
+.night-copy .section-label { margin-bottom: 1.25rem; }
+.night-copy h2 {
+  font-size: clamp(2.1rem, 3.8vw, 3.2rem);
+  line-height: 1.06;
+  margin-bottom: 1.4rem;
+  max-width: 16ch;
+}
+.night-sub {
+  color: var(--text-muted);
+  font-size: 1.04rem; line-height: 1.65;
+  max-width: 46ch;
+  margin: 0 0 1.1rem;
+}
+.night.is-night .night-copy .section-label { color: #c9d8f4; }   /* moonlight: cool and pale, tied to the sky */
+.night.is-night .night-copy .section-label::after { background: linear-gradient(90deg, rgba(235,224,203,0.5), rgba(235,224,203,0.2) 55%, transparent); }
+.night.is-night .night-copy h2 { color: #ebe0cb; }
+.night.is-night .night-copy h2 em { color: #c9d8f4; }
+.night.is-night .night-sub { color: rgba(235,224,203,0.74); }
+.night.is-night .night-gesture { color: rgba(235,224,203,0.62); }
+.night.is-night .night-caption { color: rgba(235,224,203,0.62); }
+.night.is-night .night-caption-time { color: #ebe0cb; }
+
+/* Day / Night — a segmented pill in the pricing toggle's language, carrying
+   the two gestures as icons */
+.night-toggle {
+  display: inline-flex; gap: 0.25rem;
+  margin-top: 1.4rem;
+  padding: 0.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--green-card);
+  transition: background 1.3s ease, border-color 1.3s ease;
+}
+.night.is-night .night-toggle { background: rgba(235,224,203,0.07); border-color: rgba(235,224,203,0.3); }
+.night-btn {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.6rem 1.25rem 0.6rem 1rem;
+  border-radius: 999px; border: none;
+  background: transparent; color: var(--text-muted);
+  font: inherit; font-family: var(--font-display); font-size: 0.92rem; font-weight: 600;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.night-btn svg { width: 18px; height: 18px; }
+.night-btn:hover { color: var(--white); }
+.night.is-night .night-btn { color: rgba(235,224,203,0.6); }
+.night.is-night .night-btn:hover { color: #ebe0cb; }
+.night-btn.is-on { background: var(--accent); color: #ebe0cb; box-shadow: 0 8px 18px -10px rgba(35,74,53,0.6); }
+.night.is-night .night-btn.is-on { background: #c9d8f4; color: #0b1020; box-shadow: 0 8px 18px -10px rgba(0,0,0,0.8); }
+.night-gesture {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 0.98rem; color: var(--text-muted);
+}
+
+/* the window — the demo video's chrome, without the tilt */
+.night-figure { margin: 0; }
+.night-window {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.14);
+  background: #0e1612;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 40px 80px -30px rgba(28,42,33,0.55);
+  transition: border-color 1.3s ease, box-shadow 1.3s ease;
+}
+.night.is-night .night-window {
+  border-color: rgba(235,224,203,0.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 40px 80px -30px rgba(0,0,0,0.85);
+}
+.night-scene {
+  position: relative;
+  aspect-ratio: 1920 / 933;   /* the capture's own ratio, so nothing is cropped */
+  overflow: hidden;
+}
+.night-frame {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 50%;
+  opacity: 0;
+  transition: opacity 1.3s ease;
+}
+.night-scene[data-state="day"]   .night-day { opacity: 1; }
+.night-scene[data-state="night"] .night-lit { opacity: 1; }
+
+/* caption strip: time on the left, a note on the right, both swap with the state */
+.night-caption {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+  margin: 0.9rem 0.25rem 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem; letter-spacing: 0.02em; color: var(--text-muted);
+}
+.night-caption-time { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; color: var(--text); }
+.night-caption .nc-night { display: none; }
+.night-figure.is-night .nc-day { display: none; }
+.night-figure.is-night .nc-night { display: inline; }
+
+@media (max-width: 900px) {
+  .night-grid { grid-template-columns: 1fr; row-gap: 2rem; }
+  .night-copy h2 { max-width: 18ch; }
+  .night-figure { order: -1; }            /* the yard first on phones, then the copy */
+  .night-scene { aspect-ratio: 3 / 2; }
+  .night-frame { object-position: 40% 50%; }
+}
+@media (max-width: 480px) {
+  .night-toggle { display: flex; }
+  .night-btn { flex: 1; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .night-frame, .night-ink { transition: none; }
+  .night-ink-in, .night-ink-out, .night-sky, .night-stars, .night-breathers, .night-window, .night-copy { animation: none; }
+  .night-breather { animation: none; opacity: 0.6; }
 }

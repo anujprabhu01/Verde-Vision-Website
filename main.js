@@ -743,200 +743,184 @@ applyForm?.addEventListener('submit', async (e) => {
 
 })();
 
-// ── FOOTER — the same topographic contour field as "why it wins", but static
-// (no cursor dome) and inked in cream for the dark earth block. The canvas is
-// pulled up over the arch and masked to its curve in CSS, so the contours fill
-// the curved brown cap rather than starting straight across below it. ──
-(function footerTopo() {
-  const footer = document.querySelector('footer');
-  const canvas = document.getElementById('footer-topo');
-  if (!footer || !canvas) return;
-  const ctx = canvas.getContext('2d');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const ARCH_H = 0; // footer now has a flat top edge; canvas fills it exactly
-
-  // identical value-noise → identical contour character to the why section
-  const hash = (x, y) => {
-    const s = Math.sin(x * 127.1 + y * 311.7 + 17) * 43758.5453;
-    return s - Math.floor(s);
-  };
-  const fade = (t) => t * t * (3 - 2 * t);
-  const lerp = (a, b, t) => a + (b - a) * t;
-  function noise(x, y) {
-    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
-    const u = fade(xf), v = fade(yf);
-    return lerp(
-      lerp(hash(xi, yi), hash(xi + 1, yi), u),
-      lerp(hash(xi, yi + 1), hash(xi + 1, yi + 1), u),
-      v
-    );
-  }
-  function elevation(x, y) {
-    return noise(x * 0.0035, y * 0.0035) * 1.0
-         + noise(x * 0.009 + 90, y * 0.009 + 90) * 0.5
-         + noise(x * 0.022 + 180, y * 0.022 + 180) * 0.25;
-  }
-
-  const EDGES = [
-    null, [3, 2], [2, 1], [3, 1], [0, 1], [3, 0, 2, 1], [0, 2], [3, 0],
-    [3, 0], [0, 2], [3, 0, 2, 1], [0, 1], [3, 1], [2, 1], [3, 2], null
-  ];
-  const LEVELS = (() => {
-    const out = [];
-    for (let v = -1.9; v <= 2.6; v += 0.16) out.push(v);
-    return out;
-  })();
-
-  let w = 0, h = 0, cell = 16, cols = 0, rows = 0, field = null;
-  // cursor in canvas space; .on eases 0→1 so the dome fades in/out
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0, on: 0, target: 0 };
-
-  function resize() {
-    const r = footer.getBoundingClientRect();
-    w = r.width; h = r.height + ARCH_H; // reach up over the arch cap
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cell = w < 720 ? 22 : 16;
-    cols = Math.ceil(w / cell) + 1;
-    rows = Math.ceil(h / cell) + 1;
-    field = new Float32Array(cols * rows);
-    mouse.x = mouse.tx = w / 2;
-    mouse.y = mouse.ty = h / 2;
-    computeField();
-    draw();
-  }
-
-  // base terrain + a soft dome lifted under the cursor (same as why it wins)
-  function computeField() {
-    for (let j = 0; j < rows; j++) {
-      for (let i = 0; i < cols; i++) {
-        const x = i * cell, y = j * cell;
-        let e = elevation(x, y);
-        if (mouse.on > 0.01) {
-          const dx = x - mouse.x, dy = y - mouse.y;
-          e += mouse.on * 0.8 * Math.exp(-(dx * dx + dy * dy) / (2 * 120 * 120));
-        }
-        field[j * cols + i] = e;
-      }
-    }
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-    // cream ink brightens toward the cursor, fading to the resting alpha
-    const glowRadius = 240;
-    const glow = mouse.on;
-    const majorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
-    majorGrad.addColorStop(0, `rgba(235,224,203,${(0.085 + 0.16 * glow).toFixed(3)})`);
-    majorGrad.addColorStop(1, 'rgba(235,224,203,0.085)');
-    const minorGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, glowRadius);
-    minorGrad.addColorStop(0, `rgba(235,224,203,${(0.05 + 0.11 * glow).toFixed(3)})`);
-    minorGrad.addColorStop(1, 'rgba(235,224,203,0.05)');
-    LEVELS.forEach((level, li) => {
-      const path = new Path2D();
-      for (let j = 0; j < rows - 1; j++) {
-        for (let i = 0; i < cols - 1; i++) {
-          const tl = field[j * cols + i], tr = field[j * cols + i + 1];
-          const bl = field[(j + 1) * cols + i], br = field[(j + 1) * cols + i + 1];
-          let c = 0;
-          if (tl > level) c |= 8;
-          if (tr > level) c |= 4;
-          if (br > level) c |= 2;
-          if (bl > level) c |= 1;
-          const edges = EDGES[c];
-          if (!edges) continue;
-          const x = i * cell, y = j * cell;
-          const pt = (edge) => {
-            switch (edge) {
-              case 0: return [x + cell * (level - tl) / (tr - tl), y];
-              case 1: return [x + cell, y + cell * (level - tr) / (br - tr)];
-              case 2: return [x + cell * (level - bl) / (br - bl), y + cell];
-              default: return [x, y + cell * (level - tl) / (bl - tl)];
-            }
-          };
-          for (let k = 0; k < edges.length; k += 2) {
-            const a = pt(edges[k]), bp = pt(edges[k + 1]);
-            path.moveTo(a[0], a[1]);
-            path.lineTo(bp[0], bp[1]);
-          }
-        }
-      }
-      const major = li % 5 === 0;
-      ctx.lineWidth = major ? 1.0 : 0.7;
-      ctx.strokeStyle = major ? majorGrad : minorGrad;
-      ctx.stroke(path);
-    });
-  }
-
-  // render loop runs only while the cursor (or its fade) is still moving
-  let raf = null;
-  function loop() {
-    mouse.x += (mouse.tx - mouse.x) * 0.12;
-    mouse.y += (mouse.ty - mouse.y) * 0.12;
-    mouse.on += (mouse.target - mouse.on) * 0.08;
-    const moving = Math.abs(mouse.tx - mouse.x) > 0.2 || Math.abs(mouse.ty - mouse.y) > 0.2
-      || Math.abs(mouse.target - mouse.on) > 0.003;
-    computeField();
-    draw();
-    raf = moving ? requestAnimationFrame(loop) : null;
-  }
-  function wake() { if (!raf) raf = requestAnimationFrame(loop); }
-
-  resize();
-
-  let resizeRaf = null;
-  addEventListener('resize', () => {
-    if (resizeRaf) return;
-    resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resize(); });
-  });
-  // re-render once more after web fonts settle (footer height can shift)
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
-
-  if (reduce) return; // honor reduced-motion: stay static
-
-  footer.addEventListener('pointermove', (e) => {
-    const r = footer.getBoundingClientRect();
-    mouse.tx = e.clientX - r.left;
-    mouse.ty = e.clientY - r.top + ARCH_H; // canvas sits ARCH_H px above footer
-    mouse.target = 1;
-    wake();
-  }, { passive: true });
-  // mouse leaves, or a touch lifts/cancels (pointerleave isn't reliable on
-  // touch) → ease the dome back to flat so it never sticks on mobile
-  const release = () => { mouse.target = 0; wake(); };
-  footer.addEventListener('pointerleave', release);
-  footer.addEventListener('pointerup', release);
-  footer.addEventListener('pointercancel', release);
-})();
-
-// ── CREDIBILITY BAR — duplicate the ticker for a seamless -50% loop ──
-// The CSS marquee translates the track by -50%; that's only seamless if the
-// track holds two identical halves. We clone the authored items once here so
-// the markup stays single-source. (No JS → the single set just sits static.)
-(function credMarquee() {
-  const track = document.getElementById('cred-track');
-  if (!track) return;
+// ── MARQUEES — the credibility ticker and the three catalog shelves ──
+// Each [data-marquee] holds one [data-marquee-track]. The CSS translates the
+// track by -50%; that's only seamless if it holds two identical halves, so the
+// authored items are cloned once here (markup stays single-source; no JS → the
+// single set just sits static). A data-speed (px/s) sets the animation
+// duration from the track's own width so every shelf moves at the same pace
+// regardless of how many tiles it carries. Off-screen shelves are paused so
+// they don't churn the compositor while you read the rest of the page.
+(function marquees() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const originals = Array.from(track.children);
-  originals.forEach((node) => {
-    const clone = node.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    track.appendChild(clone);
+  document.querySelectorAll('[data-marquee]').forEach((row) => {
+    const track = row.querySelector('[data-marquee-track]');
+    if (!track) return;
+    Array.from(track.children).forEach((node) => {
+      const clone = node.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      track.appendChild(clone);
+    });
+    const speed = Number(row.dataset.speed);
+    if (speed > 0) {
+      const setDuration = () => {
+        const half = track.scrollWidth / 2;
+        if (half > 0) track.style.setProperty('--dur', `${(half / speed).toFixed(1)}s`);
+      };
+      // styles.css loads non-blocking, so the first measurement can land on
+      // the unstyled track — re-measure once the sheet applies, on load, on
+      // fonts, and whenever the track's box changes (see canvas notes above).
+      setDuration();
+      document.getElementById('app-css')?.addEventListener('load', setDuration, { once: true });
+      window.addEventListener('load', setDuration, { once: true });
+      if (window.ResizeObserver) new ResizeObserver(setDuration).observe(track);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(setDuration);
+    }
+    const io = new IntersectionObserver((entries) => {
+      track.style.animationPlayState = entries[0].isIntersecting ? 'running' : 'paused';
+    });
+    io.observe(row);
   });
-  // Pause the animation while the bar is off-screen so it isn't churning the
-  // compositor as you read the rest of the page.
-  const bar = track.closest('.cred-bar') || track;
-  const io = new IntersectionObserver((entries) => {
-    track.style.animationPlayState = entries[0].isIntersecting ? 'running' : 'paused';
-  });
-  io.observe(bar);
 })();
 
 // FEATURES — the palm fronds (grow) and the feature text (rise) are now driven
 // entirely by CSS scroll-driven animations (animation-timeline: view()), so they
 // animate continuously with scroll position regardless of where the page loads.
 // No JS observer needed; see styles.css.
+
+// ── NIGHT — Day / Night: one crossfade between the daylight frame and the
+// lit one, and night falling on the section with it (.is-night on the
+// section drives the ink, the type and the controls in CSS). Plays once by
+// itself as the section enters — after both frames have decoded so the fade
+// never pops — then the buttons own it.
+(function nightMode() {
+  const scene = document.getElementById('night-scene');
+  if (!scene) return;
+  const section = scene.closest('.night');
+  const figure = scene.closest('.night-figure');
+  const frames = Array.from(scene.querySelectorAll('.night-frame'));
+  const buttons = Array.from(document.querySelectorAll('.night-btn'));
+
+  let timer = 0;
+  const setButtons = (state) => buttons.forEach((b) => {
+    const on = b.dataset.state === state;
+    b.classList.toggle('is-on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  const goDay = () => {
+    clearTimeout(timer);
+    scene.dataset.state = 'day';
+    figure?.classList.remove('is-night');
+    section?.classList.remove('is-night');
+    setButtons('day');
+  };
+  const goNight = () => {
+    clearTimeout(timer);
+    setButtons('night');
+    figure?.classList.add('is-night');
+    section?.classList.add('is-night');
+    scene.dataset.state = 'night';
+  };
+  buttons.forEach((b) => b.addEventListener('click', () => (b.dataset.state === 'night' ? goNight() : goDay())));
+
+  let ready = null;
+  const warm = () => {
+    if (ready) return ready;
+    frames.forEach((img) => { img.loading = 'eager'; });
+    ready = Promise.all(frames.map((img) => (img.decode ? img.decode().catch(() => {}) : Promise.resolve())));
+    return ready;
+  };
+  new IntersectionObserver((entries, io) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    io.disconnect(); warm();
+  }, { rootMargin: '900px 0px' }).observe(scene);
+
+  // Fire as the section's top edge comes into view, so the darkness is
+  // already gathering while the window scrolls up into place.
+  let played = false;
+  new IntersectionObserver((entries, io) => {
+    if (played || !entries.some((e) => e.isIntersecting)) return;
+    played = true; io.disconnect();
+    warm().then(() => { timer = setTimeout(goNight, 60); });
+  }, { threshold: 0.02 }).observe(section || scene);
+
+  // ── stars: two static layers drawn once per size — a dense, faint, far
+  // field and a sparse, bright, near one (CSS slips them past each other on
+  // scroll). Densest in the sky above the headline, thinning toward the foot.
+  // A handful of DOM "breathers" ease in and out on their own.
+  const far = document.getElementById('night-stars-far');
+  const near = document.getElementById('night-stars-near');
+  const breathers = document.getElementById('night-breathers');
+  const hash = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+  const drawLayer = (canvas, seed, per, sizeMin, sizeMax, aMin, halo) => {
+    const r = canvas.getBoundingClientRect();
+    const w = Math.round(r.width), hgt = Math.round(r.height);
+    if (!w || !hgt) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = w * dpr; canvas.height = hgt * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, hgt);
+    const count = Math.round((w * hgt) / per);
+    for (let i = 0; i < count; i++) {
+      const k = seed + i * 3;
+      const x = hash(k + 1) * w;
+      const yy = hash(k + 2);
+      if (hash(k + 3) > Math.pow(Math.max(0, 1 - yy / 0.93), 1.1)) continue;
+      const y = yy * hgt;
+      const size = sizeMin + hash(k * 7 + 5) * (sizeMax - sizeMin);
+      ctx.globalAlpha = aMin + Math.pow(hash(k * 11 + 9), 1.3) * (1 - aMin);
+      ctx.fillStyle = hash(k * 13 + 4) < 0.22 ? '#d6e4ff' : '#fff6e6';
+      if (halo) { ctx.shadowColor = 'rgba(255,246,225,0.8)'; ctx.shadowBlur = 5 + size * 2; } else { ctx.shadowBlur = 0; }
+      ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  };
+  const draw = () => {
+    if (far) drawLayer(far, 1000, 2400, 0.45, 1.1, 0.3, false);
+    if (near) drawLayer(near, 5000, 11000, 1.1, 2.1, 0.6, true);
+    if (breathers && !breathers.childElementCount) {
+      for (let i = 0; i < 12; i++) {
+        const b = document.createElement('span');
+        b.className = 'night-breather';
+        b.style.left = (8 + hash(i * 5 + 21) * 84) + '%';
+        b.style.top = (6 + hash(i * 5 + 22) * 54) + '%';
+        b.style.setProperty('--dur', (5 + hash(i * 5 + 23) * 4).toFixed(1) + 's');
+        b.style.setProperty('--delay', (-hash(i * 5 + 24) * 6).toFixed(1) + 's');
+        breathers.appendChild(b);
+      }
+    }
+  };
+  if (far || near) {
+    draw();
+    if (window.ResizeObserver && section) new ResizeObserver(draw).observe(section);
+    window.addEventListener('load', draw, { once: true });
+  }
+})();
+
+// ── NAV ON INK — while an ink region is under the fixed bar (the night
+// section in Night, or the closing block) the bar smokes over instead of
+// floating as a paper strip. One rect check per scroll frame.
+(function navOnInk() {
+  const nav = document.querySelector('nav');
+  const night = document.getElementById('night');
+  const ink = night?.querySelector('.night-ink');
+  const closing = document.querySelector('.closing');
+  if (!nav || (!ink && !closing)) return;
+  let raf = 0;
+  const check = () => {
+    raf = 0;
+    const navBottom = nav.getBoundingClientRect().bottom;
+    const under = (el) => { const r = el.getBoundingClientRect(); return r.top < navBottom && r.bottom > 0; };
+    const onNight = !!(ink && night.classList.contains('is-night') && under(ink));
+    const on = onNight || (closing && under(closing));
+    document.documentElement.classList.toggle('nav-on-ink', !!on);
+    document.documentElement.classList.toggle('nav-on-night', onNight);
+  };
+  const schedule = () => { if (!raf) raf = requestAnimationFrame(check); };
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', schedule);
+  night?.querySelectorAll('.night-btn').forEach((b) => b.addEventListener('click', () => setTimeout(check, 0)));
+  if (night && window.MutationObserver) new MutationObserver(schedule).observe(night, { attributes: true, attributeFilter: ['class'] });
+  check();
+})();
