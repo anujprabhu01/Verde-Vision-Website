@@ -2631,7 +2631,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   text-align: center;
   padding: clamp(7rem, 12vw, 10.5rem) 5vw clamp(5rem, 8vw, 7rem);
 }
-.closing-top .section-label { color: #9fcfb1; margin-bottom: 1.4rem; }
+.closing-top .section-label { color: #ebe0cb; margin-bottom: 1.4rem; }
 .closing-top .section-label::before,
 .closing-top .section-label::after {
   content: "";
@@ -2649,7 +2649,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   max-width: 14ch;
   margin: 0 auto 1.4rem;
 }
-.closing-top h2 em { color: #9fcfb1; }
+.closing-top h2 em { color: #ebe0cb; }   /* same paper as the rest of the line, no accent */
 .closing-sub {
   color: rgba(235,224,203,0.68);
   max-width: 46ch;
