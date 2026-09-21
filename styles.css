@@ -3106,9 +3106,19 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 .night-figure.is-night .nc-night { display: inline; }
 
 @media (max-width: 900px) {
-  .night-grid { grid-template-columns: 1fr; row-gap: 2rem; }
+  /* one column, read in order: the pitch, then the yard, then the toggle
+     directly under the picture it changes. The copy's children flow as
+     grid items of their own so the figure can slot in after the paragraphs;
+     their own bottom margins carry the spacing, so the grid adds none. */
+  .night-grid { grid-template-columns: 1fr; row-gap: 0; }
+  .night-copy { display: contents; }
   .night-copy h2 { max-width: 18ch; }
-  .night-figure { order: -1; }            /* the yard first on phones, then the copy */
+  .night-copy .section-label { order: 1; }
+  .night-copy h2 { order: 2; }
+  .night-sub { order: 3; }
+  .night-figure { order: 4; margin: 1.25rem 0 0; }
+  .night-toggle { order: 5; margin-top: 1.6rem; }
+  .night-gesture { order: 6; }
   .night-scene { aspect-ratio: 4 / 3; }
   .night-frame { object-position: 42% 50%; }
 }
