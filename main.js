@@ -759,6 +759,7 @@ applyForm?.addEventListener('submit', async (e) => {
     Array.from(track.children).forEach((node) => {
       const clone = node.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');
+      clone.querySelectorAll('button, a').forEach((el) => { el.tabIndex = -1; });   // one tab stop per tile
       track.appendChild(clone);
     });
     const speed = Number(row.dataset.speed);
@@ -781,6 +782,92 @@ applyForm?.addEventListener('submit', async (e) => {
     });
     io.observe(row);
   });
+})();
+
+// ── PLANT CARDS — click any catalog tile for its card ────────────────
+// The card's facts come from assets/catalog/catalog.json, which
+// tools/export_catalog.py writes from the app's own PlantItem catalog, so the
+// site can only say what the app says. Fetched once — warmed as the shelves
+// approach, or on the first click — and shown in a native <dialog> (focus
+// trap, Esc, focus return all come free). The shelves pause while it's open.
+(function plantCards() {
+  const dialog = document.getElementById('plant-card');
+  const rows = document.querySelector('.catalog-rows');
+  if (!dialog || !rows || typeof dialog.showModal !== 'function') return;
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let data = null, loading = null;
+  const load = () => loading || (loading = fetch('assets/catalog/catalog.json', { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    .then((d) => (data = d))
+    .catch((err) => { loading = null; throw err; }));
+
+  const fill = (p) => {
+    const isPlant = p.category !== 'hardscape' && p.category !== 'lighting';
+    dialog.classList.toggle('is-photo', !!p.photo);
+    const img = $('pc-img'); const c = p.card || { src: p.image, w: 320, h: 320 };
+    img.width = c.w; img.height = c.h; img.src = c.src; img.alt = p.name;
+    $('pc-kind').textContent = p.kind;
+    const made = $('pc-made');
+    made.textContent = p.made === 'scanned' ? (isPlant ? 'Scanned from a real plant' : 'Scanned on site')
+                     : p.made === 'modelled' ? 'Modelled in 3D' : '';
+    made.dataset.made = p.made || '';
+    made.hidden = !p.made;
+    $('pc-name').textContent = p.name;
+    const bot = $('pc-botanical'); bot.textContent = p.botanical || ''; bot.hidden = !p.botanical;
+    const size = p.category === 'lighting' ? p.height
+               : p.height && p.width ? `${p.height} tall × ${p.width} wide` : p.height || p.width;
+    const facts = [
+      [isPlant ? 'Mature size' : p.category === 'lighting' ? 'Height' : 'Size', size],
+      ['Sun', p.sun], ['Water', p.water],
+      ['Cold hardy to', p.coldF == null ? null : `${p.coldF} °F`],
+      ['Blooms', p.bloom], ['Growth', p.growth], ['Lifespan', p.lifespan],
+      ['Origin', p.origin, true],
+    ].filter(([, v]) => v);
+    $('pc-facts').innerHTML = facts.map(([k, v, wide]) =>
+      `<div${wide ? ' class="wide"' : ''}><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+    const sizes = $('pc-sizes');
+    sizes.innerHTML = p.sizes && p.sizes.length
+      ? `<b>${isPlant ? 'Sizes in the app' : 'Sizes'}</b> &middot; ${p.sizes.map(esc).join(' &middot; ')}` : '';
+    sizes.hidden = !sizes.innerHTML;
+    $('pc-desc').textContent = p.description || '';
+  };
+
+  const open = (slug) => load().then(() => {
+    const p = data && data[slug];
+    if (!p) return;
+    fill(p);
+    dialog.showModal();
+    $('pc-body').scrollTop = 0;
+  }).catch(() => {});
+  // the page state follows the dialog's own `open` attribute, whichever way it
+  // closes (Esc, backdrop, the button) — the close event is a queued task and
+  // a backgrounded tab can hold it back
+  const sync = () => document.documentElement.classList.toggle('card-open', dialog.open);
+  new MutationObserver(sync).observe(dialog, { attributes: true, attributeFilter: ['open'] });
+
+  rows.addEventListener('click', (e) => {
+    const tile = e.target.closest('.cat-tile[data-plant]');
+    if (tile) open(tile.dataset.plant);
+  });
+  // hovering a tile fetches its card image, so the click opens on a picture
+  const warmed = new Set();
+  rows.addEventListener('mouseover', (e) => {
+    const tile = e.target.closest('.cat-tile[data-plant]');
+    const p = tile && data && data[tile.dataset.plant];
+    if (!p || !p.card || warmed.has(p.slug)) return;
+    warmed.add(p.slug); new Image().src = p.card.src;
+  });
+  dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });   // the backdrop
+  dialog.querySelector('.pc-close').addEventListener('click', () => dialog.close());
+
+  if (window.IntersectionObserver) {
+    const io = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect(); load().catch(() => {});
+    }, { rootMargin: '600px 0px' });
+    io.observe(rows);
+  }
 })();
 
 // FEATURES — the palm fronds (grow) and the feature text (rise) are now driven
@@ -908,11 +995,32 @@ applyForm?.addEventListener('submit', async (e) => {
   const closing = document.querySelector('.closing');
   if (!nav || (!ink && !closing)) return;
   let raf = 0;
+  // The ink's box is mostly fade: its mask is a smoothstep over the top 22%
+  // and bottom 21%, and the scroll ramps in styles.css take the whole layer
+  // out over the last 80% of its exit. Going by the box alone kept the bar
+  // dark well into the catalog, over paper. So sample how dark the ink
+  // actually is at the bar's foot and flip at half.
+  const MASK_IN = 0.22, MASK_OUT = 0.79;
+  const ramped = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline: view()');
+  const smooth = (x) => x * x * (3 - 2 * x);
+  const inkDarkUnder = (navBottom) => {
+    const r = ink.getBoundingClientRect();
+    if (r.height <= 0 || r.top >= navBottom || r.bottom <= 0) return false;
+    const t = (navBottom - r.top) / r.height;
+    let a = smooth(t < MASK_IN ? t / MASK_IN : t > MASK_OUT ? (1 - t) / (1 - MASK_OUT) : 1);
+    if (ramped) {
+      const entered = (innerHeight - r.top) / r.height;   // view() entry 0%→100%
+      const exited = -r.top / r.height;                   // view() exit 0%→100%
+      if (entered < 0.8) { const q = 1 - Math.max(0, entered / 0.8); a *= 1 - q * q; }   // ramp in, ease-out
+      if (exited > 0.2)  { const q = Math.min(1, (exited - 0.2) / 0.8); a *= 1 - q * q; } // ramp out, ease-in
+    }
+    return a >= 0.5;
+  };
   const check = () => {
     raf = 0;
     const navBottom = nav.getBoundingClientRect().bottom;
     const under = (el) => { const r = el.getBoundingClientRect(); return r.top < navBottom && r.bottom > 0; };
-    const onNight = !!(ink && night.classList.contains('is-night') && under(ink));
+    const onNight = !!(ink && night.classList.contains('is-night') && inkDarkUnder(navBottom));
     const on = onNight || (closing && under(closing));
     document.documentElement.classList.toggle('nav-on-ink', !!on);
     document.documentElement.classList.toggle('nav-on-night', onNight);
