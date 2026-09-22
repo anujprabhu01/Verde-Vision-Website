@@ -784,6 +784,87 @@ applyForm?.addEventListener('submit', async (e) => {
   });
 })();
 
+// ── TYPESET HEADLINES — section h2s rise line by line out of clipped boxes
+// Line breaks depend on the viewport and the fonts, so the split happens
+// here, after the stylesheet and the webfonts are in: wrap every word, read
+// which rendered line it landed on, then rebuild the heading as one clipped
+// block per line (re-wrapping the <em> runs). styles.css animates .hl-in.
+// Re-split on resize; a heading whose section is already revealed simply
+// re-renders in place. Off under reduced motion — the plain fade stays.
+(function typesetHeadlines() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const heads = Array.from(document.querySelectorAll('[data-reveal-section] h2.reveal'));
+  if (!heads.length) return;
+  heads.forEach((h) => { h.dataset.hlHtml = h.innerHTML; h.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim()); });
+
+  // Every word is wrapped so its rendered line can be read off the layout.
+  // `space` records whether real whitespace preceded it — punctuation that
+  // follows a tag ("<em>yard</em>.") has none, and must not gain one when
+  // the line is rebuilt.
+  let spaced = false;
+  const wrapWords = (node, words, em) => {
+    Array.from(node.childNodes).forEach((child) => {
+      if (child.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); spaced = true; return; }
+          const w = document.createElement('span'); w.textContent = part;
+          frag.appendChild(w); words.push({ w, em, space: spaced });
+          spaced = false;
+        });
+        child.replaceWith(frag);
+      } else if (child.nodeType === 1 && child.tagName !== 'BR') {
+        wrapWords(child, words, em || child.tagName === 'EM');
+      }
+    });
+  };
+  const split = (h) => {
+    h.innerHTML = h.dataset.hlHtml;
+    const words = []; spaced = false; wrapWords(h, words, false);
+    const lines = []; let top = null;
+    words.forEach((word) => {
+      const t = word.w.offsetTop;
+      if (top === null || Math.abs(t - top) > 3) { lines.push([]); top = t; }
+      lines[lines.length - 1].push(word);
+    });
+    const base = getComputedStyle(h).transitionDelay;      // the h2's own stagger slot (.reveal-2 etc.)
+    h.textContent = '';
+    lines.forEach((line, i) => {
+      const box = document.createElement('span'); box.className = 'hl-line';
+      const inner = document.createElement('span'); inner.className = 'hl-in';
+      inner.style.setProperty('--i', i);
+      let em = null;
+      line.forEach((word, j) => {
+        const target = word.em ? (em || (em = inner.appendChild(document.createElement('em')))) : (em = null, inner);
+        if (j && word.space) target.appendChild(document.createTextNode(' '));
+        target.appendChild(document.createTextNode(word.w.textContent));
+      });
+      if (i < lines.length - 1) inner.appendChild(document.createTextNode(' '));   // so a copied headline keeps its spaces
+      box.appendChild(inner); h.appendChild(box);
+    });
+    h.style.setProperty('--hl-base', base);
+    h.classList.add('is-split');
+  };
+  let width = -1, t = 0;
+  const run = () => {
+    if (!innerWidth || innerWidth === width) return;    // nothing to measure in a 0-wide (hidden) tab
+    width = innerWidth;
+    heads.forEach(split);
+  };
+  const ready = Promise.all([
+    document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve(),
+    new Promise((res) => {
+      const link = document.getElementById('app-css');
+      if (!link || link.media === 'all' || link.sheet) res(); else link.addEventListener('load', res, { once: true });
+    }),
+  ]);
+  ready.then(() => {
+    run();
+    addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+  });
+})();
+
 // ── PLANT CARDS — click any catalog tile for its card ────────────────
 // The card's facts come from assets/catalog/catalog.json, which
 // tools/export_catalog.py writes from the app's own PlantItem catalog, so the

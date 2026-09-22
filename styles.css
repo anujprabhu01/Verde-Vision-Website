@@ -495,10 +495,15 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
 }
 
 .hero-line { display: inline-block; }
+/* each hero line is typeset out of a clipped box — same stagger as before,
+   but the line arrives whole instead of fading */
+.hero-mask { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.hero-mask .hero-anim { opacity: 1; transform: translateY(112%); animation-name: heroMaskRise; animation-duration: 1.5s; }
+@keyframes heroMaskRise { to { transform: translateY(0); } }
 /* "See the yard" should always sit on a single line — it's always short
    enough that this never forces grid column growth. The second line is
    allowed to wrap naturally (matches the Mac layout). */
-.hero-line:first-child { white-space: nowrap; }
+.hero-mask:first-child .hero-line { white-space: nowrap; }
 
 /* Centered tagline + scroll-cue chevron at the bottom of the hero. The
    text-shadow keeps the green legible where the line overlaps the
@@ -2771,6 +2776,18 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
     transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
+/* headlines are typeset rather than faded: main.js splits each h2 into its
+   rendered lines and every line rises out of its own clipped box, one after
+   another. The h2 itself stays put so nothing double-animates. */
+[data-reveal-section] h2.is-split { opacity: 1; transform: none; transition: none; }
+.hl-line { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+.hl-in {
+  display: block;
+  transform: translateY(112%);
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--hl-base, 90ms) + var(--i, 0) * 110ms);
+}
+[data-reveal-section].is-revealed .hl-in { transform: none; }
 [data-reveal-section] .reveal-2 { transition-delay: 90ms; }
 [data-reveal-section] .reveal-3 { transition-delay: 180ms; }
 [data-reveal-section] .reveal-4 { transition-delay: 290ms; }
@@ -2782,6 +2799,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hl-in, .hero-mask .hero-anim { transform: none; transition: none; animation: none; }
   [data-reveal-section] .reveal {
     opacity: 1;
     transform: none;
