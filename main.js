@@ -425,10 +425,43 @@ const navObserver = new IntersectionObserver(
 sections.forEach((s) => navObserver.observe(s));
 
 
-// ── Announcement banner — dismissal is per page view; a refresh brings it back.
-document.getElementById('banner-close')?.addEventListener('click', () => {
-  document.documentElement.classList.add('banner-dismissed');
-});
+// ── ANNOUNCEMENT BANNER — a pop-down, not a fixture ──
+// Drops in a few seconds after the page settles, stays long enough to read
+// the line twice, then retires on its own. Once per SESSION rather than per
+// page view: a strip that animates in on every single load is more
+// irritating than one that just sits there. --banner-h carries the nav and
+// the progress bar down with it, so nothing in the page itself reflows.
+(function siteBanner() {
+  const el = document.getElementById('site-banner');
+  if (!el) return;
+  const root = document.documentElement;
+  const KEY = 'vv-banner-seen';
+  try { if (sessionStorage.getItem(KEY)) return; } catch (e) { /* private mode */ }
+
+  const AFTER = 3000;    // measured from the moment the loader clears
+  const STAY = 10000;
+
+  const retire = () => root.classList.remove('banner-open');
+  const show = () => {
+    try { sessionStorage.setItem(KEY, '1'); } catch (e) { /* private mode */ }
+    root.classList.add('banner-open');
+    setTimeout(retire, STAY);
+  };
+  document.getElementById('banner-close')?.addEventListener('click', retire);
+
+  // start counting once the loader is out of the way, so the banner can't
+  // spend its appearance behind the intro cover
+  const start = () => setTimeout(show, AFTER);
+  if (root.classList.contains('is-loading')) {
+    const mo = new MutationObserver(() => {
+      if (root.classList.contains('is-loading')) return;
+      mo.disconnect(); start();
+    });
+    mo.observe(root, { attributes: true, attributeFilter: ['class'] });
+  } else {
+    start();
+  }
+})();
 
 // ── Pricing — billing toggle, card detail expanders, founding-pricing form ──
 const btMonthly      = document.getElementById('bt-monthly');

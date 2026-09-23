@@ -232,8 +232,9 @@
     })();
   </script>
 
-  <!-- ANNOUNCEMENT BANNER — dismissal lasts for the current page view only;
-       every fresh load shows the banner again. -->
+  <!-- ANNOUNCEMENT BANNER — hidden on arrival. main.js drops it in a few
+       seconds after the page settles, holds it long enough to read, then
+       retires it. Once per session. -->
   <div class="site-banner" id="site-banner">
     <p class="site-banner-text">
       <span class="banner-full"><strong>We're launching at The Landscape Expo</strong> - Anaheim, November 4-5.<span class="banner-more"> Come see Verde Vision live.</span></span>
@@ -944,7 +945,7 @@
     </footer>
   </section>
 
-  <script src="main.js?v=85"></script>
+  <script src="main.js?v=87"></script>
 
 </body>
 </html>
