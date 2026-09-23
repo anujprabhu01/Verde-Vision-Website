@@ -79,6 +79,8 @@ MODELLED = {
     "Blue Palo Verde", "Chaste Tree", "Beaked Yucca", "Agave Geminiflora",   # purchased models
     "Texas Ebony", "Mulga", "Desert Spoon", "Green Hopseed", "Ocotillo",      # generated (Sep 2026)
     "Aloe Vera", "Mexican Fence Post", "Orange Tree",                         # .blend marketplace models
+    "Saguaro", "Honey Mesquite", "Mexican Fan Palm",                          # confirmed Sep 2026
+    "Argentine Toothpick", "Red Yucca",
 }
 SCANNED = {
     "Agave Americana", "Golden Barrel Cactus", "AZ Boulder 1", "Totem Pole Cactus", "Organ Pipe Cactus",
@@ -88,20 +90,26 @@ SCANNED = {
     "White Dawn Lantana", "Purple Lantana", "Yellow Lantana", "Texas Sage", "Aloe Ferox", "Blue Glow Agave",
 }
 
+# Most recent additions, by SITE name — the headline says the library keeps
+# growing, so the newest few say so on the tile. Keep this short (3-5): a
+# marker on a third of the shelf stops meaning anything. Move entries out as
+# newer ones land.
+NEW = {"Green Hopseed", "Desert Spoon", "Mulga", "Artichoke Agave"}
+
 # The three shelves, in tile order, by SITE name. Lights and boulders are
 # spaced through the rows on purpose; keep each row long enough (≥ 13) that
 # the loop doesn't visibly repeat on a wide screen.
 ROWS = [
-    {"dir": "left", "speed": 34, "tiles": [
+    {"dir": "left", "speed": 40, "tiles": [
         "Blue Palo Verde", "Desert Ironwood", "Honey Mesquite", "Path Light", "Desert Willow", "Texas Ebony",
         "Mulga", "Chaste Tree", "Orange Tree", "Leatherleaf Acacia", "Arizona Boulder", "Mexican Fan Palm",
         "Madagascar Palm", "Texas Sage", "Green Hopseed", "Jojoba", "Little John Bottlebrush", "Yellow Bells",
         "Yellow Lantana"]},
-    {"dir": "right", "speed": 30, "tiles": [
+    {"dir": "right", "speed": 24, "tiles": [
         "Saguaro", "Organ Pipe", "Totem Pole", "Mexican Fence Post", "Uplight", "Argentine Toothpick",
         "Golden Barrel", "Fire Barrel", "Santa Rita Prickly Pear", "Agave Americana", "Artichoke Agave",
         "Flat Boulder", "Blue Glow Agave", "Black Tip Agave", "Twin-flowered Agave"]},
-    {"dir": "left", "speed": 28, "tiles": [
+    {"dir": "left", "speed": 34, "tiles": [
         "Desert Spoon", "Red Yucca", "Flood Light", "Beaked Yucca", "Aloe Vera", "Purple Lantana", "Ocotillo",
         "Aloe Ferox", "Gray Boulder", "Moroccan Mound", "Tropical Agave", "Firestick", "White Dawn Lantana"]},
 ]
@@ -306,8 +314,13 @@ def card_image(it: dict, e: dict, xcassets: Path):
 
 def tile_html(e: dict) -> str:
     cls = "cat-tile cat-tile--photo" if e["photo"] else "cat-tile"
+    # .cat-shot exists to carry the contact shadow and to bottom-align the
+    # render, so every plant on a shelf stands on the same ground line.
+    new_mark = '<span class="cat-new">New</span>' if e["name"] in NEW else ""
     return (f'          <li class="{cls}" data-plant="{e["slug"]}">'
+            f'<span class="cat-shot">'
             f'<img src="{e["image"]}" alt="{e["name"]}" width="320" height="320" loading="lazy" decoding="async" />'
+            f'{new_mark}</span>'
             f'<span class="cat-name">{e["name"]}</span><span class="cat-kind">{e["kind"]}</span>'
             f'<button type="button" class="cat-more" aria-label="About {e["name"]}"></button></li>')
 

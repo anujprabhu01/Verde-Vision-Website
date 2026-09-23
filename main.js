@@ -776,6 +776,25 @@ applyForm?.addEventListener('submit', async (e) => {
 
 })();
 
+// ── CATALOG SHELVES ON TOUCH — hold to stop them ──
+// The shelves pause on hover, which a finger doesn't have. Before this the
+// only way to stop one on a phone was to open a plant card. A touch anywhere
+// on the shelves holds all three still, and they start again a beat after
+// you let go, so a tap that opens a card doesn't leave them frozen.
+(function shelfHold() {
+  const rows = document.querySelector('.catalog-rows');
+  if (!rows) return;
+  let release = 0;
+  const hold = () => { clearTimeout(release); rows.classList.add('is-held'); };
+  const letGo = () => {
+    clearTimeout(release);
+    release = setTimeout(() => rows.classList.remove('is-held'), 2500);
+  };
+  rows.addEventListener('touchstart', hold, { passive: true });
+  rows.addEventListener('touchend', letGo, { passive: true });
+  rows.addEventListener('touchcancel', letGo, { passive: true });
+})();
+
 // ── MARQUEES — the credibility ticker and the three catalog shelves ──
 // Each [data-marquee] holds one [data-marquee-track]. The CSS translates the
 // track by -50%; that's only seamless if it holds two identical halves, so the
@@ -810,8 +829,13 @@ applyForm?.addEventListener('submit', async (e) => {
       if (window.ResizeObserver) new ResizeObserver(setDuration).observe(track);
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(setDuration);
     }
+    // A class, not an inline style: inline animation-play-state outranks every
+    // stylesheet rule, so setting 'running' here silently killed the hover
+    // pause on both the shelves and the credibility ticker (the !important on
+    // the card-open rule is the scar from that). Every pause reason now sets
+    // the same value through CSS, so they simply add up.
     const io = new IntersectionObserver((entries) => {
-      track.style.animationPlayState = entries[0].isIntersecting ? 'running' : 'paused';
+      row.classList.toggle('is-offscreen', !entries[0].isIntersecting);
     });
     io.observe(row);
   });

@@ -86,7 +86,7 @@
   "bloom": "Spring – Early Summer",
   "growth": "Fast",
   "lifespan": "Long-lived (25+ yrs)",
-  "made": null,
+  "made": "modelled",
   "card": {
    "src": "assets/catalog/card/honey-mesquite.webp",
    "w": 800,
@@ -362,7 +362,7 @@
   "bloom": "Spring – Summer",
   "growth": "Fast",
   "lifespan": "Long-lived (25+ yrs)",
-  "made": null,
+  "made": "modelled",
   "card": {
    "src": "assets/catalog/card/mexican-fan-palm.webp",
    "w": 355,
@@ -604,7 +604,7 @@
   "bloom": "Late Spring",
   "growth": "Slow",
   "lifespan": "Very long-lived (100+ yrs)",
-  "made": null,
+  "made": "modelled",
   "card": {
    "src": "assets/catalog/card/saguaro.webp",
    "w": 130,
@@ -752,7 +752,7 @@
   "bloom": "Spring – Summer",
   "growth": "Slow",
   "lifespan": "Very long-lived (100+ yrs)",
-  "made": null,
+  "made": "modelled",
   "card": {
    "src": "assets/catalog/card/argentine-toothpick.webp",
    "w": 269,
@@ -1085,7 +1085,7 @@
   "bloom": "Spring through fall (April – October), coral-red spikes, repeat blooming",
   "growth": "Moderate",
   "lifespan": "Long-lived (25+ yrs)",
-  "made": null,
+  "made": "modelled",
   "card": {
    "src": "assets/catalog/card/red-yucca.webp",
    "w": 743,
