@@ -2097,7 +2097,10 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   counter-increment: why-bubble;
   position: absolute; left: var(--bx); top: var(--by);
   width: var(--bd); height: var(--bd);
-  transform: translate(-50%, -50%);
+  /* centring rides the independent `translate` property so `transform` is
+     free for the drift animation below (translate is applied first) */
+  translate: -50% -50%;
+  --amp: 16px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
   text-align: center; padding: 1rem;
   border-radius: 50%; border: 1.5px solid rgba(46, 93, 67, 0.3);
@@ -2122,6 +2125,9 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
               0 18px 36px -16px rgba(28,42,33,0.3);
   z-index: 5; outline: none;
+  /* hold still while it's being read or aimed at (it stops where it is —
+     no snap back, since the drift is a transform the growth doesn't use) */
+  animation-play-state: paused;
 }
 .why-bubble-problem {
   font-family: var(--font-serif); font-style: italic; font-weight: 500; font-size: 1.25rem; line-height: 1.3;
@@ -2142,6 +2148,57 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 .why-bubble:focus-visible .why-bubble-solution,
 .why-bubble.is-active .why-bubble-solution { max-height: 8rem; opacity: 1; transition-delay: 0.35s; }
 
+/* the drift — the shadows already say these hover above the contour map, so
+   they're given a little of the motion that implies: each bubble tours a
+   small upright ellipse balanced on its own resting point, at constant
+   speed, over 12-17s. Three shapes and five periods/phases mean the ring
+   never falls into step with itself. The lighter bubbles bob a bit more.
+   Rides `transform`; the centring uses `translate`.
+   --amp is THE dial: it scales every path at once (smaller on phones, where
+   the five sit closer together). */
+@keyframes why-drift-a {
+  0%     { transform: translate(0, calc(var(--amp) * -1.0)); }
+  12.5%  { transform: translate(calc(var(--amp) * 0.39), calc(var(--amp) * -0.71)); }
+  25%    { transform: translate(calc(var(--amp) * 0.55), 0); }
+  37.5%  { transform: translate(calc(var(--amp) * 0.39), calc(var(--amp) * 0.71)); }
+  50%    { transform: translate(0, calc(var(--amp) * 1.0)); }
+  62.5%  { transform: translate(calc(var(--amp) * -0.39), calc(var(--amp) * 0.71)); }
+  75%    { transform: translate(calc(var(--amp) * -0.55), 0); }
+  87.5%  { transform: translate(calc(var(--amp) * -0.39), calc(var(--amp) * -0.71)); }
+  100%   { transform: translate(0, calc(var(--amp) * -1.0)); }
+}
+@keyframes why-drift-b {
+  0%     { transform: translate(0, calc(var(--amp) * -0.8)); }
+  12.5%  { transform: translate(calc(var(--amp) * -0.53), calc(var(--amp) * -0.57)); }
+  25%    { transform: translate(calc(var(--amp) * -0.75), 0); }
+  37.5%  { transform: translate(calc(var(--amp) * -0.53), calc(var(--amp) * 0.57)); }
+  50%    { transform: translate(0, calc(var(--amp) * 0.8)); }
+  62.5%  { transform: translate(calc(var(--amp) * 0.53), calc(var(--amp) * 0.57)); }
+  75%    { transform: translate(calc(var(--amp) * 0.75), 0); }
+  87.5%  { transform: translate(calc(var(--amp) * 0.53), calc(var(--amp) * -0.57)); }
+  100%   { transform: translate(0, calc(var(--amp) * -0.8)); }
+}
+@keyframes why-drift-c {
+  0%     { transform: translate(0, calc(var(--amp) * -1.2)); }
+  12.5%  { transform: translate(calc(var(--amp) * 0.32), calc(var(--amp) * -0.85)); }
+  25%    { transform: translate(calc(var(--amp) * 0.45), 0); }
+  37.5%  { transform: translate(calc(var(--amp) * 0.32), calc(var(--amp) * 0.85)); }
+  50%    { transform: translate(0, calc(var(--amp) * 1.2)); }
+  62.5%  { transform: translate(calc(var(--amp) * -0.32), calc(var(--amp) * 0.85)); }
+  75%    { transform: translate(calc(var(--amp) * -0.45), 0); }
+  87.5%  { transform: translate(calc(var(--amp) * -0.32), calc(var(--amp) * -0.85)); }
+  100%   { transform: translate(0, calc(var(--amp) * -1.2)); }
+}
+/* linear, because a circuit walked at constant speed is what floating looks
+   like — easing each of the eight legs would read as a stutter */
+.why-bubble { animation: var(--drift) linear infinite; }
+/* negative delays start each one mid-lap, so nothing lines up on load */
+.why-b1 { --drift: why-drift-a 14s -2s; }
+.why-b2 { --drift: why-drift-b 17s -9s; }
+.why-b3 { --drift: why-drift-c 12s -5s; }
+.why-b4 { --drift: why-drift-a 16s -13s; }
+.why-b5 { --drift: why-drift-b 15s -7s; }
+
 /* base positions + sizes — desktop arranges the five in a ring around the
    centred headline, clear of it and of each other at max expansion
    (clamp(...,...,290px) → 145px radius) */
@@ -2155,7 +2212,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   .why { min-height: 0; padding: 5rem 0 6rem; }
   .why-head h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
   .why-bubbles { position: relative; inset: auto; height: 86vh; min-height: 560px; margin-top: 3rem; }
-  .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, left, top, border-color, box-shadow; }
+  .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, left, top, border-color, box-shadow; --amp: 11px; }
   .why-bubble-problem { font-size: 1.05rem; line-height: 1.25; }
   .why-bubble-solution { font-size: 1.05rem; }
   .why-bubble:hover .why-bubble-problem,
@@ -2176,6 +2233,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   .why-bubble, .why-bubble-problem, .why-bubble-solution { transition: none; }
+  .why-bubble { animation: none; }
 }
 
 /* ── PRICING ── */
