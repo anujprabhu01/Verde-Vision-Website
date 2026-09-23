@@ -1718,11 +1718,16 @@ h2 em {
   transition: transform 0.25s ease;
 }
 .cat-tile--photo img { object-fit: cover; }
-/* the newest few say so, so "added every week" is shown, not claimed */
+/* the newest few say so, so "added every week" is shown, not claimed.
+   A filled clay chip rather than clay text: on a cream tile, letterspaced
+   caps at this size disappear into the card. Clay on cream is the same
+   pairing the announcement strip uses, so it stays in the palette. */
 .cat-new {
   position: absolute; z-index: 2; top: 0; left: 0;
-  font-family: var(--font-display); font-size: 0.55rem; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--clay);
+  font-family: var(--font-display); font-size: 0.56rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; line-height: 1;
+  color: #f5eeda; background: var(--clay);
+  padding: 0.3rem 0.5rem; border-radius: 999px;
 }
 .cat-name {
   font-family: var(--font-serif); font-size: 1.02rem; font-weight: 500;
