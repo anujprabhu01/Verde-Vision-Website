@@ -2108,14 +2108,20 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 .why-bubbles { position: absolute; inset: 0; z-index: 3; counter-reset: why-bubble; }
 .why-bubble {
   counter-increment: why-bubble;
+  /* --size drives width, height AND the centring margins together, so the
+     bubble always hangs centred on its --bx/--by point at whatever size it
+     currently is. Centring deliberately does NOT use transform: a percentage
+     translate resolves against the element's own box, and iOS Safari hands
+     the transform to the compositor the moment the drift animation starts —
+     where the -50% is resolved once and never re-resolved as width grows.
+     That's what pushed a tapped bubble right and down on iPhone while
+     looking perfect everywhere else. Margins are layout, so they can't go
+     stale, and transform is left holding nothing but the drift's pixels. */
   position: absolute; left: var(--bx); top: var(--by);
-  width: var(--bd); height: var(--bd);
-  /* centring rides `transform`, and every drift keyframe carries the -50%
-     with it. Splitting the two — centring on the independent `translate`
-     property, drift on `transform` — works in Chrome but not reliably in
-     iOS Safari, which drops the translate while an animation owns transform:
-     the bubble then anchors at its top-left and grows rightward on tap. */
-  transform: translate(-50%, -50%);
+  --size: var(--bd);
+  width: var(--size); height: var(--size);
+  margin-left: calc(var(--size) * -0.5);
+  margin-top: calc(var(--size) * -0.5);
   --amp: 16px;
   /* iOS paints a dark overlay in the element's shape on tap — on a circle
      that reads as a black flash. The growth is the feedback. */
@@ -2131,6 +2137,8 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
               0 10px 20px -12px rgba(28, 42, 21, 0.25);
   transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
               height 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              margin-left 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+              margin-top 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
               border-color 0.6s ease, box-shadow 0.6s ease;
 }
 .why-bubble::before {
@@ -2145,7 +2153,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
    hover rule here would keep a bubble open through the tap meant to close
    it — and tap-elsewhere would look like the only way to shut it. */
 .why-bubble:focus-visible, .why-bubble.is-active {
-  width: clamp(190px, 24vw, 290px); height: clamp(190px, 24vw, 290px);
+  --size: clamp(190px, 24vw, 290px);
   border-color: var(--clay);
   box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
               0 18px 36px -16px rgba(28,42,33,0.3);
@@ -2153,7 +2161,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 }
 @media (hover: hover) {
   .why-bubble:hover {
-    width: clamp(190px, 24vw, 290px); height: clamp(190px, 24vw, 290px);
+    --size: clamp(190px, 24vw, 290px);
     border-color: var(--clay);
     box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
                 0 18px 36px -16px rgba(28,42,33,0.3);
@@ -2198,37 +2206,37 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
    --amp is THE dial: it scales every path at once (smaller on phones, where
    the five sit closer together). */
 @keyframes why-drift-a {
-  0%     { transform: translate(-50%, calc(-50% + var(--amp) * -1.0)); }
-  12.5%  { transform: translate(calc(-50% + var(--amp) * 0.39), calc(-50% + var(--amp) * -0.71)); }
-  25%    { transform: translate(calc(-50% + var(--amp) * 0.55), -50%); }
-  37.5%  { transform: translate(calc(-50% + var(--amp) * 0.39), calc(-50% + var(--amp) * 0.71)); }
-  50%    { transform: translate(-50%, calc(-50% + var(--amp) * 1.0)); }
-  62.5%  { transform: translate(calc(-50% + var(--amp) * -0.39), calc(-50% + var(--amp) * 0.71)); }
-  75%    { transform: translate(calc(-50% + var(--amp) * -0.55), -50%); }
-  87.5%  { transform: translate(calc(-50% + var(--amp) * -0.39), calc(-50% + var(--amp) * -0.71)); }
-  100%   { transform: translate(-50%, calc(-50% + var(--amp) * -1.0)); }
+  0%     { transform: translate(0, calc(var(--amp) * -1.0)); }
+  12.5%  { transform: translate(calc(var(--amp) * 0.39), calc(var(--amp) * -0.71)); }
+  25%    { transform: translate(calc(var(--amp) * 0.55), 0); }
+  37.5%  { transform: translate(calc(var(--amp) * 0.39), calc(var(--amp) * 0.71)); }
+  50%    { transform: translate(0, calc(var(--amp) * 1.0)); }
+  62.5%  { transform: translate(calc(var(--amp) * -0.39), calc(var(--amp) * 0.71)); }
+  75%    { transform: translate(calc(var(--amp) * -0.55), 0); }
+  87.5%  { transform: translate(calc(var(--amp) * -0.39), calc(var(--amp) * -0.71)); }
+  100%   { transform: translate(0, calc(var(--amp) * -1.0)); }
 }
 @keyframes why-drift-b {
-  0%     { transform: translate(-50%, calc(-50% + var(--amp) * -0.8)); }
-  12.5%  { transform: translate(calc(-50% + var(--amp) * -0.53), calc(-50% + var(--amp) * -0.57)); }
-  25%    { transform: translate(calc(-50% + var(--amp) * -0.75), -50%); }
-  37.5%  { transform: translate(calc(-50% + var(--amp) * -0.53), calc(-50% + var(--amp) * 0.57)); }
-  50%    { transform: translate(-50%, calc(-50% + var(--amp) * 0.8)); }
-  62.5%  { transform: translate(calc(-50% + var(--amp) * 0.53), calc(-50% + var(--amp) * 0.57)); }
-  75%    { transform: translate(calc(-50% + var(--amp) * 0.75), -50%); }
-  87.5%  { transform: translate(calc(-50% + var(--amp) * 0.53), calc(-50% + var(--amp) * -0.57)); }
-  100%   { transform: translate(-50%, calc(-50% + var(--amp) * -0.8)); }
+  0%     { transform: translate(0, calc(var(--amp) * -0.8)); }
+  12.5%  { transform: translate(calc(var(--amp) * -0.53), calc(var(--amp) * -0.57)); }
+  25%    { transform: translate(calc(var(--amp) * -0.75), 0); }
+  37.5%  { transform: translate(calc(var(--amp) * -0.53), calc(var(--amp) * 0.57)); }
+  50%    { transform: translate(0, calc(var(--amp) * 0.8)); }
+  62.5%  { transform: translate(calc(var(--amp) * 0.53), calc(var(--amp) * 0.57)); }
+  75%    { transform: translate(calc(var(--amp) * 0.75), 0); }
+  87.5%  { transform: translate(calc(var(--amp) * 0.53), calc(var(--amp) * -0.57)); }
+  100%   { transform: translate(0, calc(var(--amp) * -0.8)); }
 }
 @keyframes why-drift-c {
-  0%     { transform: translate(-50%, calc(-50% + var(--amp) * -1.2)); }
-  12.5%  { transform: translate(calc(-50% + var(--amp) * 0.32), calc(-50% + var(--amp) * -0.85)); }
-  25%    { transform: translate(calc(-50% + var(--amp) * 0.45), -50%); }
-  37.5%  { transform: translate(calc(-50% + var(--amp) * 0.32), calc(-50% + var(--amp) * 0.85)); }
-  50%    { transform: translate(-50%, calc(-50% + var(--amp) * 1.2)); }
-  62.5%  { transform: translate(calc(-50% + var(--amp) * -0.32), calc(-50% + var(--amp) * 0.85)); }
-  75%    { transform: translate(calc(-50% + var(--amp) * -0.45), -50%); }
-  87.5%  { transform: translate(calc(-50% + var(--amp) * -0.32), calc(-50% + var(--amp) * -0.85)); }
-  100%   { transform: translate(-50%, calc(-50% + var(--amp) * -1.2)); }
+  0%     { transform: translate(0, calc(var(--amp) * -1.2)); }
+  12.5%  { transform: translate(calc(var(--amp) * 0.32), calc(var(--amp) * -0.85)); }
+  25%    { transform: translate(calc(var(--amp) * 0.45), 0); }
+  37.5%  { transform: translate(calc(var(--amp) * 0.32), calc(var(--amp) * 0.85)); }
+  50%    { transform: translate(0, calc(var(--amp) * 1.2)); }
+  62.5%  { transform: translate(calc(var(--amp) * -0.32), calc(var(--amp) * 0.85)); }
+  75%    { transform: translate(calc(var(--amp) * -0.45), 0); }
+  87.5%  { transform: translate(calc(var(--amp) * -0.32), calc(var(--amp) * -0.85)); }
+  100%   { transform: translate(0, calc(var(--amp) * -1.2)); }
 }
 /* linear, because a circuit walked at constant speed is what floating looks
    like — easing each of the eight legs would read as a stutter */
@@ -2253,7 +2261,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   .why { min-height: 0; padding: 5rem 0 6rem; }
   .why-head h2 { white-space: normal; font-size: clamp(1.85rem, 8vw, 2.6rem); line-height: 1.12; }
   .why-bubbles { position: relative; inset: auto; height: 86vh; min-height: 560px; margin-top: 3rem; }
-  .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, left, top, border-color, box-shadow; --amp: 11px; }
+  .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, margin-left, margin-top, left, top, border-color, box-shadow; --amp: 11px; }
   .why-bubble-problem { font-size: 1.05rem; line-height: 1.25; }
   .why-bubble-solution { font-size: 1.05rem; }
   .why-bubble:focus-visible .why-bubble-problem,
@@ -2261,9 +2269,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   .why-bubble:focus-visible .why-bubble-solution,
   .why-bubble.is-active .why-bubble-solution { max-height: 6.5rem; }
   /* expand in place — don't jump the bubble to a new position */
-  .why-bubble:focus-visible, .why-bubble.is-active {
-    width: min(70vw, 230px); height: min(70vw, 230px);
-  }
+  .why-bubble:focus-visible, .why-bubble.is-active { --size: min(70vw, 230px); }
   .why-b1 { --bx: 76%; --by: 14%; --bd: 100px; }
   .why-b2 { --bx: 26%; --by: 34%; --bd: 114px; }
   .why-b3 { --bx: 60%; --by: 52%; --bd: 92px; }
@@ -2273,7 +2279,7 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 @media (hover: hover) and (max-width: 960px) {
   .why-bubble:hover .why-bubble-problem { font-size: 0.85rem; }
   .why-bubble:hover .why-bubble-solution { max-height: 6.5rem; }
-  .why-bubble:hover { width: min(70vw, 230px); height: min(70vw, 230px); }
+  .why-bubble:hover { --size: min(70vw, 230px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .why-bubble, .why-bubble-problem, .why-bubble-solution { transition: none; }
