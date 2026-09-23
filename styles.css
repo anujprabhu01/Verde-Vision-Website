@@ -2110,10 +2110,18 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   counter-increment: why-bubble;
   position: absolute; left: var(--bx); top: var(--by);
   width: var(--bd); height: var(--bd);
-  /* centring rides the independent `translate` property so `transform` is
-     free for the drift animation below (translate is applied first) */
-  translate: -50% -50%;
+  /* centring rides `transform`, and every drift keyframe carries the -50%
+     with it. Splitting the two — centring on the independent `translate`
+     property, drift on `transform` — works in Chrome but not reliably in
+     iOS Safari, which drops the translate while an animation owns transform:
+     the bubble then anchors at its top-left and grows rightward on tap. */
+  transform: translate(-50%, -50%);
   --amp: 16px;
+  /* iOS paints a dark overlay in the element's shape on tap — on a circle
+     that reads as a black flash. The growth is the feedback. */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none; -webkit-user-select: none;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
   text-align: center; padding: 1rem;
   border-radius: 50%; border: 1.5px solid rgba(46, 93, 67, 0.3);
@@ -2190,37 +2198,37 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
    --amp is THE dial: it scales every path at once (smaller on phones, where
    the five sit closer together). */
 @keyframes why-drift-a {
-  0%     { transform: translate(0, calc(var(--amp) * -1.0)); }
-  12.5%  { transform: translate(calc(var(--amp) * 0.39), calc(var(--amp) * -0.71)); }
-  25%    { transform: translate(calc(var(--amp) * 0.55), 0); }
-  37.5%  { transform: translate(calc(var(--amp) * 0.39), calc(var(--amp) * 0.71)); }
-  50%    { transform: translate(0, calc(var(--amp) * 1.0)); }
-  62.5%  { transform: translate(calc(var(--amp) * -0.39), calc(var(--amp) * 0.71)); }
-  75%    { transform: translate(calc(var(--amp) * -0.55), 0); }
-  87.5%  { transform: translate(calc(var(--amp) * -0.39), calc(var(--amp) * -0.71)); }
-  100%   { transform: translate(0, calc(var(--amp) * -1.0)); }
+  0%     { transform: translate(-50%, calc(-50% + var(--amp) * -1.0)); }
+  12.5%  { transform: translate(calc(-50% + var(--amp) * 0.39), calc(-50% + var(--amp) * -0.71)); }
+  25%    { transform: translate(calc(-50% + var(--amp) * 0.55), -50%); }
+  37.5%  { transform: translate(calc(-50% + var(--amp) * 0.39), calc(-50% + var(--amp) * 0.71)); }
+  50%    { transform: translate(-50%, calc(-50% + var(--amp) * 1.0)); }
+  62.5%  { transform: translate(calc(-50% + var(--amp) * -0.39), calc(-50% + var(--amp) * 0.71)); }
+  75%    { transform: translate(calc(-50% + var(--amp) * -0.55), -50%); }
+  87.5%  { transform: translate(calc(-50% + var(--amp) * -0.39), calc(-50% + var(--amp) * -0.71)); }
+  100%   { transform: translate(-50%, calc(-50% + var(--amp) * -1.0)); }
 }
 @keyframes why-drift-b {
-  0%     { transform: translate(0, calc(var(--amp) * -0.8)); }
-  12.5%  { transform: translate(calc(var(--amp) * -0.53), calc(var(--amp) * -0.57)); }
-  25%    { transform: translate(calc(var(--amp) * -0.75), 0); }
-  37.5%  { transform: translate(calc(var(--amp) * -0.53), calc(var(--amp) * 0.57)); }
-  50%    { transform: translate(0, calc(var(--amp) * 0.8)); }
-  62.5%  { transform: translate(calc(var(--amp) * 0.53), calc(var(--amp) * 0.57)); }
-  75%    { transform: translate(calc(var(--amp) * 0.75), 0); }
-  87.5%  { transform: translate(calc(var(--amp) * 0.53), calc(var(--amp) * -0.57)); }
-  100%   { transform: translate(0, calc(var(--amp) * -0.8)); }
+  0%     { transform: translate(-50%, calc(-50% + var(--amp) * -0.8)); }
+  12.5%  { transform: translate(calc(-50% + var(--amp) * -0.53), calc(-50% + var(--amp) * -0.57)); }
+  25%    { transform: translate(calc(-50% + var(--amp) * -0.75), -50%); }
+  37.5%  { transform: translate(calc(-50% + var(--amp) * -0.53), calc(-50% + var(--amp) * 0.57)); }
+  50%    { transform: translate(-50%, calc(-50% + var(--amp) * 0.8)); }
+  62.5%  { transform: translate(calc(-50% + var(--amp) * 0.53), calc(-50% + var(--amp) * 0.57)); }
+  75%    { transform: translate(calc(-50% + var(--amp) * 0.75), -50%); }
+  87.5%  { transform: translate(calc(-50% + var(--amp) * 0.53), calc(-50% + var(--amp) * -0.57)); }
+  100%   { transform: translate(-50%, calc(-50% + var(--amp) * -0.8)); }
 }
 @keyframes why-drift-c {
-  0%     { transform: translate(0, calc(var(--amp) * -1.2)); }
-  12.5%  { transform: translate(calc(var(--amp) * 0.32), calc(var(--amp) * -0.85)); }
-  25%    { transform: translate(calc(var(--amp) * 0.45), 0); }
-  37.5%  { transform: translate(calc(var(--amp) * 0.32), calc(var(--amp) * 0.85)); }
-  50%    { transform: translate(0, calc(var(--amp) * 1.2)); }
-  62.5%  { transform: translate(calc(var(--amp) * -0.32), calc(var(--amp) * 0.85)); }
-  75%    { transform: translate(calc(var(--amp) * -0.45), 0); }
-  87.5%  { transform: translate(calc(var(--amp) * -0.32), calc(var(--amp) * -0.85)); }
-  100%   { transform: translate(0, calc(var(--amp) * -1.2)); }
+  0%     { transform: translate(-50%, calc(-50% + var(--amp) * -1.2)); }
+  12.5%  { transform: translate(calc(-50% + var(--amp) * 0.32), calc(-50% + var(--amp) * -0.85)); }
+  25%    { transform: translate(calc(-50% + var(--amp) * 0.45), -50%); }
+  37.5%  { transform: translate(calc(-50% + var(--amp) * 0.32), calc(-50% + var(--amp) * 0.85)); }
+  50%    { transform: translate(-50%, calc(-50% + var(--amp) * 1.2)); }
+  62.5%  { transform: translate(calc(-50% + var(--amp) * -0.32), calc(-50% + var(--amp) * 0.85)); }
+  75%    { transform: translate(calc(-50% + var(--amp) * -0.45), -50%); }
+  87.5%  { transform: translate(calc(-50% + var(--amp) * -0.32), calc(-50% + var(--amp) * -0.85)); }
+  100%   { transform: translate(-50%, calc(-50% + var(--amp) * -1.2)); }
 }
 /* linear, because a circuit walked at constant speed is what floating looks
    like — easing each of the eight legs would read as a stutter */
