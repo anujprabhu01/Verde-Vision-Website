@@ -1681,13 +1681,10 @@ h2 em {
   will-change: transform;
 }
 .catalog-row[data-dir="right"] .catalog-track { animation-name: catScrollRight; }
-/* pausing only the hovered row leaves two sliding beside the one you're
-   reading, so any hover stops the whole set. .is-held is main.js holding them
-   while a finger is down: touch has no hover to pause with, and before this
-   the only way to stop a shelf on a phone was to open a card. */
-@media (hover: hover) {
-  .catalog-rows:hover .catalog-track { animation-play-state: paused; }
-}
+/* The shelves keep moving under the cursor on purpose — a row that stops
+   when you pass over it reads as a snag, not a courtesy. .is-held is main.js
+   holding them while a finger is down: touch has no hover, and otherwise the
+   only way to stop a shelf on a phone is to open a card. */
 .catalog-rows.is-held .catalog-track { animation-play-state: paused; }
 /* off-screen shelves and tickers don't churn the compositor while you read
    the rest of the page — main.js sets the class (see the note there) */
@@ -1709,20 +1706,10 @@ h2 em {
    a shelf reads as a row of plants standing on one ground line rather than a
    scatter of centred cutouts. (It does NOT convey relative scale — each webp
    is framed to its own subject, so a barrel fills its frame exactly like a
-   tree fills its own. Showing real scale would mean sizing tiles by mature
-   height, which is a different decision.) ::after is the contact shadow:
-   without one, a cutout on flat cream is clip art. */
+   tree fills its own.) It also positions the NEW mark. */
 .cat-shot {
   position: relative; display: block;
   width: 100%; aspect-ratio: 1 / 1; margin-bottom: 0.6rem;
-}
-.cat-shot::after {
-  content: ""; position: absolute; z-index: 0; pointer-events: none;
-  left: 50%; bottom: 2px; width: 56%; height: 11px;
-  transform: translateX(-50%);
-  background: radial-gradient(50% 50% at 50% 50%,
-    rgba(28,42,33,0.26) 0%, rgba(28,42,33,0.10) 55%, rgba(28,42,33,0) 100%);
-  transition: width 0.25s ease, opacity 0.25s ease;
 }
 .cat-tile img {
   position: relative; z-index: 1;
@@ -1756,7 +1743,6 @@ h2 em {
      That parallax is what says "3D asset" rather than "photograph" — and it
      only fires when someone stops, which is the opposite of ambient motion. */
   .cat-tile:hover img { transform: translateY(-5px); }
-  .cat-tile:hover .cat-shot::after { width: 48%; opacity: 0.85; }
 }
 .cat-more { position: absolute; inset: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
 .cat-more:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
