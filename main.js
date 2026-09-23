@@ -1066,6 +1066,128 @@ applyForm?.addEventListener('submit', async (e) => {
   }
 })();
 
+// ── METEORS — a rare streak across the night sky, on its own schedule.
+// Deliberately NOT tied to the cursor: the contour field in "why it wins"
+// owns that gesture, and a trail that follows your hand is a comet, not a
+// meteor. One at a time, only while the section is on screen, and only in
+// Night (in Day the whole ink layer sits at opacity 0, so nothing shows and
+// nothing needs to know). Between streaks there is no loop at all — a timer
+// wakes the next one — and each flight clears only its own dirty rect
+// rather than the whole sky.
+(function meteors() {
+  const canvas = document.getElementById('night-meteors');
+  const section = document.getElementById('night');
+  if (!canvas || !section) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const ctx = canvas.getContext('2d');
+
+  let w = 0, h = 0, dpr = 1;
+  const size = () => {
+    const r = canvas.getBoundingClientRect();
+    w = Math.round(r.width); h = Math.round(r.height);
+    if (!w || !h) return false;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return true;
+  };
+
+  // one streak: a head travelling a straight line, with a tapered tail
+  // trailing behind it along the same heading
+  const spawn = () => {
+    const leftward = Math.random() < 0.35;
+    const ang = (18 + Math.random() * 20) * Math.PI / 180;      // below horizontal
+    const ux = (leftward ? -1 : 1) * Math.cos(ang), uy = Math.sin(ang);
+    const travel = 240 + Math.random() * 220;
+    const len = 90 + Math.random() * 90;                        // tail length
+    const x0 = leftward ? w * (0.45 + Math.random() * 0.5) : w * (0.05 + Math.random() * 0.5);
+    const y0 = h * (0.28 + Math.random() * 0.38);   // clear of the ink's top fade
+    return {
+      x0, y0, ux, uy, len, travel,
+      dur: 440 + Math.random() * 280,
+      t0: performance.now(),
+      prev: null
+    };
+  };
+
+  const render = (m, now) => {
+    const p = Math.min(1, (now - m.t0) / m.dur);
+    // in fast, out slow — a meteor is brightest just after it appears
+    const a = p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88);
+    const hx = m.x0 + m.ux * m.travel * p, hy = m.y0 + m.uy * m.travel * p;
+    const tx = hx - m.ux * m.len, ty = hy - m.uy * m.len;
+
+    // clear only what was drawn last frame
+    if (m.prev) ctx.clearRect(m.prev[0], m.prev[1], m.prev[2], m.prev[3]);
+    const pad = 6;
+    m.prev = [Math.min(hx, tx) - pad, Math.min(hy, ty) - pad,
+              Math.abs(hx - tx) + pad * 2, Math.abs(hy - ty) + pad * 2];
+
+    const g = ctx.createLinearGradient(hx, hy, tx, ty);
+    g.addColorStop(0, `rgba(255,248,234,${(0.95 * a).toFixed(3)})`);
+    g.addColorStop(0.3, `rgba(226,235,255,${(0.34 * a).toFixed(3)})`);
+    g.addColorStop(1, 'rgba(214,228,255,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
+    ctx.fillStyle = `rgba(255,250,240,${a.toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(hx, hy, 1.25, 0, Math.PI * 2); ctx.fill();
+    return p < 1;
+  };
+
+  // The first streak of a visit is on a fixed short fuse, not the ambient
+  // interval: it's the one that teaches you the sky does something, and it
+  // buys patience for the slower rhythm afterwards. Every arrival gets one,
+  // including coming back to the section later.
+  const FIRST = 3000;
+  const AMBIENT = () => 7000 + Math.random() * 7000;
+
+  let timer = 0, raf = 0, onScreen = false;
+  const disarm = () => { clearTimeout(timer); timer = 0; };
+  const arm = (delay) => {
+    disarm();
+    if (!onScreen) return;
+    timer = setTimeout(() => {
+      timer = 0;
+      if (!onScreen || document.hidden) return;
+      // the section plays itself to night on arrival and the ink takes 1.3s;
+      // until then the whole sky sits at opacity 0, so wait rather than spend
+      // a meteor on a sky nobody can see
+      if (!section.classList.contains('is-night')) return arm(300);
+      fly();
+    }, delay);
+  };
+  const schedule = () => arm(AMBIENT());
+
+  const fly = () => {
+    if (!size()) return schedule();
+    const m = spawn();
+    const step = () => {
+      if (!render(m, performance.now())) {
+        ctx.clearRect(0, 0, w, h);
+        raf = 0;
+        return schedule();
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  new IntersectionObserver((entries) => {
+    const visible = entries.some((e) => e.isIntersecting);
+    if (visible === onScreen) return;          // ignore duplicate edges
+    onScreen = visible;
+    if (onScreen) {
+      arm(FIRST);
+    } else {
+      disarm();
+      cancelAnimationFrame(raf); raf = 0;
+      if (w && h) ctx.clearRect(0, 0, w, h);
+    }
+  }, { threshold: 0.05 }).observe(section);
+
+  addEventListener('resize', () => { if (!raf) size(); });
+})();
+
 // ── NAV ON INK — while an ink region is under the fixed bar (the night
 // section in Night, or the closing block) the bar smokes over instead of
 // floating as a paper strip. One rect check per scroll frame.

@@ -3055,6 +3055,15 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 .night-sky { position: absolute; inset: 0; }
 .night-stars { position: absolute; left: 0; width: 100%; top: -12%; height: 124%; display: block; will-change: transform; }
 .night-breathers { position: absolute; inset: 0; will-change: transform; }
+/* meteors ride the top of the sky only — low ones would streak through the
+   headline and through the fade where the ink gives way to paper. No
+   parallax offset: they cross too fast for it to read. */
+/* width:100%, not left:0/right:0 — a canvas is a replaced element, so an
+   absolutely positioned one with auto width takes its INTRINSIC ratio
+   (300x150 → 2:1) instead of stretching, which made this 2x its own height
+   and sent meteors off the side of the screen. .night-stars sizes the same
+   way for the same reason. */
+.night-meteors { position: absolute; left: 0; top: 0; width: 100%; height: 62%; display: block; }
 .night-breather {
   position: absolute; width: 3px; height: 3px; border-radius: 50%;
   background: #fff8ea;
@@ -3230,5 +3239,6 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) {
   .night-frame, .night-ink, .night-scene::after { transition: none; }
   .night-ink-in, .night-ink-out, .night-sky, .night-stars, .night-breathers, .night-window, .night-copy { animation: none; }
+  .night-meteors { display: none; }
   .night-breather { animation: none; opacity: 0.6; }
 }
