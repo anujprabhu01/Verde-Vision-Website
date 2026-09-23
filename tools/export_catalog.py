@@ -66,7 +66,11 @@ KIND_BY_CATEGORY = {
     "tree": "Tree", "shrub": "Shrub", "flower": "Flower", "grass": "Grass", "succulent": "Succulent",
     "groundcover": "Groundcover", "hardscape": "Boulder", "lighting": "Lighting",
 }
-PHOTO_TILES = {"Path Light", "Landscape Uplight", "Flood Light"}
+# Tiles whose art is a photograph rather than a transparent render, so the tile
+# crops to fill (object-fit: cover) instead of sitting on the card. Empty since
+# the three LED fixtures were re-rendered as transparent lit product shots —
+# they used to be opaque night scenes, which read as black boxes on paper.
+PHOTO_TILES = set()
 
 # How each asset was made — the card says so, because the intro copy promises
 # it. Anything in neither set gets no badge (legacy entries whose provenance

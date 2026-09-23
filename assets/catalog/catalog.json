@@ -99,7 +99,7 @@
   "appName": "Path Light",
   "kind": "Lighting",
   "category": "lighting",
-  "photo": true,
+  "photo": false,
   "image": "assets/catalog/path-light.webp",
   "botanical": null,
   "height": "1.75 ft",
@@ -116,7 +116,7 @@
   "made": null,
   "card": {
    "src": "assets/catalog/card/path-light.webp",
-   "w": 800,
+   "w": 305,
    "h": 800
   }
  },
@@ -708,7 +708,7 @@
   "appName": "Landscape Uplight",
   "kind": "Lighting",
   "category": "lighting",
-  "photo": true,
+  "photo": false,
   "image": "assets/catalog/uplight.webp",
   "botanical": null,
   "height": "0.7 ft",
@@ -725,7 +725,7 @@
   "made": null,
   "card": {
    "src": "assets/catalog/card/uplight.webp",
-   "w": 800,
+   "w": 367,
    "h": 800
   }
  },
@@ -1098,7 +1098,7 @@
   "appName": "Flood Light",
   "kind": "Lighting",
   "category": "lighting",
-  "photo": true,
+  "photo": false,
   "image": "assets/catalog/flood-light.webp",
   "botanical": null,
   "height": "0.4 ft",
@@ -1115,7 +1115,7 @@
   "made": null,
   "card": {
    "src": "assets/catalog/card/flood-light.webp",
-   "w": 800,
+   "w": 611,
    "h": 800
   }
  },
