@@ -2130,17 +2130,35 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   font-family: var(--font-serif); font-style: italic; font-size: 0.7rem;
   letter-spacing: 0.16em; color: var(--clay); opacity: 0.6;
 }
-/* expanded state — only the hovered/active bubble grows, and the solution
-   settles in underneath the (now smaller) problem, so both stay readable */
-.why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
+/* expanded state — only the open bubble grows, and the solution settles in
+   underneath the (now smaller) problem, so both stay readable.
+   :hover lives in its own hover-capable block below: iOS Safari leaves
+   :hover on the last element you tapped until you tap something else, so a
+   hover rule here would keep a bubble open through the tap meant to close
+   it — and tap-elsewhere would look like the only way to shut it. */
+.why-bubble:focus-visible, .why-bubble.is-active {
   width: clamp(190px, 24vw, 290px); height: clamp(190px, 24vw, 290px);
   border-color: var(--clay);
   box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
               0 18px 36px -16px rgba(28,42,33,0.3);
   z-index: 5; outline: none;
-  /* hold still while it's being read or aimed at (it stops where it is —
-     no snap back, since the drift is a transform the growth doesn't use) */
-  animation-play-state: paused;
+}
+@media (hover: hover) {
+  .why-bubble:hover {
+    width: clamp(190px, 24vw, 290px); height: clamp(190px, 24vw, 290px);
+    border-color: var(--clay);
+    box-shadow: 0 40px 84px -28px rgba(28,42,33,0.5),
+                0 18px 36px -16px rgba(28,42,33,0.3);
+    z-index: 5; outline: none;
+  }
+  /* hold still while it's being read or aimed at (it stops where it is — no
+     snap back, since the drift is a transform the growth doesn't use).
+     Pointer devices only: on touch there's no aiming across time, and
+     freezing one bubble's clock while the other four keep drifting leaves
+     the ring visibly out of phase once the card closes. */
+  .why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
+    animation-play-state: paused;
+  }
 }
 .why-bubble-problem {
   font-family: var(--font-serif); font-style: italic; font-weight: 500; font-size: 1.25rem; line-height: 1.3;
@@ -2154,12 +2172,14 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
 }
 /* entering: the bubble grows first, then the problem steps back to make
    room for the solution settling in below it */
-.why-bubble:hover .why-bubble-problem,
 .why-bubble:focus-visible .why-bubble-problem,
 .why-bubble.is-active .why-bubble-problem { font-size: 1rem; opacity: 0.65; transition-delay: 0.15s; }
-.why-bubble:hover .why-bubble-solution,
 .why-bubble:focus-visible .why-bubble-solution,
 .why-bubble.is-active .why-bubble-solution { max-height: 8rem; opacity: 1; transition-delay: 0.35s; }
+@media (hover: hover) {
+  .why-bubble:hover .why-bubble-problem { font-size: 1rem; opacity: 0.65; transition-delay: 0.15s; }
+  .why-bubble:hover .why-bubble-solution { max-height: 8rem; opacity: 1; transition-delay: 0.35s; }
+}
 
 /* the drift — the shadows already say these hover above the contour map, so
    they're given a little of the motion that implies: each bubble tours a
@@ -2228,14 +2248,12 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   .why-bubble { padding: 0.5rem; gap: 0.2rem; transition-property: width, height, left, top, border-color, box-shadow; --amp: 11px; }
   .why-bubble-problem { font-size: 1.05rem; line-height: 1.25; }
   .why-bubble-solution { font-size: 1.05rem; }
-  .why-bubble:hover .why-bubble-problem,
   .why-bubble:focus-visible .why-bubble-problem,
   .why-bubble.is-active .why-bubble-problem { font-size: 0.85rem; }
-  .why-bubble:hover .why-bubble-solution,
   .why-bubble:focus-visible .why-bubble-solution,
   .why-bubble.is-active .why-bubble-solution { max-height: 6.5rem; }
   /* expand in place — don't jump the bubble to a new position */
-  .why-bubble:hover, .why-bubble:focus-visible, .why-bubble.is-active {
+  .why-bubble:focus-visible, .why-bubble.is-active {
     width: min(70vw, 230px); height: min(70vw, 230px);
   }
   .why-b1 { --bx: 76%; --by: 14%; --bd: 100px; }
@@ -2243,6 +2261,11 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   .why-b3 { --bx: 60%; --by: 52%; --bd: 92px; }
   .why-b4 { --bx: 30%; --by: 70%; --bd: 110px; }
   .why-b5 { --bx: 70%; --by: 90%; --bd: 100px; }
+}
+@media (hover: hover) and (max-width: 960px) {
+  .why-bubble:hover .why-bubble-problem { font-size: 0.85rem; }
+  .why-bubble:hover .why-bubble-solution { max-height: 6.5rem; }
+  .why-bubble:hover { width: min(70vw, 230px); height: min(70vw, 230px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .why-bubble, .why-bubble-problem, .why-bubble-solution { transition: none; }
