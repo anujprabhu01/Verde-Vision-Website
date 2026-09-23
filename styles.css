@@ -117,13 +117,17 @@ html.banner-open .site-banner { transform: none; }
 .banner-short { display: none; }
 
 .banner-close {
+  /* the glyph is small; the target must not be. Sized to the full height of
+     the strip and 44px wide — a thumb in the top corner of a phone is the
+     least accurate tap on the page, and the old 28x28 box missed constantly.
+     right:8px keeps the x where it was optically. */
   position: absolute;
-  right: 1rem; top: 50%;
-  transform: translateY(-50%);
+  right: 8px; top: 0;
+  width: 44px; height: 100%;
+  display: flex; align-items: center; justify-content: center;
   background: none; border: none; cursor: pointer;
   color: rgba(245,238,218,0.8);
   font-size: 1.3rem; line-height: 1;
-  padding: 0.25rem 0.5rem;
   transition: color 0.2s;
 }
 .banner-close:hover { color: #f5eeda; }
