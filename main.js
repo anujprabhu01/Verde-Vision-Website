@@ -1149,56 +1149,179 @@ applyForm?.addEventListener('submit', async (e) => {
     return true;
   };
 
+  // ── THE GREEN ONE. Real meteors do carry colour, but only the bright ones:
+  // under about magnitude -4 you are seeing with rods, and rods are colour
+  // blind, which is why an ordinary streak reads white. When one IS bright
+  // enough to show a colour it is usually green, arrived at from two
+  // directions at once - forbidden atomic oxygen at ~100 km (557.7 nm, the
+  // same line that makes the aurora green) and nickel burning off the body.
+  // So this is not a hue swap on the same sprite. The green one is brighter,
+  // slower and longer, and it leaves a persistent train: the ghost of the
+  // path, hanging for a beat after the head has gone. Anything less and it
+  // reads as "there's a green one" instead of "wait - did I just see that".
+  const DEBUG = /[?&]meteors=debug\b/.test(location.search);
+  const GREEN_ODDS = DEBUG ? 3 : 20;
+  const TRAIN_MS = 1200;      // how long past the head the flight stays alive for
+  const TRAIN_TAU = 560;      // decay constant of a point from the moment it is passed
+
+  // The copy and the night photo paint OVER this canvas — the ink is the
+  // section's first child, the grid comes after it and neither carries a
+  // z-index — so a streak that flies into the figure is simply gone, and one
+  // that only clips it dies halfway across the sky. Every path is resampled
+  // until it is in open sky, against a rect measured live so it follows the
+  // layout instead of trusting a number written here. This barely moves where
+  // meteors appear (the ones that flew into the photo were never visible
+  // anyway) — it stops them vanishing mid-flight.
+  const blocked = () => {
+    const fig = section.querySelector('.night-figure');
+    if (!fig) return null;
+    const c = canvas.getBoundingClientRect(), f = fig.getBoundingClientRect();
+    if (!f.width || !f.height) return null;
+    return [f.left - c.left, f.top - c.top, f.right - c.left, f.bottom - c.top];
+  };
+  const clearOf = (b, m) => {
+    if (!b) return true;
+    for (let i = 0; i <= 8; i++) {
+      const q = i / 8;
+      const x = m.x0 + m.ux * m.travel * q, y = m.y0 + m.uy * m.travel * q;
+      if (x > b[0] - 12 && x < b[2] + 12 && y > b[1] - 12 && y < b[3] + 12) return false;
+    }
+    return true;
+  };
+
   // one streak: a head travelling a straight line, with a tapered tail
   // trailing behind it along the same heading
-  const spawn = () => {
+  const draft = (green) => {
     const leftward = Math.random() < 0.35;
     const ang = (18 + Math.random() * 20) * Math.PI / 180;      // below horizontal
     const ux = (leftward ? -1 : 1) * Math.cos(ang), uy = Math.sin(ang);
-    const travel = 240 + Math.random() * 220;
-    const len = 90 + Math.random() * 90;                        // tail length
+    const travel = green ? 300 + Math.random() * 240 : 240 + Math.random() * 220;
+    const len = green ? 150 + Math.random() * 110 : 90 + Math.random() * 90;  // tail length
     const x0 = leftward ? w * (0.45 + Math.random() * 0.5) : w * (0.05 + Math.random() * 0.5);
-    const y0 = h * (0.28 + Math.random() * 0.38);   // clear of the ink's top fade
+    // 0.28 is where the sky's alpha mask has opened up; a green starts in the
+    // top half of that band so most drafts clear the figure on the first go
+    const y0 = h * (0.28 + Math.random() * (green ? 0.18 : 0.38));
+    const dur = green ? 780 + Math.random() * 320 : 440 + Math.random() * 280;
     return {
-      x0, y0, ux, uy, len, travel,
-      dur: 440 + Math.random() * 280,
+      x0, y0, ux, uy, len, travel, dur, green,
+      life: dur + (green ? TRAIN_MS : 0),
       t0: performance.now(),
-      prev: null
+      prev: null, box: null
     };
   };
 
+  const spawn = (green) => {
+    const b = blocked();
+    let m = draft(green);
+    for (let tries = 0; tries < 40 && !clearOf(b, m); tries++) m = draft(green);
+    return m;
+  };
+
   const render = (m, now) => {
-    const p = Math.min(1, (now - m.t0) / m.dur);
+    const e = now - m.t0;
+    const p = Math.min(1, e / m.dur);
     // in fast, out slow — a meteor is brightest just after it appears
     const a = p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88);
     const hx = m.x0 + m.ux * m.travel * p, hy = m.y0 + m.uy * m.travel * p;
     const tx = hx - m.ux * m.len, ty = hy - m.uy * m.len;
 
-    // clear only what was drawn last frame
-    if (m.prev) ctx.clearRect(m.prev[0], m.prev[1], m.prev[2], m.prev[3]);
-    const pad = 6;
-    m.prev = [Math.min(hx, tx) - pad, Math.min(hy, ty) - pad,
-              Math.abs(hx - tx) + pad * 2, Math.abs(hy - ty) + pad * 2];
+    if (m.green) {
+      // the train outlives the head, over ground a per-frame dirty rect has
+      // already released — so a green flight owns one box, the whole path,
+      // and clears that whole box each frame instead
+      if (!m.box) {
+        const ex = m.x0 + m.ux * m.travel, ey = m.y0 + m.uy * m.travel;
+        const pad = m.len + 10;
+        m.box = [Math.min(m.x0, ex) - pad, Math.min(m.y0, ey) - pad,
+                 Math.abs(ex - m.x0) + pad * 2, Math.abs(ey - m.y0) + pad * 2];
+      }
+      ctx.clearRect(m.box[0], m.box[1], m.box[2], m.box[3]);
+    } else {
+      // clear only what was drawn last frame
+      if (m.prev) ctx.clearRect(m.prev[0], m.prev[1], m.prev[2], m.prev[3]);
+      const pad = 6;
+      m.prev = [Math.min(hx, tx) - pad, Math.min(hy, ty) - pad,
+                Math.abs(hx - tx) + pad * 2, Math.abs(hy - ty) + pad * 2];
+    }
+
+    // the persistent train, under everything else: each point on the path
+    // starts decaying from the moment the head passes IT, so the ghost fades
+    // from the origin down rather than dimming all at once
+    if (m.green && p > 0.02) {
+      const g = ctx.createLinearGradient(m.x0, m.y0, hx, hy);
+      for (let i = 0; i <= 6; i++) {
+        const q = i / 6;                                // fraction of the path flown so far
+        const age = Math.max(0, e - q * p * m.dur);     // how long ago the head passed it
+        const ta = 0.38 * Math.exp(-age / TRAIN_TAU) * (0.25 + 0.75 * q);
+        g.addColorStop(q, `rgba(126,226,172,${ta.toFixed(3)})`);
+      }
+      ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(m.x0, m.y0); ctx.lineTo(hx, hy); ctx.stroke();
+    }
 
     const g = ctx.createLinearGradient(hx, hy, tx, ty);
-    g.addColorStop(0, `rgba(255,248,234,${(0.95 * a).toFixed(3)})`);
-    g.addColorStop(0.3, `rgba(226,235,255,${(0.34 * a).toFixed(3)})`);
-    g.addColorStop(1, 'rgba(214,228,255,0)');
-    ctx.strokeStyle = g; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+    if (m.green) {
+      // white-hot core in a jade sheath: the green is the glowing air column
+      // and the nickel coming off it, not the incandescent head itself
+      g.addColorStop(0, `rgba(255,255,252,${a.toFixed(3)})`);
+      g.addColorStop(0.10, `rgba(196,255,226,${(0.88 * a).toFixed(3)})`);
+      g.addColorStop(0.34, `rgba(128,240,186,${(0.52 * a).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(96,214,158,0)');
+    } else {
+      g.addColorStop(0, `rgba(255,248,234,${(0.95 * a).toFixed(3)})`);
+      g.addColorStop(0.3, `rgba(226,235,255,${(0.34 * a).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(214,228,255,0)');
+    }
+    ctx.strokeStyle = g; ctx.lineWidth = m.green ? 2.4 : 1.5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
+
+    // The head of a real fireball is the light source — bright enough at these
+    // magnitudes to throw a shadow on the ground — and observers describe a
+    // hot core inside a glow rather than a point. So it is built in three
+    // layers, added rather than painted over (composite 'lighter') because it
+    // is emitted light: a wide bloom, the coma burning around the body, and
+    // the white-hot nucleus. The green concentrates here and in the wake just
+    // behind, which is where the excited oxygen actually is.
+    if (m.green && a > 0) {
+      ctx.globalCompositeOperation = 'lighter';
+      const bloom = ctx.createRadialGradient(hx, hy, 0, hx, hy, 30);
+      bloom.addColorStop(0, `rgba(116,252,188,${(0.40 * a).toFixed(3)})`);
+      bloom.addColorStop(0.34, `rgba(84,226,160,${(0.15 * a).toFixed(3)})`);
+      bloom.addColorStop(1, 'rgba(62,190,132,0)');
+      ctx.fillStyle = bloom;
+      ctx.beginPath(); ctx.arc(hx, hy, 30, 0, Math.PI * 2); ctx.fill();
+      const coma = ctx.createRadialGradient(hx, hy, 0, hx, hy, 10);
+      coma.addColorStop(0, `rgba(255,255,252,${(0.92 * a).toFixed(3)})`);
+      coma.addColorStop(0.38, `rgba(196,255,224,${(0.52 * a).toFixed(3)})`);
+      coma.addColorStop(1, 'rgba(138,240,188,0)');
+      ctx.fillStyle = coma;
+      ctx.beginPath(); ctx.arc(hx, hy, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
     ctx.fillStyle = `rgba(255,250,240,${a.toFixed(3)})`;
-    ctx.beginPath(); ctx.arc(hx, hy, 1.25, 0, Math.PI * 2); ctx.fill();
-    return p < 1;
+    ctx.beginPath(); ctx.arc(hx, hy, m.green ? 2.4 : 1.25, 0, Math.PI * 2); ctx.fill();
+    return e < m.life;
   };
 
   // The first streak of a visit is on a fixed short fuse, not the ambient
   // interval: it's the one that teaches you the sky does something, and it
   // buys patience for the slower rhythm afterwards. Every arrival gets one,
   // including coming back to the section later.
-  const FIRST = 3000;
-  const AMBIENT = () => 7000 + Math.random() * 7000;
+  const FIRST = DEBUG ? 500 : 3000;
+  const AMBIENT = DEBUG ? () => 700 + Math.random() * 300
+                        : () => 7000 + Math.random() * 7000;
 
   let timer = 0, raf = 0, onScreen = false;
+  // one in GREEN_ODDS, with two guard rails: never the first streak of a
+  // visit (that one is teaching you the sky does something, and a green
+  // opener would also make the egg findable by reloading), and never two
+  // running — a double green reads as a bug, not as a rarity
+  let flights = 0, lastGreen = false;
+  const pickGreen = () => {
+    if (flights === 0 && !DEBUG) return false;
+    if (lastGreen) return false;
+    return Math.random() < 1 / GREEN_ODDS;
+  };
   const disarm = () => { clearTimeout(timer); timer = 0; };
   const arm = (delay) => {
     disarm();
@@ -1215,9 +1338,10 @@ applyForm?.addEventListener('submit', async (e) => {
   };
   const schedule = () => arm(AMBIENT());
 
-  const fly = () => {
+  const fly = (forceGreen) => {
     if (!size()) return schedule();
-    const m = spawn();
+    const m = spawn(forceGreen === undefined ? pickGreen() : !!forceGreen);
+    flights++; lastGreen = m.green;
     const step = () => {
       if (!render(m, performance.now())) {
         ctx.clearRect(0, 0, w, h);
@@ -1234,6 +1358,7 @@ applyForm?.addEventListener('submit', async (e) => {
     if (visible === onScreen) return;          // ignore duplicate edges
     onScreen = visible;
     if (onScreen) {
+      flights = 0; lastGreen = false;   // each arrival gets its plain opener
       arm(FIRST);
     } else {
       disarm();
@@ -1243,6 +1368,15 @@ applyForm?.addEventListener('submit', async (e) => {
   }, { threshold: 0.05 }).observe(section);
 
   addEventListener('resize', () => { if (!raf) size(); });
+
+  // ?meteors=debug — the lab. Streaks land about once a second and one in
+  // three is green, so the rare one can actually be judged and tuned instead
+  // of waited out; __meteor(true) fires one on demand. None of this exists on
+  // a normal visit, and nothing below runs without the flag in the URL.
+  if (DEBUG) window.__meteor = (green = true) => {
+    if (raf) return false;
+    disarm(); fly(green); return true;
+  };
 })();
 
 // ── NAV ON INK — while an ink region is under the fixed bar (the night
