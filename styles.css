@@ -3154,7 +3154,49 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
    (300x150 → 2:1) instead of stretching, which made this 2x its own height
    and sent meteors off the side of the screen. .night-stars sizes the same
    way for the same reason. */
+/* A fireball is bright enough to light the ground under it — that is most of
+   what makes one feel like an event rather than a scratch on the sky — so the
+   sky around the green one lifts with it. Its own element rather than more
+   canvas: the meteor canvas is only the top 62% of the sky, and a wash this
+   wide drawn there would end at a hard horizontal line partway down. Sitting
+   in .night-sky it also takes the same alpha mask as the stars and the ink,
+   so it fades out exactly where the sky itself does. Driven by transform and
+   opacity only — both compositor-side, so an 800px gradient never repaints. */
+.night-glow {
+  position: absolute; left: 0; top: 0;
+  width: 800px; height: 800px; margin: -400px 0 0 -400px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side,
+    rgba(132, 250, 194, 0.58) 0%,
+    rgba(100, 220, 164, 0.27) 32%,
+    rgba(74, 176, 128, 0.09) 60%,
+    rgba(54, 134, 98, 0) 100%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
 .night-meteors { position: absolute; left: 0; top: 0; width: 100%; height: 62%; display: block; }
+
+/* The full stop at the end of the night headline is a way in (see main.js).
+   The element is created by script after the headline is typeset, so this
+   only ever styles a period that is already there. inline-block because a
+   transform does not apply to a bare inline run, and transform is what keeps
+   the swell off the layout — growing the font size would reflow the line.
+   The origin is the glyph's own baseline, measured at 72% of the inline box
+   (the rest of that box is ascender space above the dot and descender space
+   below it); anywhere else and the dot lifts off the baseline as it grows. */
+.night-dot {
+  display: inline-block;
+  transform-origin: 50% 72%;
+  transition: transform .2s cubic-bezier(.34, 1.25, .64, 1);
+}
+/* Only in Night, where clicking it can actually do something. In Day the ink
+   sits at opacity 0 and there is no sky to drop anything through, so the
+   period stays an ordinary period — no cursor change, no swell, no tell. */
+.night.is-night .night-dot { cursor: default; }
+.night.is-night .night-dot:hover { transform: scale(1.5); }
+@media (prefers-reduced-motion: reduce) { .night-dot { transition: none; } }
 .night-breather {
   position: absolute; width: 3px; height: 3px; border-radius: 50%;
   background: #fff8ea;

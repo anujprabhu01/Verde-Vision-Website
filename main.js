@@ -1164,6 +1164,37 @@ applyForm?.addEventListener('submit', async (e) => {
   const TRAIN_MS = 1200;      // how long past the head the flight stays alive for
   const TRAIN_TAU = 560;      // decay constant of a point from the moment it is passed
 
+  // The terminal burst. Deep enough into the atmosphere the pressure on the
+  // leading face beats the strength of the rock and it comes apart; the
+  // fragments expose far more surface to the air at once, ablation spikes and
+  // the thing flares — usually the brightest instant of the whole event —
+  // then burns out fast. That is what separates a bolide from a fireball.
+  // Rendered a touch earlier and a good deal softer than nature: a real
+  // terminal flash is near instantaneous, and at web frame rates
+  // instantaneous is indistinguishable from a dropped frame. It rises slower
+  // than it collapses, which is the part that reads as an event rather than
+  // a flicker, and it stays under the launch brightness so it never looks
+  // like a second meteor.
+  const BURST_AT = 0.74;                  // fraction of the path where it lets go
+  const BURST_UP = 0.09, BURST_DN = 0.055;   // rise wider than the collapse
+
+  // How hard the green one lights the sky around it. GLOW_RIDE rides the
+  // meteor's own brightness; GLOW_FLASH is what the terminal burst adds, and
+  // it dominates, because the flare is the moment a real fireball floods the
+  // ground. Capped so the sky lifts rather than washes out.
+  const glow = document.getElementById('night-glow');
+  const GLOW_RIDE = 0.10, GLOW_FLASH = 0.26, GLOW_MAX = 0.30;
+  const lightSky = (x, y, v) => {
+    if (!glow) return;
+    if (v > 0.002) glow.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    glow.style.opacity = v.toFixed(3);
+  };
+  const burst = (p) => {
+    const d = p - BURST_AT;
+    const x = Math.abs(d) / (d < 0 ? BURST_UP : BURST_DN);
+    return x >= 1 ? 0 : 0.5 * (1 + Math.cos(Math.PI * x));
+  };
+
   // The copy and the night photo paint OVER this canvas — the ink is the
   // section's first child, the grid comes after it and neither carries a
   // z-index — so a streak that flies into the figure is simply gone, and one
@@ -1173,20 +1204,39 @@ applyForm?.addEventListener('submit', async (e) => {
   // meteors appear (the ones that flew into the photo were never visible
   // anyway) — it stops them vanishing mid-flight.
   const blocked = () => {
-    const fig = section.querySelector('.night-figure');
-    if (!fig) return null;
-    const c = canvas.getBoundingClientRect(), f = fig.getBoundingClientRect();
+    // the PICTURE, not the <figure> — the figure also wraps the caption strip
+    // and the gap above it, some 32px of empty page that occludes nothing
+    const win = section.querySelector('.night-window');
+    if (!win) return null;
+    const c = canvas.getBoundingClientRect(), f = win.getBoundingClientRect();
     if (!f.width || !f.height) return null;
     return [f.left - c.left, f.top - c.top, f.right - c.left, f.bottom - c.top];
   };
+  // An exact segment-versus-rectangle test (Liang–Barsky), not nine samples
+  // along the path. Sampling left gaps between the sample points, and those
+  // gaps had to be covered by a fat margin — which is what made streaks pull
+  // up well short of the picture. Tested over the whole DRAWN extent: the
+  // tail trails len behind the start, so the segment starts there rather than
+  // at the head's first position. EDGE only has to clear the drawn line
+  // itself (a 2.4px stroke, a nucleus under 4px across at full burst); the
+  // head's bloom is soft-edged light and may fall behind the picture, which
+  // is what light does.
+  const EDGE = 4;
   const clearOf = (b, m) => {
     if (!b) return true;
-    for (let i = 0; i <= 8; i++) {
-      const q = i / 8;
-      const x = m.x0 + m.ux * m.travel * q, y = m.y0 + m.uy * m.travel * q;
-      if (x > b[0] - 12 && x < b[2] + 12 && y > b[1] - 12 && y < b[3] + 12) return false;
+    const xmin = b[0] - EDGE, ymin = b[1] - EDGE, xmax = b[2] + EDGE, ymax = b[3] + EDGE;
+    const ax = m.x0 - m.ux * m.len, ay = m.y0 - m.uy * m.len;
+    const dx = m.ux * (m.travel + m.len), dy = m.uy * (m.travel + m.len);
+    const P = [-dx, dx, -dy, dy];
+    const Q = [ax - xmin, xmax - ax, ay - ymin, ymax - ay];
+    let t0 = 0, t1 = 1;
+    for (let i = 0; i < 4; i++) {
+      if (P[i] === 0) { if (Q[i] < 0) return true; continue; }   // parallel, outside that slab
+      const r = Q[i] / P[i];
+      if (P[i] < 0) { if (r > t1) return true; if (r > t0) t0 = r; }
+      else { if (r < t0) return true; if (r < t1) t1 = r; }
     }
-    return true;
+    return false;                                                // the streak would enter the picture
   };
 
   // one streak: a head travelling a straight line, with a tapered tail
@@ -1221,8 +1271,11 @@ applyForm?.addEventListener('submit', async (e) => {
     const e = now - m.t0;
     const p = Math.min(1, e / m.dur);
     // in fast, out slow — a meteor is brightest just after it appears
-    const a = p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88);
+    const base = p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88);
+    const b = m.green ? burst(p) : 0;
+    const a = Math.min(1, base + b * 0.5);
     const hx = m.x0 + m.ux * m.travel * p, hy = m.y0 + m.uy * m.travel * p;
+    if (m.green) lightSky(hx, hy, Math.min(GLOW_MAX, a * GLOW_RIDE + b * GLOW_FLASH));
     const tx = hx - m.ux * m.len, ty = hy - m.uy * m.len;
 
     if (m.green) {
@@ -1231,7 +1284,7 @@ applyForm?.addEventListener('submit', async (e) => {
       // and clears that whole box each frame instead
       if (!m.box) {
         const ex = m.x0 + m.ux * m.travel, ey = m.y0 + m.uy * m.travel;
-        const pad = m.len + 10;
+        const pad = m.len + 52;   // room for the bloom at full burst
         m.box = [Math.min(m.x0, ex) - pad, Math.min(m.y0, ey) - pad,
                  Math.abs(ex - m.x0) + pad * 2, Math.abs(ey - m.y0) + pad * 2];
       }
@@ -1284,22 +1337,24 @@ applyForm?.addEventListener('submit', async (e) => {
     // behind, which is where the excited oxygen actually is.
     if (m.green && a > 0) {
       ctx.globalCompositeOperation = 'lighter';
-      const bloom = ctx.createRadialGradient(hx, hy, 0, hx, hy, 30);
+      const br = 30 * (1 + 0.55 * b);
+      const bloom = ctx.createRadialGradient(hx, hy, 0, hx, hy, br);
       bloom.addColorStop(0, `rgba(116,252,188,${(0.40 * a).toFixed(3)})`);
       bloom.addColorStop(0.34, `rgba(84,226,160,${(0.15 * a).toFixed(3)})`);
       bloom.addColorStop(1, 'rgba(62,190,132,0)');
       ctx.fillStyle = bloom;
-      ctx.beginPath(); ctx.arc(hx, hy, 30, 0, Math.PI * 2); ctx.fill();
-      const coma = ctx.createRadialGradient(hx, hy, 0, hx, hy, 10);
+      ctx.beginPath(); ctx.arc(hx, hy, br, 0, Math.PI * 2); ctx.fill();
+      const cr = 10 * (1 + 0.35 * b);
+      const coma = ctx.createRadialGradient(hx, hy, 0, hx, hy, cr);
       coma.addColorStop(0, `rgba(255,255,252,${(0.92 * a).toFixed(3)})`);
       coma.addColorStop(0.38, `rgba(196,255,224,${(0.52 * a).toFixed(3)})`);
       coma.addColorStop(1, 'rgba(138,240,188,0)');
       ctx.fillStyle = coma;
-      ctx.beginPath(); ctx.arc(hx, hy, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(hx, hy, cr, 0, Math.PI * 2); ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
     }
     ctx.fillStyle = `rgba(255,250,240,${a.toFixed(3)})`;
-    ctx.beginPath(); ctx.arc(hx, hy, m.green ? 2.4 : 1.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(hx, hy, m.green ? 2.4 * (1 + 0.5 * b) : 1.25, 0, Math.PI * 2); ctx.fill();
     return e < m.life;
   };
 
@@ -1345,6 +1400,7 @@ applyForm?.addEventListener('submit', async (e) => {
     const step = () => {
       if (!render(m, performance.now())) {
         ctx.clearRect(0, 0, w, h);
+        lightSky(0, 0, 0);
         raf = 0;
         return schedule();
       }
@@ -1364,10 +1420,78 @@ applyForm?.addEventListener('submit', async (e) => {
       disarm();
       cancelAnimationFrame(raf); raf = 0;
       if (w && h) ctx.clearRect(0, 0, w, h);
+      lightSky(0, 0, 0);
     }
   }, { threshold: 0.05 }).observe(section);
 
   addEventListener('resize', () => { if (!raf) size(); });
+
+  // ── The full stop at the end of "night." drops a green one. There is no
+  // element to click: typesetHeadlines() rebuilds the heading out of bare
+  // text nodes (keeping only the <em> runs) and re-splits it on every resize,
+  // so a span written into the HTML is flattened on the first pass. Instead
+  // the listener sits on the heading and, at click time, measures the last
+  // character with a Range and asks whether the pointer landed on it. That
+  // needs no markup, survives every re-split and reflow, and leaves the
+  // heading's text and aria-label exactly as they were.
+  //
+  // Night only — in Day the ink sits at opacity 0 and there is no sky for it
+  // to fall through — never while something is already flying, and never when
+  // the "click" is really the end of a drag across the text. Under reduced
+  // motion this whole block never runs, so the period is just a period.
+  const head = section.querySelector('.night-copy h2');
+  if (head) {
+    const PAD = 5;
+    const dotRect = () => {
+      const walk = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
+      let last = null, n;
+      while ((n = walk.nextNode())) if (n.textContent.trim()) last = n;
+      const i = last ? last.textContent.lastIndexOf('.') : -1;
+      if (i < 0) return null;
+      const r = document.createRange();
+      r.setStart(last, i); r.setEnd(last, i + 1);
+      return r.getBoundingClientRect();
+    };
+    // Presentation only: the period gets a real element so it can carry a
+    // cursor and a hover swell. It cannot be written into the HTML —
+    // typesetHeadlines() rebuilds the heading out of bare text nodes and
+    // re-splits on every resize — so it is re-applied after each split, which
+    // a MutationObserver watches for. The observer disconnects around its own
+    // edit so it does not retrigger on it. The click below does NOT depend on
+    // any of this: that is a Range measurement against the last character, so
+    // if this ever stops matching the markup the egg still works.
+    const markDot = () => {
+      if (head.querySelector('.night-dot')) return;
+      const walk = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
+      let last = null, n;
+      while ((n = walk.nextNode())) if (n.textContent.trim()) last = n;
+      if (!last || !last.textContent.endsWith('.')) return;
+      const span = document.createElement('span');
+      span.className = 'night-dot';
+      span.textContent = '.';
+      last.textContent = last.textContent.slice(0, -1);
+      last.parentNode.insertBefore(span, last.nextSibling);
+    };
+    const mo = new MutationObserver(() => {
+      mo.disconnect(); markDot(); mo.observe(head, { childList: true, subtree: true });
+    });
+    markDot();
+    mo.observe(head, { childList: true, subtree: true });
+
+    let px = 0, py = 0;
+    head.addEventListener('pointerdown', (e) => { px = e.clientX; py = e.clientY; });
+    head.addEventListener('click', (e) => {
+      if (Math.hypot(e.clientX - px, e.clientY - py) > 4) return;   // a drag
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed) return;                          // selecting text
+      if (raf || !section.classList.contains('is-night')) return;
+      const r = dotRect();
+      if (!r || e.clientX < r.left - PAD || e.clientX > r.right + PAD ||
+          e.clientY < r.top - PAD || e.clientY > r.bottom + PAD) return;
+      disarm();
+      fly(true);
+    });
+  }
 
   // ?meteors=debug — the lab. Streaks land about once a second and one in
   // three is green, so the rare one can actually be judged and tuned instead
