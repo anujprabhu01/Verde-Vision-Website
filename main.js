@@ -1161,8 +1161,17 @@ applyForm?.addEventListener('submit', async (e) => {
   // reads as "there's a green one" instead of "wait - did I just see that".
   const DEBUG = /[?&]meteors=debug\b/.test(location.search);
   const GREEN_ODDS = DEBUG ? 3 : 20;
-  const TRAIN_MS = 1200;      // how long past the head the flight stays alive for
-  const TRAIN_TAU = 560;      // decay constant of a point from the moment it is passed
+  // A persistent train outlives the meteor — that is the whole meaning of the
+  // word. It does not end when the head does; it hangs where the head went
+  // and goes out slowly. So the flight stays alive well past the head, the
+  // decay is slow enough that the train is still clearly there when the head
+  // dies, and TRAIN_OUT ramps whatever is left to nothing over the last half
+  // second. That ramp is not tuning: it is what makes a hard cut impossible
+  // no matter what the other two numbers are set to.
+  const TRAIN_MS = 2400;      // how long past the head the flight stays alive for
+  const TRAIN_TAU = 720;      // decay constant of a point from the moment it is passed
+  const TRAIN_OUT = 520;      // final ramp to zero, so the train never snaps off
+  const TRAIN_AMP = 0.92;
 
   // The terminal burst. Deep enough into the atmosphere the pressure on the
   // leading face beats the strength of the rock and it comes apart; the
@@ -1176,7 +1185,7 @@ applyForm?.addEventListener('submit', async (e) => {
   // a flicker, and it stays under the launch brightness so it never looks
   // like a second meteor.
   const BURST_AT = 0.74;                  // fraction of the path where it lets go
-  const BURST_UP = 0.09, BURST_DN = 0.055;   // rise wider than the collapse
+  const BURST_UP = 0.09, BURST_DN = 0.075;   // rise wider than the collapse
 
   // How hard the green one lights the sky around it. GLOW_RIDE rides the
   // meteor's own brightness; GLOW_FLASH is what the terminal burst adds, and
@@ -1194,6 +1203,16 @@ applyForm?.addEventListener('submit', async (e) => {
     const x = Math.abs(d) / (d < 0 ? BURST_UP : BURST_DN);
     return x >= 1 ? 0 : 0.5 * (1 + Math.cos(Math.PI * x));
   };
+  // How brightly the meteor burned at a given point of its path: in fast, out
+  // slow, with the flare on top. The head reads this at p. The train reads it
+  // at EVERY point behind, because a train is a record of what was shed, and
+  // what was shed at a point is what the meteor was burning there. That is
+  // what makes the far end of the train taper away to nothing — by then there
+  // was almost nothing left to shed — and it is why the glowing tip never
+  // comes to a dead stop. It goes out as it arrives, instead of halting at
+  // full brightness the instant the head reaches the end of the path.
+  const lit = (s) => Math.min(1,
+    (s < 0.12 ? s / 0.12 : Math.max(0, 1 - (s - 0.12) / 0.88)) + burst(s) * 0.5);
 
   // The copy and the night photo paint OVER this canvas — the ink is the
   // section's first child, the grid comes after it and neither carries a
@@ -1271,9 +1290,9 @@ applyForm?.addEventListener('submit', async (e) => {
     const e = now - m.t0;
     const p = Math.min(1, e / m.dur);
     // in fast, out slow — a meteor is brightest just after it appears
-    const base = p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88);
     const b = m.green ? burst(p) : 0;
-    const a = Math.min(1, base + b * 0.5);
+    const a = m.green ? lit(p)
+                      : (p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88));
     const hx = m.x0 + m.ux * m.travel * p, hy = m.y0 + m.uy * m.travel * p;
     if (m.green) lightSky(hx, hy, Math.min(GLOW_MAX, a * GLOW_RIDE + b * GLOW_FLASH));
     const tx = hx - m.ux * m.len, ty = hy - m.uy * m.len;
@@ -1301,11 +1320,13 @@ applyForm?.addEventListener('submit', async (e) => {
     // starts decaying from the moment the head passes IT, so the ghost fades
     // from the origin down rather than dimming all at once
     if (m.green && p > 0.02) {
+      const out = Math.min(1, (m.life - e) / TRAIN_OUT);
       const g = ctx.createLinearGradient(m.x0, m.y0, hx, hy);
-      for (let i = 0; i <= 6; i++) {
-        const q = i / 6;                                // fraction of the path flown so far
-        const age = Math.max(0, e - q * p * m.dur);     // how long ago the head passed it
-        const ta = 0.38 * Math.exp(-age / TRAIN_TAU) * (0.25 + 0.75 * q);
+      for (let i = 0; i <= 10; i++) {
+        const q = i / 10;                               // fraction of the segment drawn so far
+        const s = q * p;                                // ...as a fraction of the whole path
+        const age = Math.max(0, e - s * m.dur);         // how long ago the head passed it
+        const ta = TRAIN_AMP * lit(s) * Math.exp(-age / TRAIN_TAU) * out;
         g.addColorStop(q, `rgba(126,226,172,${ta.toFixed(3)})`);
       }
       ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
