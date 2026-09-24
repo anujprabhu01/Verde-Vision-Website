@@ -1179,13 +1179,13 @@ applyForm?.addEventListener('submit', async (e) => {
   // path and the streak behind the head, glare scales the head's bloom, flash
   // scales the terminal burst and sky scales the light it throws. All default
   // to 1, so green is the baseline everything else is measured against.
-  const GREEN  = { hi: [126, 232, 176], lo: [255, 204, 116], odds: DEBUG ? 3 : 20 };
+  const GREEN  = { hi: [126, 232, 176], lo: [255, 204, 116], odds: DEBUG ? 3 : 10 };
   // Ionised calcium takes far more excitation to light up than oxygen or
   // nickel do, and excitation here means velocity — so the violet one is not
   // simply a brighter green, it is a faster and more violent meteor. It
   // crosses more sky in less time, drags a longer streak, carries a bigger
   // head, flares harder at the end and throws more light while doing it.
-  const VIOLET = { hi: [158, 108, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 50,
+  const VIOLET = { hi: [158, 108, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 20,
                    speed: 0.80, reach: 1.18, tail: 1.22, glare: 1.4, flash: 1.3,
                    sky: 1.45, wide: 1.15 };
 
@@ -1200,7 +1200,7 @@ applyForm?.addEventListener('submit', async (e) => {
   // changed as it went. Naked-eye galactic supernovae come a few times a
   // millennium, so it is the one thing here that earns being rarer than
   // everything else put together.
-  const NOVA = { hi: [216, 232, 255], lo: [255, 192, 128], odds: DEBUG ? 8 : 100, nova: true };
+  const NOVA = { hi: [216, 232, 255], lo: [255, 192, 128], odds: DEBUG ? 8 : 50, nova: true };
   const NOVA_RISE = 380;        // the flash: sudden, but not a single frame
   const NOVA_FLASH_TAU = 820;   // and it does not last — the core goes first
   const NOVA_SHELL_IN = 140;    // the shell comes out of the flash, just behind it
