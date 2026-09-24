@@ -1178,6 +1178,27 @@ applyForm?.addEventListener('submit', async (e) => {
   const GREEN  = { hi: [126, 232, 176], lo: [255, 204, 116], odds: DEBUG ? 3 : 20 };
   const VIOLET = { hi: [170, 128, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 100 };
 
+  // And the rarest thing in the sky, which is not a meteor at all. A
+  // supernova does not cross anything: it is a star that was not there,
+  // arriving in place. SN 1006 reached about magnitude -7.5 — brighter than
+  // Venus, roughly a quarter moon's worth of light, visible in daylight for
+  // weeks and casting faint shadows at night. It "appeared suddenly, shone
+  // with extraordinary intensity for months, and then slowly faded away":
+  // fast up, slow down, nothing like the linear fade of a streak. Japanese
+  // observers called it blue-white; Ibn Ridwan wrote down that the colour
+  // changed as it went. Naked-eye galactic supernovae come a few times a
+  // millennium, so it is the one thing here that earns being rarer than
+  // everything else put together.
+  const NOVA = { hi: [216, 232, 255], lo: [255, 192, 128], odds: DEBUG ? 8 : 200, nova: true };
+  const NOVA_RISE = 380;        // the flash: sudden, but not a single frame
+  const NOVA_FLASH_TAU = 820;   // and it does not last — the core goes first
+  const NOVA_SHELL_IN = 140;    // the shell comes out of the flash, just behind it
+  const NOVA_SHELL_RUN = 2700;  // how long it takes to reach full size
+  const NOVA_TAU = 1900;        // the shell's own, slower decline
+  const NOVA_R = 78;            // radius of the shell at full expansion
+  const NOVA_LIFE = 6000;
+  const NOVA_OUT = 800;         // final ramp to nothing, so it cannot snap off
+
   // Where along the path the handover happens. Flat at first, because up
   // there nothing is quenching anything, then given away through the second
   // half as the air thickens. Smoothstepped so there is no frame you can
@@ -1222,16 +1243,17 @@ applyForm?.addEventListener('submit', async (e) => {
   // ground. Capped so the sky lifts rather than washes out.
   const glow = document.getElementById('night-glow');
   const GLOW_RIDE = 0.10, GLOW_FLASH = 0.26, GLOW_MAX = 0.30;
-  const lightSky = (x, y, v) => {
+  const lightSky = (x, y, v, k = 1) => {
     if (!glow) return;
-    if (v > 0.002) glow.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    if (v > 0.002) glow.style.transform =
+      `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${k})`;
     glow.style.opacity = v.toFixed(3);
   };
   // Set once per flight, not per frame: the gradient would have to repaint,
   // and the glow only matters around the burst anyway, so it takes the colour
   // the meteor will be when it flares.
-  const glowColour = (pal) => {
-    if (glow) glow.style.setProperty('--glow-rgb', rgb(pal, BURST_AT));
+  const glowColour = (pal, at = BURST_AT) => {
+    if (glow) glow.style.setProperty('--glow-rgb', rgb(pal, at));
   };
   const burst = (p) => {
     const d = p - BURST_AT;
@@ -1314,7 +1336,209 @@ applyForm?.addEventListener('submit', async (e) => {
     };
   };
 
+  // A supernova has no path, so it borrows the meteor's shape with a travel
+  // and a tail of zero: clearOf then degenerates into a point-in-rectangle
+  // test and keeps it out of the picture for free. It sits in the band above
+  // the copy, where the sky's mask is fully open and nothing paints over it —
+  // a streak crossing the headline is gone in half a second, but a point
+  // hanging behind a letter for five is just missing.
+  const draftNova = () => {
+    // The shell is not a smooth bubble — look at the Crab and it is all
+    // shredded filaments. These are fixed at spawn so they expand WITH the
+    // shell rather than boiling about, and they start well out from the
+    // centre: spokes running from the middle would read as a firework.
+    const fil = [];
+    const n = 15 + (Math.random() * 8 | 0);
+    for (let i = 0; i < n; i++) fil.push({
+      t: (i / n) * Math.PI * 2 + (Math.random() - 0.5) * 0.9,   // uneven, or it reads as a sun symbol
+      a: 0.42 + Math.random() * 0.30,
+      b: 0.92 + Math.random() * 0.34,
+      w: 0.05 + Math.random() * 0.17,
+      lw: 0.7 + Math.random() * 1.9
+    });
+    // The rim is built from clumps rather than drawn as a ring. A clean
+    // radial gradient gives a smoke ring; the real thing is lumpy and torn,
+    // brighter on one side than the other, and shot through with different
+    // colours — the Crab is teal through the middle with gold and rust at the
+    // edges. Each clump keeps its own angle, distance and hue for the whole
+    // flight, so the shell expands rather than boiling.
+    const HUES = ['255,150,140', '255,150,140', '255,186,126', '255,170,132',
+                  '255,196,150', '150,232,212', '186,236,190'];
+    const clump = [];
+    const cn = 13 + (Math.random() * 6 | 0);
+    let ang = Math.random() * Math.PI * 2;
+    for (let i = 0; i < cn; i++) {
+      ang += (Math.PI * 2 / cn) * (0.55 + Math.random() * 0.9);
+      clump.push({
+        t: ang,
+        r: 0.80 + Math.random() * 0.26,
+        s: 0.20 + Math.random() * 0.22,
+        a: 0.10 + Math.random() * 0.17,
+        c: HUES[Math.random() * HUES.length | 0]
+      });
+    }
+    return {
+      nova: true, pal: NOVA, fil, clump,
+      // The sky's own alpha mask only reaches full opacity at 22% of the SKY's
+      // height — y = 0.355 of this canvas, since the canvas is 62% of it — so
+      // anything centred above that is drawn into the fade and arrives washed
+      // out. The band starts below it. novaClear then does the rest: with the
+      // headline occupying the left, the open sky on this layout is the upper
+      // right, and that is where most of these end up.
+      x0: w * (0.08 + Math.random() * 0.84),
+      y0: h * (0.36 + Math.random() * 0.075),
+      ux: 0, uy: 0, len: 0, travel: 0,
+      dur: NOVA_RISE, life: NOVA_LIFE,
+      t0: performance.now(), prev: null, box: null
+    };
+  };
+
+  // A remnant is wider than a streak and it sits still for seconds, so it has
+  // to keep off the words as well as the picture — a meteor crossing the
+  // headline is gone in half a second, a nebula parked behind it is broken.
+  //
+  // The HEADING, though, not the whole .night-copy cell. That cell is a grid
+  // track running most of the section's height and it is mostly empty: its
+  // top edge is the small "night mode" label, and the headline itself starts
+  // 50px below that. Avoiding the cell threw away all of the sky over the
+  // left-hand column, which is why these only ever turned up on the right.
+  // The label is a thin line of small caps and the faint outer edge of the
+  // shell passing behind it costs nothing.
+  const novaClear = (m) => {
+    // The clearance is the shell's BRIGHT reach, not its absolute outermost
+    // pixel. A clump's gradient runs to zero at its rim, so demanding room for
+    // that last transparent millimetre only costs sky — and the sky it costs
+    // is the left-hand side, where the headline sits higher than the picture
+    // does on the right.
+    const R = NOVA_R * 1.18 + 8;
+    const c = canvas.getBoundingClientRect();
+    for (const sel of ['.night-window', '.night-copy h2']) {
+      const el = section.querySelector(sel);
+      if (!el) continue;
+      const f = el.getBoundingClientRect();
+      if (!f.width) continue;
+      if (m.x0 + R > f.left - c.left && m.x0 - R < f.right - c.left &&
+          m.y0 + R > f.top - c.top && m.y0 - R < f.bottom - c.top) return false;
+    }
+    return true;
+  };
+
+  // The flash goes first and the shell outlives it — which is the whole shape
+  // of the thing. A brilliant blue-white core, a rose shell pushing outward
+  // and slowing as it goes, filaments tearing through it, and a blue interior
+  // lit from inside. It never moves. That is the point: everything else in
+  // this sky travels.
+  const renderNova = (m, now) => {
+    const e = now - m.t0;
+    const up = Math.min(1, e / NOVA_RISE);
+    const flash = up * up * (3 - 2 * up)
+                * (e <= NOVA_RISE ? 1 : Math.exp(-(e - NOVA_RISE) / NOVA_FLASH_TAU));
+    const su = Math.max(0, Math.min(1, (e - NOVA_SHELL_IN) / NOVA_SHELL_RUN));
+    const R = 5 + (NOVA_R - 5) * (1 - (1 - su) * (1 - su));      // expands, decelerating
+    const out = Math.min(1, (m.life - e) / NOVA_OUT);
+    const shell = Math.min(1, Math.max(0, e - NOVA_SHELL_IN) / 300)
+                * Math.exp(-Math.max(0, e - NOVA_RISE) / NOVA_TAU) * out;
+    const core = flash * out;
+    const c = rgb(m.pal, e / m.life);
+
+    if (!m.box) m.box = [m.x0 - 130, m.y0 - 130, 260, 260];
+    ctx.clearRect(m.box[0], m.box[1], m.box[2], m.box[3]);
+    ctx.globalCompositeOperation = 'lighter';
+
+    if (shell > 0.003) {
+      // the interior, lit from inside
+      const gi = ctx.createRadialGradient(m.x0, m.y0, 0, m.x0, m.y0, R * 1.05);
+      gi.addColorStop(0, `rgba(140,196,255,${(0.26 * shell).toFixed(3)})`);
+      gi.addColorStop(0.55, `rgba(104,164,246,${(0.13 * shell).toFixed(3)})`);
+      gi.addColorStop(1, 'rgba(80,130,220,0)');
+      ctx.fillStyle = gi;
+      ctx.beginPath(); ctx.arc(m.x0, m.y0, R * 1.05, 0, Math.PI * 2); ctx.fill();
+
+      // a faint even ring underneath, only to bind the clumps into one object
+      const gr = ctx.createRadialGradient(m.x0, m.y0, 0, m.x0, m.y0, R * 1.24);
+      gr.addColorStop(0, 'rgba(255,150,140,0)');
+      gr.addColorStop(0.62, `rgba(255,150,140,${(0.03 * shell).toFixed(3)})`);
+      gr.addColorStop(0.84, `rgba(255,158,146,${(0.13 * shell).toFixed(3)})`);
+      gr.addColorStop(1, 'rgba(255,200,150,0)');
+      ctx.fillStyle = gr;
+      ctx.beginPath(); ctx.arc(m.x0, m.y0, R * 1.24, 0, Math.PI * 2); ctx.fill();
+
+      // and the shell proper: lumps of ejecta sitting on the rim at their own
+      // distances, in their own colours
+      for (const k of m.clump) {
+        const kx = m.x0 + Math.cos(k.t) * R * k.r, ky = m.y0 + Math.sin(k.t) * R * k.r;
+        const kr = Math.max(3, R * k.s);
+        const gk = ctx.createRadialGradient(kx, ky, 0, kx, ky, kr);
+        gk.addColorStop(0, `rgba(${k.c},${(k.a * shell).toFixed(3)})`);
+        gk.addColorStop(0.55, `rgba(${k.c},${(k.a * 0.38 * shell).toFixed(3)})`);
+        gk.addColorStop(1, `rgba(${k.c},0)`);
+        ctx.fillStyle = gk;
+        ctx.beginPath(); ctx.arc(kx, ky, kr, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.lineCap = 'round';
+      for (const f of m.fil) {
+        const cx = Math.cos(f.t), cy = Math.sin(f.t);
+        const ax = m.x0 + cx * R * f.a, ay = m.y0 + cy * R * f.a;
+        const bx = m.x0 + cx * R * f.b, by = m.y0 + cy * R * f.b;
+        const gf = ctx.createLinearGradient(ax, ay, bx, by);
+        gf.addColorStop(0, 'rgba(255,192,132,0)');
+        gf.addColorStop(0.45, `rgba(255,178,132,${(f.w * shell).toFixed(3)})`);
+        gf.addColorStop(1, 'rgba(255,150,140,0)');
+        ctx.strokeStyle = gf; ctx.lineWidth = f.lw;
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      }
+    }
+
+    if (core > 0.003) {
+      const halo = ctx.createRadialGradient(m.x0, m.y0, 0, m.x0, m.y0, 46);
+      halo.addColorStop(0, `rgba(${c},${(0.32 * core).toFixed(3)})`);
+      halo.addColorStop(0.3, `rgba(${c},${(0.10 * core).toFixed(3)})`);
+      halo.addColorStop(1, `rgba(${c},0)`);
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(m.x0, m.y0, 46, 0, Math.PI * 2); ctx.fill();
+
+      const hot = ctx.createRadialGradient(m.x0, m.y0, 0, m.x0, m.y0, 10);
+      hot.addColorStop(0, `rgba(255,255,255,${(0.95 * core).toFixed(3)})`);
+      hot.addColorStop(0.45, `rgba(${c},${(0.5 * core).toFixed(3)})`);
+      hot.addColorStop(1, `rgba(${c},0)`);
+      ctx.fillStyle = hot;
+      ctx.beginPath(); ctx.arc(m.x0, m.y0, 10, 0, Math.PI * 2); ctx.fill();
+
+      const arm = 52 * core;
+      ctx.lineWidth = 1.1; ctx.lineCap = 'butt';
+      for (const [dx, dy] of [[1, 0], [0, 1]]) {
+        const g2 = ctx.createLinearGradient(m.x0 - dx * arm, m.y0 - dy * arm,
+                                            m.x0 + dx * arm, m.y0 + dy * arm);
+        g2.addColorStop(0, `rgba(${c},0)`);
+        g2.addColorStop(0.5, `rgba(255,255,255,${(0.5 * core).toFixed(3)})`);
+        g2.addColorStop(1, `rgba(${c},0)`);
+        ctx.strokeStyle = g2;
+        ctx.beginPath();
+        ctx.moveTo(m.x0 - dx * arm, m.y0 - dy * arm);
+        ctx.lineTo(m.x0 + dx * arm, m.y0 + dy * arm);
+        ctx.stroke();
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    if (core > 0.003) {
+      ctx.fillStyle = `rgba(255,255,255,${core.toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(m.x0, m.y0, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+    // SN 1006 cast faint shadows, so it does light the sky — but it is a
+    // point at stellar distance, not something burning overhead, so the pool
+    // is a fraction of a fireball's
+    lightSky(m.x0, m.y0, 0.13 * Math.max(core, shell * 0.5), 0.34);
+    return e < m.life;
+  };
+
   const spawn = (pal) => {
+    if (pal && pal.nova) {
+      let m = draftNova();
+      for (let tries = 0; tries < 60 && !novaClear(m); tries++) m = draftNova();
+      return m;
+    }
     const b = blocked();
     let m = draft(pal);
     for (let tries = 0; tries < 40 && !clearOf(b, m); tries++) m = draft(pal);
@@ -1322,6 +1546,7 @@ applyForm?.addEventListener('submit', async (e) => {
   };
 
   const render = (m, now) => {
+    if (m.nova) return renderNova(m, now);
     const e = now - m.t0;
     const p = Math.min(1, e / m.dur);
     // in fast, out slow — a meteor is brightest just after it appears
@@ -1430,15 +1655,16 @@ applyForm?.addEventListener('submit', async (e) => {
                         : () => 7000 + Math.random() * 7000;
 
   let timer = 0, raf = 0, onScreen = false;
-  // Violet is rolled first so the commoner green cannot shadow it. Two guard
-  // rails on both: never the first streak of a visit (that one teaches you
-  // the sky does something, and a coloured opener would make the egg findable
-  // by reloading), and never two running — back to back reads as a bug rather
+  // Rolled rarest first, so a commoner one cannot shadow it. Two guard rails
+  // on all three: never the first streak of a visit (that one teaches you the
+  // sky does something, and a coloured opener would make the eggs findable by
+  // reloading), and never two running — back to back reads as a bug rather
   // than as a rarity.
   let flights = 0, lastFire = false;
   const pick = () => {
     if (flights === 0 && !DEBUG) return null;
     if (lastFire) return null;
+    if (Math.random() < 1 / NOVA.odds) return NOVA;
     if (Math.random() < 1 / VIOLET.odds) return VIOLET;
     if (Math.random() < 1 / GREEN.odds) return GREEN;
     return null;
@@ -1463,7 +1689,7 @@ applyForm?.addEventListener('submit', async (e) => {
     if (!size()) return schedule();
     const m = spawn(force === undefined ? pick() : force);
     flights++; lastFire = !!m.pal;
-    if (m.pal) glowColour(m.pal);
+    if (m.pal) glowColour(m.pal, m.nova ? 0 : BURST_AT);
     const step = () => {
       if (!render(m, performance.now())) {
         ctx.clearRect(0, 0, w, h);
@@ -1511,7 +1737,7 @@ applyForm?.addEventListener('submit', async (e) => {
   // the "click" is really the end of a drag across the text.
   const head = section.querySelector('.night-copy h2');
   if (head) {
-    const TARGETS = [[/\bit\b/, GREEN], [/\blit\b/, VIOLET]];
+    const TARGETS = [[/\bit\b/, GREEN], [/\blit\b/, VIOLET], [/\bnight\b/, NOVA]];
     // The tittle's centre inside the glyph's inline box, as fractions of that
     // box. Measured off the rendered face, not guessed: the box is a whole
     // line-height tall and the dot sits right at the top of it, 9% down —
@@ -1590,9 +1816,15 @@ applyForm?.addEventListener('submit', async (e) => {
       if (Math.hypot(e.clientX - px, e.clientY - py) > 4) return;   // a drag
       const sel = window.getSelection();
       if (sel && !sel.isCollapsed) return;                          // selecting text
-      if (raf || !section.classList.contains('is-night')) return;
+      if (!section.classList.contains('is-night')) return;
       const d = dots.find((d) => onTittle(d.el, e.clientX, e.clientY));
       if (!d) return;
+      // A deliberate click takes the sky over rather than queuing behind
+      // whatever happens to be up there. Refusing while something flies
+      // would swallow a good fraction of them — an ambient flight lasts up
+      // to three and a half seconds with its train — and a button that does
+      // nothing a quarter of the time reads as no button at all.
+      if (raf) { cancelAnimationFrame(raf); raf = 0; ctx.clearRect(0, 0, w, h); lightSky(0, 0, 0); }
       disarm();
       fly(d.pal);
     });
@@ -1605,7 +1837,8 @@ applyForm?.addEventListener('submit', async (e) => {
   if (DEBUG) window.__meteor = (which = 'green') => {
     if (raf) return false;
     disarm();
-    fly(which === 'violet' ? VIOLET : which === 'plain' ? null : GREEN);
+    fly(which === 'violet' ? VIOLET : which === 'nova' ? NOVA
+        : which === 'plain' ? null : GREEN);
     return true;
   };
 })();
