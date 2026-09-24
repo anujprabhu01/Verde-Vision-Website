@@ -1160,7 +1160,36 @@ applyForm?.addEventListener('submit', async (e) => {
   // path, hanging for a beat after the head has gone. Anything less and it
   // reads as "there's a green one" instead of "wait - did I just see that".
   const DEBUG = /[?&]meteors=debug\b/.test(location.search);
-  const GREEN_ODDS = DEBUG ? 3 : 20;
+
+  // Two fireballs, and they are the same machine burning different stuff.
+  //
+  // GREEN is the common one — forbidden atomic oxygen at ~100 km (557.7 nm,
+  // the line that makes the aurora green) plus nickel off the body itself.
+  // That oxygen line is also why it CHANGES COLOUR on the way down: the
+  // excited state takes about 0.74s to radiate, which is an age at these
+  // densities, so lower down collisions knock the atom out of it before it
+  // can. The green is quenched and iron and sodium take over. Green high,
+  // gold low, and never the other way round.
+  //
+  // VIOLET is ionised calcium, which needs far more excitation to light up at
+  // all — the rarest colour a meteor actually shows. It stays cool as it
+  // goes: calcium handing over to magnesium's blue-white rather than to the
+  // warm metals.
+  const GREEN  = { hi: [126, 232, 176], lo: [255, 204, 116], odds: DEBUG ? 3 : 20 };
+  const VIOLET = { hi: [170, 128, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 100 };
+
+  // Where along the path the handover happens. Flat at first, because up
+  // there nothing is quenching anything, then given away through the second
+  // half as the air thickens. Smoothstepped so there is no frame you can
+  // point at and call the moment it changed.
+  const SHIFT_IN = 0.30, SHIFT_OUT = 0.88;
+  const rgb = (pal, s) => {
+    let t = (s - SHIFT_IN) / (SHIFT_OUT - SHIFT_IN);
+    t = t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+    return `${pal.hi[0] + (pal.lo[0] - pal.hi[0]) * t | 0},`
+         + `${pal.hi[1] + (pal.lo[1] - pal.hi[1]) * t | 0},`
+         + `${pal.hi[2] + (pal.lo[2] - pal.hi[2]) * t | 0}`;
+  };
   // A persistent train outlives the meteor — that is the whole meaning of the
   // word. It does not end when the head does; it hangs where the head went
   // and goes out slowly. So the flight stays alive well past the head, the
@@ -1197,6 +1226,12 @@ applyForm?.addEventListener('submit', async (e) => {
     if (!glow) return;
     if (v > 0.002) glow.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     glow.style.opacity = v.toFixed(3);
+  };
+  // Set once per flight, not per frame: the gradient would have to repaint,
+  // and the glow only matters around the burst anyway, so it takes the colour
+  // the meteor will be when it flares.
+  const glowColour = (pal) => {
+    if (glow) glow.style.setProperty('--glow-rgb', rgb(pal, BURST_AT));
   };
   const burst = (p) => {
     const d = p - BURST_AT;
@@ -1260,29 +1295,29 @@ applyForm?.addEventListener('submit', async (e) => {
 
   // one streak: a head travelling a straight line, with a tapered tail
   // trailing behind it along the same heading
-  const draft = (green) => {
+  const draft = (pal) => {
     const leftward = Math.random() < 0.35;
     const ang = (18 + Math.random() * 20) * Math.PI / 180;      // below horizontal
     const ux = (leftward ? -1 : 1) * Math.cos(ang), uy = Math.sin(ang);
-    const travel = green ? 300 + Math.random() * 240 : 240 + Math.random() * 220;
-    const len = green ? 150 + Math.random() * 110 : 90 + Math.random() * 90;  // tail length
+    const travel = pal ? 300 + Math.random() * 240 : 240 + Math.random() * 220;
+    const len = pal ? 150 + Math.random() * 110 : 90 + Math.random() * 90;  // tail length
     const x0 = leftward ? w * (0.45 + Math.random() * 0.5) : w * (0.05 + Math.random() * 0.5);
     // 0.28 is where the sky's alpha mask has opened up; a green starts in the
     // top half of that band so most drafts clear the figure on the first go
-    const y0 = h * (0.28 + Math.random() * (green ? 0.18 : 0.38));
-    const dur = green ? 780 + Math.random() * 320 : 440 + Math.random() * 280;
+    const y0 = h * (0.28 + Math.random() * (pal ? 0.18 : 0.38));
+    const dur = pal ? 780 + Math.random() * 320 : 440 + Math.random() * 280;
     return {
-      x0, y0, ux, uy, len, travel, dur, green,
-      life: dur + (green ? TRAIN_MS : 0),
+      x0, y0, ux, uy, len, travel, dur, pal,
+      life: dur + (pal ? TRAIN_MS : 0),
       t0: performance.now(),
       prev: null, box: null
     };
   };
 
-  const spawn = (green) => {
+  const spawn = (pal) => {
     const b = blocked();
-    let m = draft(green);
-    for (let tries = 0; tries < 40 && !clearOf(b, m); tries++) m = draft(green);
+    let m = draft(pal);
+    for (let tries = 0; tries < 40 && !clearOf(b, m); tries++) m = draft(pal);
     return m;
   };
 
@@ -1290,14 +1325,14 @@ applyForm?.addEventListener('submit', async (e) => {
     const e = now - m.t0;
     const p = Math.min(1, e / m.dur);
     // in fast, out slow — a meteor is brightest just after it appears
-    const b = m.green ? burst(p) : 0;
-    const a = m.green ? lit(p)
-                      : (p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88));
+    const b = m.pal ? burst(p) : 0;
+    const a = m.pal ? lit(p)
+                    : (p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88));
     const hx = m.x0 + m.ux * m.travel * p, hy = m.y0 + m.uy * m.travel * p;
-    if (m.green) lightSky(hx, hy, Math.min(GLOW_MAX, a * GLOW_RIDE + b * GLOW_FLASH));
+    if (m.pal) lightSky(hx, hy, Math.min(GLOW_MAX, a * GLOW_RIDE + b * GLOW_FLASH));
     const tx = hx - m.ux * m.len, ty = hy - m.uy * m.len;
 
-    if (m.green) {
+    if (m.pal) {
       // the train outlives the head, over ground a per-frame dirty rect has
       // already released — so a green flight owns one box, the whole path,
       // and clears that whole box each frame instead
@@ -1319,7 +1354,7 @@ applyForm?.addEventListener('submit', async (e) => {
     // the persistent train, under everything else: each point on the path
     // starts decaying from the moment the head passes IT, so the ghost fades
     // from the origin down rather than dimming all at once
-    if (m.green && p > 0.02) {
+    if (m.pal && p > 0.02) {
       const out = Math.min(1, (m.life - e) / TRAIN_OUT);
       const g = ctx.createLinearGradient(m.x0, m.y0, hx, hy);
       for (let i = 0; i <= 10; i++) {
@@ -1327,26 +1362,32 @@ applyForm?.addEventListener('submit', async (e) => {
         const s = q * p;                                // ...as a fraction of the whole path
         const age = Math.max(0, e - s * m.dur);         // how long ago the head passed it
         const ta = TRAIN_AMP * lit(s) * Math.exp(-age / TRAIN_TAU) * out;
-        g.addColorStop(q, `rgba(126,226,172,${ta.toFixed(3)})`);
+        // the train carries the colour the meteor was burning at that point,
+        // so the ghost is green where it came in and gold where it went out
+        g.addColorStop(q, `rgba(${rgb(m.pal, s)},${ta.toFixed(3)})`);
       }
       ctx.strokeStyle = g; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(m.x0, m.y0); ctx.lineTo(hx, hy); ctx.stroke();
     }
 
     const g = ctx.createLinearGradient(hx, hy, tx, ty);
-    if (m.green) {
-      // white-hot core in a jade sheath: the green is the glowing air column
-      // and the nickel coming off it, not the incandescent head itself
+    if (m.pal) {
+      // White-hot core in a coloured sheath — the colour is the glowing air
+      // column and what is coming off the body, not the incandescent head.
+      // Head and tail are read at their own points on the path, so the streak
+      // itself carries the handover: the tail is still the high-altitude
+      // colour while the head has already moved on.
+      const cH = rgb(m.pal, p), cT = rgb(m.pal, Math.max(0, p - m.len / m.travel));
       g.addColorStop(0, `rgba(255,255,252,${a.toFixed(3)})`);
-      g.addColorStop(0.10, `rgba(196,255,226,${(0.88 * a).toFixed(3)})`);
-      g.addColorStop(0.34, `rgba(128,240,186,${(0.52 * a).toFixed(3)})`);
-      g.addColorStop(1, 'rgba(96,214,158,0)');
+      g.addColorStop(0.10, `rgba(${cH},${(0.88 * a).toFixed(3)})`);
+      g.addColorStop(0.34, `rgba(${cT},${(0.52 * a).toFixed(3)})`);
+      g.addColorStop(1, `rgba(${cT},0)`);
     } else {
       g.addColorStop(0, `rgba(255,248,234,${(0.95 * a).toFixed(3)})`);
       g.addColorStop(0.3, `rgba(226,235,255,${(0.34 * a).toFixed(3)})`);
       g.addColorStop(1, 'rgba(214,228,255,0)');
     }
-    ctx.strokeStyle = g; ctx.lineWidth = m.green ? 2.4 : 1.5; ctx.lineCap = 'round';
+    ctx.strokeStyle = g; ctx.lineWidth = m.pal ? 2.4 : 1.5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
 
     // The head of a real fireball is the light source — bright enough at these
@@ -1356,26 +1397,27 @@ applyForm?.addEventListener('submit', async (e) => {
     // is emitted light: a wide bloom, the coma burning around the body, and
     // the white-hot nucleus. The green concentrates here and in the wake just
     // behind, which is where the excited oxygen actually is.
-    if (m.green && a > 0) {
+    if (m.pal && a > 0) {
+      const c = rgb(m.pal, p);
       ctx.globalCompositeOperation = 'lighter';
       const br = 30 * (1 + 0.55 * b);
       const bloom = ctx.createRadialGradient(hx, hy, 0, hx, hy, br);
-      bloom.addColorStop(0, `rgba(116,252,188,${(0.40 * a).toFixed(3)})`);
-      bloom.addColorStop(0.34, `rgba(84,226,160,${(0.15 * a).toFixed(3)})`);
-      bloom.addColorStop(1, 'rgba(62,190,132,0)');
+      bloom.addColorStop(0, `rgba(${c},${(0.40 * a).toFixed(3)})`);
+      bloom.addColorStop(0.34, `rgba(${c},${(0.15 * a).toFixed(3)})`);
+      bloom.addColorStop(1, `rgba(${c},0)`);
       ctx.fillStyle = bloom;
       ctx.beginPath(); ctx.arc(hx, hy, br, 0, Math.PI * 2); ctx.fill();
       const cr = 10 * (1 + 0.35 * b);
       const coma = ctx.createRadialGradient(hx, hy, 0, hx, hy, cr);
       coma.addColorStop(0, `rgba(255,255,252,${(0.92 * a).toFixed(3)})`);
-      coma.addColorStop(0.38, `rgba(196,255,224,${(0.52 * a).toFixed(3)})`);
-      coma.addColorStop(1, 'rgba(138,240,188,0)');
+      coma.addColorStop(0.38, `rgba(${c},${(0.52 * a).toFixed(3)})`);
+      coma.addColorStop(1, `rgba(${c},0)`);
       ctx.fillStyle = coma;
       ctx.beginPath(); ctx.arc(hx, hy, cr, 0, Math.PI * 2); ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
     }
     ctx.fillStyle = `rgba(255,250,240,${a.toFixed(3)})`;
-    ctx.beginPath(); ctx.arc(hx, hy, m.green ? 2.4 * (1 + 0.5 * b) : 1.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(hx, hy, m.pal ? 2.4 * (1 + 0.5 * b) : 1.25, 0, Math.PI * 2); ctx.fill();
     return e < m.life;
   };
 
@@ -1388,15 +1430,18 @@ applyForm?.addEventListener('submit', async (e) => {
                         : () => 7000 + Math.random() * 7000;
 
   let timer = 0, raf = 0, onScreen = false;
-  // one in GREEN_ODDS, with two guard rails: never the first streak of a
-  // visit (that one is teaching you the sky does something, and a green
-  // opener would also make the egg findable by reloading), and never two
-  // running — a double green reads as a bug, not as a rarity
-  let flights = 0, lastGreen = false;
-  const pickGreen = () => {
-    if (flights === 0 && !DEBUG) return false;
-    if (lastGreen) return false;
-    return Math.random() < 1 / GREEN_ODDS;
+  // Violet is rolled first so the commoner green cannot shadow it. Two guard
+  // rails on both: never the first streak of a visit (that one teaches you
+  // the sky does something, and a coloured opener would make the egg findable
+  // by reloading), and never two running — back to back reads as a bug rather
+  // than as a rarity.
+  let flights = 0, lastFire = false;
+  const pick = () => {
+    if (flights === 0 && !DEBUG) return null;
+    if (lastFire) return null;
+    if (Math.random() < 1 / VIOLET.odds) return VIOLET;
+    if (Math.random() < 1 / GREEN.odds) return GREEN;
+    return null;
   };
   const disarm = () => { clearTimeout(timer); timer = 0; };
   const arm = (delay) => {
@@ -1414,10 +1459,11 @@ applyForm?.addEventListener('submit', async (e) => {
   };
   const schedule = () => arm(AMBIENT());
 
-  const fly = (forceGreen) => {
+  const fly = (force) => {
     if (!size()) return schedule();
-    const m = spawn(forceGreen === undefined ? pickGreen() : !!forceGreen);
-    flights++; lastGreen = m.green;
+    const m = spawn(force === undefined ? pick() : force);
+    flights++; lastFire = !!m.pal;
+    if (m.pal) glowColour(m.pal);
     const step = () => {
       if (!render(m, performance.now())) {
         ctx.clearRect(0, 0, w, h);
@@ -1435,7 +1481,7 @@ applyForm?.addEventListener('submit', async (e) => {
     if (visible === onScreen) return;          // ignore duplicate edges
     onScreen = visible;
     if (onScreen) {
-      flights = 0; lastGreen = false;   // each arrival gets its plain opener
+      flights = 0; lastFire = false;    // each arrival gets its plain opener
       arm(FIRST);
     } else {
       disarm();
@@ -1447,57 +1493,96 @@ applyForm?.addEventListener('submit', async (e) => {
 
   addEventListener('resize', () => { if (!raf) size(); });
 
-  // ── The full stop at the end of "night." drops a green one. There is no
-  // element to click: typesetHeadlines() rebuilds the heading out of bare
-  // text nodes (keeping only the <em> runs) and re-splits it on every resize,
-  // so a span written into the HTML is flattened on the first pass. Instead
-  // the listener sits on the heading and, at click time, measures the last
-  // character with a Range and asks whether the pointer landed on it. That
-  // needs no markup, survives every re-split and reflow, and leaves the
-  // heading's text and aria-label exactly as they were.
+  // ── TWO WAYS IN, and they are the dots over the i's: the tittle of the "i"
+  // in "it" drops a green one, the tittle of the "i" in "lit" drops a violet.
+  // They already look like the thing they call down.
   //
-  // Night only — in Day the ink sits at opacity 0 and there is no sky for it
-  // to fall through — never while something is already flying, and never when
-  // the "click" is really the end of a drag across the text. Under reduced
-  // motion this whole block never runs, so the period is just a period.
+  // There is nothing in the HTML to hang this on. typesetHeadlines() rebuilds
+  // the heading out of bare text nodes (keeping only the <em> runs) and
+  // re-splits it on every resize, so a span written into the markup is
+  // flattened on the first pass. Each target character is therefore re-wrapped
+  // after every split, which a MutationObserver watches for; it disconnects
+  // around its own edit so it does not retrigger on it. The words are found by
+  // regex over the heading's own text rather than by position, so rewording
+  // the sentence moves the targets instead of breaking them.
+  //
+  // Night only — in Day the ink sits at opacity 0 and there is no sky to drop
+  // anything through — never while something is already flying, and never when
+  // the "click" is really the end of a drag across the text.
   const head = section.querySelector('.night-copy h2');
   if (head) {
-    const PAD = 5;
-    const dotRect = () => {
+    const TARGETS = [[/\bit\b/, GREEN], [/\blit\b/, VIOLET]];
+    // The tittle's centre inside the glyph's inline box, as fractions of that
+    // box. Measured off the rendered face, not guessed: the box is a whole
+    // line-height tall and the dot sits right at the top of it, 9% down —
+    // nearly all of that box is empty ascender space above and descender
+    // space below. TIT_R is the reach of the target, a little wider than the
+    // 0.12em dot so it can be hit on purpose without being hit by accident.
+    const TIT_X = 0.50, TIT_Y = 0.092, TIT_R = 0.20;
+    let dots = [], litEl = null;
+
+    const wrapChar = (at) => {
       const walk = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
-      let last = null, n;
-      while ((n = walk.nextNode())) if (n.textContent.trim()) last = n;
-      const i = last ? last.textContent.lastIndexOf('.') : -1;
-      if (i < 0) return null;
-      const r = document.createRange();
-      r.setStart(last, i); r.setEnd(last, i + 1);
-      return r.getBoundingClientRect();
+      let n, acc = 0;
+      while ((n = walk.nextNode())) {
+        const len = n.textContent.length;
+        if (at < acc + len) {
+          const ch = n.splitText(at - acc);
+          ch.splitText(1);
+          const span = document.createElement('span');
+          span.className = 'night-dot';
+          span.textContent = ch.textContent;
+          ch.replaceWith(span);
+          return span;
+        }
+        acc += len;
+      }
+      return null;
     };
-    // Presentation only: the period gets a real element so it can carry a
-    // cursor and a hover swell. It cannot be written into the HTML —
-    // typesetHeadlines() rebuilds the heading out of bare text nodes and
-    // re-splits on every resize — so it is re-applied after each split, which
-    // a MutationObserver watches for. The observer disconnects around its own
-    // edit so it does not retrigger on it. The click below does NOT depend on
-    // any of this: that is a Range measurement against the last character, so
-    // if this ever stops matching the markup the egg still works.
-    const markDot = () => {
+
+    const markDots = () => {
       if (head.querySelector('.night-dot')) return;
-      const walk = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
-      let last = null, n;
-      while ((n = walk.nextNode())) if (n.textContent.trim()) last = n;
-      if (!last || !last.textContent.endsWith('.')) return;
-      const span = document.createElement('span');
-      span.className = 'night-dot';
-      span.textContent = '.';
-      last.textContent = last.textContent.slice(0, -1);
-      last.parentNode.insertBefore(span, last.nextSibling);
+      const text = head.textContent;
+      const found = [];
+      for (const [re, pal] of TARGETS) {
+        const hit = re.exec(text);
+        if (hit) found.push({ at: hit.index + hit[0].indexOf('i'), pal });
+      }
+      // later one first: wrapping a character would move the other's offset
+      found.sort((a, b) => b.at - a.at);
+      litEl = null;   // the old spans are gone; do not hold a dead node
+      dots = found.map(({ at, pal }) => ({ el: wrapChar(at), pal })).filter((d) => d.el);
     };
+
     const mo = new MutationObserver(() => {
-      mo.disconnect(); markDot(); mo.observe(head, { childList: true, subtree: true });
+      mo.disconnect(); markDots(); mo.observe(head, { childList: true, subtree: true });
     });
-    markDot();
+    markDots();
     mo.observe(head, { childList: true, subtree: true });
+
+    const onTittle = (el, x, y) => {
+      const r = el.getBoundingClientRect();
+      if (!r.height) return false;
+      const cx = r.left + r.width * TIT_X, cy = r.top + r.height * TIT_Y;
+      return Math.hypot(x - cx, y - cy) <= Math.max(11, r.height * TIT_R);
+    };
+
+    // Hover is driven from the same hit test as the click, not from :hover on
+    // the span — the span is the whole letter, and a swell that fires anywhere
+    // on the "i" while only the dot is clickable would be a lie. So the cursor
+    // and the swell appear exactly where the click will land.
+    const setLit = (el) => {
+      if (litEl === el) return;
+      if (litEl) litEl.classList.remove('is-lit');
+      litEl = el;
+      if (litEl) litEl.classList.add('is-lit');
+    };
+    head.addEventListener('mousemove', (e) => {
+      if (!section.classList.contains('is-night')) return setLit(null);
+      const d = dots.find((d) => onTittle(d.el, e.clientX, e.clientY));
+      setLit(d ? d.el : null);
+    });
+    head.addEventListener('mouseleave', () => setLit(null));
 
     let px = 0, py = 0;
     head.addEventListener('pointerdown', (e) => { px = e.clientX; py = e.clientY; });
@@ -1506,11 +1591,10 @@ applyForm?.addEventListener('submit', async (e) => {
       const sel = window.getSelection();
       if (sel && !sel.isCollapsed) return;                          // selecting text
       if (raf || !section.classList.contains('is-night')) return;
-      const r = dotRect();
-      if (!r || e.clientX < r.left - PAD || e.clientX > r.right + PAD ||
-          e.clientY < r.top - PAD || e.clientY > r.bottom + PAD) return;
+      const d = dots.find((d) => onTittle(d.el, e.clientX, e.clientY));
+      if (!d) return;
       disarm();
-      fly(true);
+      fly(d.pal);
     });
   }
 
@@ -1518,9 +1602,11 @@ applyForm?.addEventListener('submit', async (e) => {
   // three is green, so the rare one can actually be judged and tuned instead
   // of waited out; __meteor(true) fires one on demand. None of this exists on
   // a normal visit, and nothing below runs without the flag in the URL.
-  if (DEBUG) window.__meteor = (green = true) => {
+  if (DEBUG) window.__meteor = (which = 'green') => {
     if (raf) return false;
-    disarm(); fly(green); return true;
+    disarm();
+    fly(which === 'violet' ? VIOLET : which === 'plain' ? null : GREEN);
+    return true;
   };
 })();
 

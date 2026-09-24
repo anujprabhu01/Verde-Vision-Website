@@ -3166,11 +3166,12 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
   position: absolute; left: 0; top: 0;
   width: 800px; height: 800px; margin: -400px 0 0 -400px;
   border-radius: 50%;
+  --glow-rgb: 132, 250, 194;          /* set per flight from the palette */
   background: radial-gradient(closest-side,
-    rgba(132, 250, 194, 0.58) 0%,
-    rgba(100, 220, 164, 0.27) 32%,
-    rgba(74, 176, 128, 0.09) 60%,
-    rgba(54, 134, 98, 0) 100%);
+    rgba(var(--glow-rgb), 0.58) 0%,
+    rgba(var(--glow-rgb), 0.27) 32%,
+    rgba(var(--glow-rgb), 0.09) 60%,
+    rgba(var(--glow-rgb), 0) 100%);
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity;
@@ -3186,17 +3187,30 @@ html.card-open .catalog-track { animation-play-state: paused !important; }
    The origin is the glyph's own baseline, measured at 72% of the inline box
    (the rest of that box is ascender space above the dot and descender space
    below it); anywhere else and the dot lifts off the baseline as it grows. */
-.night-dot {
-  display: inline-block;
-  transform-origin: 50% 72%;
+.night-dot { position: relative; }
+/* The swell is a second dot grown over the real tittle, not a transform on the
+   letter: scaling an "i" inside a word is a typographic wobble, and the stem
+   would grow with the dot. At rest it is scale(0) and renders nothing at all,
+   so an untouched headline is byte-identical to one without any of this. */
+.night-dot::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 9.2%;               /* the tittle, measured off the face */
+  width: 0.20em; height: 0.20em;      /* the dot itself is 0.123em across */
+  margin: -0.10em 0 0 -0.10em;
+  border-radius: 50%;
+  background: currentColor;
+  transform: scale(0);
   transition: transform .2s cubic-bezier(.34, 1.25, .64, 1);
+  pointer-events: none;
 }
-/* Only in Night, where clicking it can actually do something. In Day the ink
-   sits at opacity 0 and there is no sky to drop anything through, so the
-   period stays an ordinary period — no cursor change, no swell, no tell. */
-.night.is-night .night-dot { cursor: default; }
-.night.is-night .night-dot:hover { transform: scale(1.5); }
-@media (prefers-reduced-motion: reduce) { .night-dot { transition: none; } }
+/* is-lit is set by the same hit test that decides whether a click counts, so
+   the tell appears exactly where the target is — and only in Night, where
+   clicking can actually do something. In Day the ink sits at opacity 0 and
+   there is no sky to drop anything through, so the i stays an ordinary i. */
+.night.is-night .night-dot.is-lit { cursor: default; }
+.night.is-night .night-dot.is-lit::after { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) { .night-dot::after { transition: none; } }
 .night-breather {
   position: absolute; width: 3px; height: 3px; border-radius: 50%;
   background: #fff8ea;
