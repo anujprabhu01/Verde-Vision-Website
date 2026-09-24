@@ -1175,8 +1175,19 @@ applyForm?.addEventListener('submit', async (e) => {
   // all — the rarest colour a meteor actually shows. It stays cool as it
   // goes: calcium handing over to magnesium's blue-white rather than to the
   // warm metals.
+  // speed < 1 is FASTER (it scales the flight time), reach and tail scale the
+  // path and the streak behind the head, glare scales the head's bloom, flash
+  // scales the terminal burst and sky scales the light it throws. All default
+  // to 1, so green is the baseline everything else is measured against.
   const GREEN  = { hi: [126, 232, 176], lo: [255, 204, 116], odds: DEBUG ? 3 : 20 };
-  const VIOLET = { hi: [170, 128, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 50 };
+  // Ionised calcium takes far more excitation to light up than oxygen or
+  // nickel do, and excitation here means velocity — so the violet one is not
+  // simply a brighter green, it is a faster and more violent meteor. It
+  // crosses more sky in less time, drags a longer streak, carries a bigger
+  // head, flares harder at the end and throws more light while doing it.
+  const VIOLET = { hi: [158, 108, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 50,
+                   speed: 0.80, reach: 1.18, tail: 1.22, glare: 1.4, flash: 1.3,
+                   sky: 1.45, wide: 1.15 };
 
   // And the rarest thing in the sky, which is not a meteor at all. A
   // supernova does not cross anything: it is a star that was not there,
@@ -1268,8 +1279,9 @@ applyForm?.addEventListener('submit', async (e) => {
   // was almost nothing left to shed — and it is why the glowing tip never
   // comes to a dead stop. It goes out as it arrives, instead of halting at
   // full brightness the instant the head reaches the end of the path.
-  const lit = (s) => Math.min(1,
-    (s < 0.12 ? s / 0.12 : Math.max(0, 1 - (s - 0.12) / 0.88)) + burst(s) * 0.5);
+  const lit = (s, pal) => Math.min(1,
+    (s < 0.12 ? s / 0.12 : Math.max(0, 1 - (s - 0.12) / 0.88))
+    + burst(s) * 0.5 * (pal?.flash ?? 1));
 
   // The copy and the night photo paint OVER this canvas — the ink is the
   // section's first child, the grid comes after it and neither carries a
@@ -1321,13 +1333,16 @@ applyForm?.addEventListener('submit', async (e) => {
     const leftward = Math.random() < 0.35;
     const ang = (18 + Math.random() * 20) * Math.PI / 180;      // below horizontal
     const ux = (leftward ? -1 : 1) * Math.cos(ang), uy = Math.sin(ang);
-    const travel = pal ? 300 + Math.random() * 240 : 240 + Math.random() * 220;
-    const len = pal ? 150 + Math.random() * 110 : 90 + Math.random() * 90;  // tail length
+    const travel = pal ? (300 + Math.random() * 240) * (pal.reach ?? 1)
+                       : 240 + Math.random() * 220;
+    const len = pal ? (150 + Math.random() * 110) * (pal.tail ?? 1)
+                    : 90 + Math.random() * 90;                        // tail length
     const x0 = leftward ? w * (0.45 + Math.random() * 0.5) : w * (0.05 + Math.random() * 0.5);
     // 0.28 is where the sky's alpha mask has opened up; a green starts in the
     // top half of that band so most drafts clear the figure on the first go
     const y0 = h * (0.28 + Math.random() * (pal ? 0.18 : 0.38));
-    const dur = pal ? 780 + Math.random() * 320 : 440 + Math.random() * 280;
+    const dur = pal ? (780 + Math.random() * 320) * (pal.speed ?? 1)
+                    : 440 + Math.random() * 280;
     return {
       x0, y0, ux, uy, len, travel, dur, pal,
       life: dur + (pal ? TRAIN_MS : 0),
@@ -1559,10 +1574,13 @@ applyForm?.addEventListener('submit', async (e) => {
     const p = Math.min(1, e / m.dur);
     // in fast, out slow — a meteor is brightest just after it appears
     const b = m.pal ? burst(p) : 0;
-    const a = m.pal ? lit(p)
+    const a = m.pal ? lit(p, m.pal)
                     : (p < 0.12 ? p / 0.12 : Math.max(0, 1 - (p - 0.12) / 0.88));
     const hx = m.x0 + m.ux * m.travel * p, hy = m.y0 + m.uy * m.travel * p;
-    if (m.pal) lightSky(hx, hy, Math.min(GLOW_MAX, a * GLOW_RIDE + b * GLOW_FLASH));
+    if (m.pal) {
+      const k = m.pal.sky ?? 1;
+      lightSky(hx, hy, Math.min(GLOW_MAX * k, (a * GLOW_RIDE + b * GLOW_FLASH) * k));
+    }
     const tx = hx - m.ux * m.len, ty = hy - m.uy * m.len;
 
     if (m.pal) {
@@ -1594,7 +1612,7 @@ applyForm?.addEventListener('submit', async (e) => {
         const q = i / 10;                               // fraction of the segment drawn so far
         const s = q * p;                                // ...as a fraction of the whole path
         const age = Math.max(0, e - s * m.dur);         // how long ago the head passed it
-        const ta = TRAIN_AMP * lit(s) * Math.exp(-age / TRAIN_TAU) * out;
+        const ta = TRAIN_AMP * lit(s, m.pal) * Math.exp(-age / TRAIN_TAU) * out;
         // the train carries the colour the meteor was burning at that point,
         // so the ghost is green where it came in and gold where it went out
         g.addColorStop(q, `rgba(${rgb(m.pal, s)},${ta.toFixed(3)})`);
@@ -1620,7 +1638,8 @@ applyForm?.addEventListener('submit', async (e) => {
       g.addColorStop(0.3, `rgba(226,235,255,${(0.34 * a).toFixed(3)})`);
       g.addColorStop(1, 'rgba(214,228,255,0)');
     }
-    ctx.strokeStyle = g; ctx.lineWidth = m.pal ? 2.4 : 1.5; ctx.lineCap = 'round';
+    ctx.strokeStyle = g; ctx.lineWidth = m.pal ? 2.4 * (m.pal.wide ?? 1) : 1.5;
+    ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
 
     // The head of a real fireball is the light source — bright enough at these
@@ -1633,14 +1652,15 @@ applyForm?.addEventListener('submit', async (e) => {
     if (m.pal && a > 0) {
       const c = rgb(m.pal, p);
       ctx.globalCompositeOperation = 'lighter';
-      const br = 30 * (1 + 0.55 * b);
+      const gl = m.pal.glare ?? 1;
+      const br = 30 * gl * (1 + 0.55 * b);
       const bloom = ctx.createRadialGradient(hx, hy, 0, hx, hy, br);
       bloom.addColorStop(0, `rgba(${c},${(0.40 * a).toFixed(3)})`);
       bloom.addColorStop(0.34, `rgba(${c},${(0.15 * a).toFixed(3)})`);
       bloom.addColorStop(1, `rgba(${c},0)`);
       ctx.fillStyle = bloom;
       ctx.beginPath(); ctx.arc(hx, hy, br, 0, Math.PI * 2); ctx.fill();
-      const cr = 10 * (1 + 0.35 * b);
+      const cr = 10 * gl * (1 + 0.35 * b);
       const coma = ctx.createRadialGradient(hx, hy, 0, hx, hy, cr);
       coma.addColorStop(0, `rgba(255,255,252,${(0.92 * a).toFixed(3)})`);
       coma.addColorStop(0.38, `rgba(${c},${(0.52 * a).toFixed(3)})`);
@@ -1650,7 +1670,9 @@ applyForm?.addEventListener('submit', async (e) => {
       ctx.globalCompositeOperation = 'source-over';
     }
     ctx.fillStyle = `rgba(255,250,240,${a.toFixed(3)})`;
-    ctx.beginPath(); ctx.arc(hx, hy, m.pal ? 2.4 * (1 + 0.5 * b) : 1.25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(hx, hy, m.pal ? 2.4 * (m.pal.wide ?? 1) * (1 + 0.5 * b) : 1.25, 0, Math.PI * 2);
+    ctx.fill();
     return e < m.life;
   };
 
@@ -1659,8 +1681,10 @@ applyForm?.addEventListener('submit', async (e) => {
   // buys patience for the slower rhythm afterwards. Every arrival gets one,
   // including coming back to the section later.
   const FIRST = DEBUG ? 500 : 3000;
+  // 5 to 20 seconds. The wide spread is the point: a streak that arrives
+  // after a long wait is worth more than one that arrives on a metronome.
   const AMBIENT = DEBUG ? () => 700 + Math.random() * 300
-                        : () => 7000 + Math.random() * 7000;
+                        : () => 5000 + Math.random() * 15000;
 
   let timer = 0, raf = 0, onScreen = false;
   // Rolled rarest first, so a commoner one cannot shadow it. Two guard rails
