@@ -1176,7 +1176,7 @@ applyForm?.addEventListener('submit', async (e) => {
   // goes: calcium handing over to magnesium's blue-white rather than to the
   // warm metals.
   const GREEN  = { hi: [126, 232, 176], lo: [255, 204, 116], odds: DEBUG ? 3 : 20 };
-  const VIOLET = { hi: [170, 128, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 100 };
+  const VIOLET = { hi: [170, 128, 255], lo: [168, 202, 255], odds: DEBUG ? 6 : 50 };
 
   // And the rarest thing in the sky, which is not a meteor at all. A
   // supernova does not cross anything: it is a star that was not there,
@@ -1189,7 +1189,7 @@ applyForm?.addEventListener('submit', async (e) => {
   // changed as it went. Naked-eye galactic supernovae come a few times a
   // millennium, so it is the one thing here that earns being rarer than
   // everything else put together.
-  const NOVA = { hi: [216, 232, 255], lo: [255, 192, 128], odds: DEBUG ? 8 : 200, nova: true };
+  const NOVA = { hi: [216, 232, 255], lo: [255, 192, 128], odds: DEBUG ? 8 : 100, nova: true };
   const NOVA_RISE = 380;        // the flash: sudden, but not a single frame
   const NOVA_FLASH_TAU = 820;   // and it does not last — the core goes first
   const NOVA_SHELL_IN = 140;    // the shell comes out of the flash, just behind it
@@ -1386,7 +1386,7 @@ applyForm?.addEventListener('submit', async (e) => {
       // headline occupying the left, the open sky on this layout is the upper
       // right, and that is where most of these end up.
       x0: w * (0.08 + Math.random() * 0.84),
-      y0: h * (0.36 + Math.random() * 0.075),
+      y0: h * (0.41 + Math.random() * 0.09),
       ux: 0, uy: 0, len: 0, travel: 0,
       dur: NOVA_RISE, life: NOVA_LIFE,
       t0: performance.now(), prev: null, box: null
@@ -1404,21 +1404,29 @@ applyForm?.addEventListener('submit', async (e) => {
   // left-hand column, which is why these only ever turned up on the right.
   // The label is a thin line of small caps and the faint outer edge of the
   // shell passing behind it costs nothing.
+  // Two different clearances, because the two obstacles are not alike. The
+  // PICTURE is opaque and would swallow the shell whole, so it gets the full
+  // bright radius. The HEADING is type: light passes between the letters, so
+  // it only has to stay clear of the core and the inner glow, and the rim is
+  // allowed to drift behind the top of the words. (A clump's gradient runs to
+  // zero at its rim anyway, so reserving room for that last transparent
+  // millimetre only ever cost sky.)
+  // 1.06R is as far out as a clump's CENTRE ever sits, so this keeps the
+  // bright lumps off the picture while letting their soft outer gradient tuck
+  // behind its edge. Without the trim the picture is a much harder ceiling
+  // than the words are, and nearly every remnant ends up on the left.
+  const NOVA_KEEP_PIC = NOVA_R * 1.06 + 12;
+  const NOVA_KEEP_TEXT = 46;
   const novaClear = (m) => {
-    // The clearance is the shell's BRIGHT reach, not its absolute outermost
-    // pixel. A clump's gradient runs to zero at its rim, so demanding room for
-    // that last transparent millimetre only costs sky — and the sky it costs
-    // is the left-hand side, where the headline sits higher than the picture
-    // does on the right.
-    const R = NOVA_R * 1.18 + 8;
     const c = canvas.getBoundingClientRect();
-    for (const sel of ['.night-window', '.night-copy h2']) {
+    for (const [sel, keep] of [['.night-window', NOVA_KEEP_PIC],
+                               ['.night-copy h2', NOVA_KEEP_TEXT]]) {
       const el = section.querySelector(sel);
       if (!el) continue;
       const f = el.getBoundingClientRect();
       if (!f.width) continue;
-      if (m.x0 + R > f.left - c.left && m.x0 - R < f.right - c.left &&
-          m.y0 + R > f.top - c.top && m.y0 - R < f.bottom - c.top) return false;
+      if (m.x0 + keep > f.left - c.left && m.x0 - keep < f.right - c.left &&
+          m.y0 + keep > f.top - c.top && m.y0 - keep < f.bottom - c.top) return false;
     }
     return true;
   };
@@ -1675,7 +1683,14 @@ applyForm?.addEventListener('submit', async (e) => {
     if (!onScreen) return;
     timer = setTimeout(() => {
       timer = 0;
-      if (!onScreen || document.hidden) return;
+      if (!onScreen) return;     // the observer re-arms this on re-entry
+      // A hidden tab must RE-ARM, not return. Background timers still fire,
+      // just throttled — and returning here left nothing scheduled and nothing
+      // that would ever schedule again: the observer only fires when the
+      // section crosses the viewport, which never happens if you simply switch
+      // tabs and come back to a page already sitting on it. The sky went out
+      // for the rest of the visit.
+      if (document.hidden) return arm(AMBIENT());
       // the section plays itself to night on arrival and the ink takes 1.3s;
       // until then the whole sky sits at opacity 0, so wait rather than spend
       // a meteor on a sky nobody can see
@@ -1718,6 +1733,13 @@ applyForm?.addEventListener('submit', async (e) => {
   }, { threshold: 0.05 }).observe(section);
 
   addEventListener('resize', () => { if (!raf) size(); });
+
+  // Coming back to the tab restarts the rhythm straight away rather than
+  // waiting out whatever throttled interval was left running in the
+  // background. arm() disarms first, so this cannot stack up timers.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && onScreen && !raf) arm(FIRST);
+  });
 
   // ── TWO WAYS IN, and they are the dots over the i's: the tittle of the "i"
   // in "it" drops a green one, the tittle of the "i" in "lit" drops a violet.
