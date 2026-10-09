@@ -46,18 +46,17 @@ SITE_OVERRIDES = {
     "Totem Pole Cactus":    {"name": "Totem Pole", "image": "totem-pole-cactus"},
     "Organ Pipe Cactus":    {"name": "Organ Pipe", "image": "organ-pipe-cactus"},
     "Agave Truncata":       {"name": "Artichoke Agave", "image": "agave-truncata"},
-    "Agave Geminiflora":    {"name": "Twin-flowered Agave", "image": "agave-geminiflora"},
     "AZ Boulder 1":         {"name": "Arizona Boulder", "image": "az-boulder"},
     "Landscape Uplight":    {"name": "Uplight"},
 }
 
 KIND = {
-    "Mexican Fan Palm": "Palm", "Madagascar Palm": "Palm",
-    "Saguaro": "Cactus", "Organ Pipe Cactus": "Cactus", "Totem Pole Cactus": "Cactus",
+    "Madagascar Palm": "Palm",
+    "Organ Pipe Cactus": "Cactus", "Totem Pole Cactus": "Cactus",
     "Mexican Fence Post": "Cactus", "Argentine Toothpick": "Cactus", "Golden Barrel Cactus": "Cactus",
     "Fire Barrel Cactus": "Cactus", "Santa Rita Prickly Pear": "Cactus",
     "Agave Americana": "Agave", "Agave Truncata": "Agave", "Blue Glow Agave": "Agave",
-    "Black Tip Agave": "Agave", "Agave Geminiflora": "Agave", "Tropical Agave": "Agave",
+    "Black Tip Agave": "Agave", "Tropical Agave": "Agave",
     "Desert Spoon": "Accent", "Red Yucca": "Accent", "Beaked Yucca": "Yucca",
     "Ocotillo": "Shrub",
     "Aloe Vera": "Succulent", "Aloe Ferox": "Succulent", "Moroccan Mound": "Succulent", "Firestick": "Succulent",
@@ -76,17 +75,17 @@ PHOTO_TILES = set()
 # it. Anything in neither set gets no badge (legacy entries whose provenance
 # isn't recorded in the Swift comments; fill them in as you confirm them).
 MODELLED = {
-    "Blue Palo Verde", "Chaste Tree", "Beaked Yucca", "Agave Geminiflora",   # purchased models
+    "Blue Palo Verde", "Chaste Tree", "Beaked Yucca",                        # purchased models
     "Texas Ebony", "Mulga", "Desert Spoon", "Green Hopseed", "Ocotillo",      # generated (Sep 2026)
     "Aloe Vera", "Mexican Fence Post", "Orange Tree",                         # .blend marketplace models
-    "Saguaro", "Honey Mesquite", "Mexican Fan Palm",                          # confirmed Sep 2026
+    "Honey Mesquite",                                                         # confirmed Sep 2026
     "Argentine Toothpick", "Red Yucca",
 }
 SCANNED = {
     "Agave Americana", "Golden Barrel Cactus", "AZ Boulder 1", "Totem Pole Cactus", "Organ Pipe Cactus",
     "Agave Truncata", "Tropical Agave", "Fire Barrel Cactus", "Yellow Bells", "Firestick",
     "Little John Bottlebrush", "Moroccan Mound", "Santa Rita Prickly Pear", "Madagascar Palm",
-    "Black Tip Agave", "Desert Willow", "Desert Ironwood", "Jojoba", "Leatherleaf Acacia",
+    "Black Tip Agave", "Jojoba",
     "White Dawn Lantana", "Purple Lantana", "Yellow Lantana", "Texas Sage", "Aloe Ferox", "Blue Glow Agave",
 }
 
@@ -101,17 +100,16 @@ NEW = {"Green Hopseed", "Desert Spoon", "Mulga", "Artichoke Agave"}
 # the loop doesn't visibly repeat on a wide screen.
 ROWS = [
     {"dir": "left", "speed": 40, "tiles": [
-        "Blue Palo Verde", "Desert Ironwood", "Honey Mesquite", "Path Light", "Desert Willow", "Texas Ebony",
-        "Mulga", "Chaste Tree", "Orange Tree", "Leatherleaf Acacia", "Arizona Boulder", "Mexican Fan Palm",
-        "Madagascar Palm", "Texas Sage", "Green Hopseed", "Jojoba", "Little John Bottlebrush", "Yellow Bells",
-        "Yellow Lantana"]},
+        "Blue Palo Verde", "Honey Mesquite", "Path Light", "Texas Ebony", "Mulga", "Chaste Tree",
+        "Orange Tree", "Arizona Boulder", "Texas Sage", "Green Hopseed", "Jojoba", "Little John Bottlebrush",
+        "Yellow Bells"]},
     {"dir": "right", "speed": 24, "tiles": [
-        "Saguaro", "Organ Pipe", "Totem Pole", "Mexican Fence Post", "Uplight", "Argentine Toothpick",
+        "Madagascar Palm", "Organ Pipe", "Totem Pole", "Mexican Fence Post", "Uplight", "Argentine Toothpick",
         "Golden Barrel", "Fire Barrel", "Santa Rita Prickly Pear", "Agave Americana", "Artichoke Agave",
-        "Flat Boulder", "Blue Glow Agave", "Black Tip Agave", "Twin-flowered Agave"]},
+        "Blue Glow Agave", "Black Tip Agave"]},
     {"dir": "left", "speed": 34, "tiles": [
         "Desert Spoon", "Red Yucca", "Flood Light", "Beaked Yucca", "Aloe Vera", "Purple Lantana", "Ocotillo",
-        "Aloe Ferox", "Gray Boulder", "Moroccan Mound", "Tropical Agave", "Firestick", "White Dawn Lantana"]},
+        "Aloe Ferox", "Yellow Lantana", "Moroccan Mound", "Tropical Agave", "Firestick", "White Dawn Lantana"]},
 ]
 
 SIZE_LABEL = {

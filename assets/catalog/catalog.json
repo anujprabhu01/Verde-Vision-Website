@@ -30,37 +30,6 @@
    "h": 605
   }
  },
- "desert-ironwood": {
-  "slug": "desert-ironwood",
-  "name": "Desert Ironwood",
-  "appName": "Desert Ironwood",
-  "kind": "Tree",
-  "category": "tree",
-  "photo": false,
-  "image": "assets/catalog/desert-ironwood.webp",
-  "botanical": "Olneya tesota",
-  "height": "25 ft",
-  "width": "25 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "5 gal",
-   "15 gal",
-   "24\" box"
-  ],
-  "origin": "Sonoran Desert",
-  "description": "One of the Sonoran Desert's great nurse trees and among the longest-lived — individuals can persist well over a century. Ironwood carries a dense canopy of small blue-grey leaflets on gnarled grey bark, and flushes lavender-pink pea flowers in late spring. Its wood is famously heavy and hard, sinking in water. Slow but tough as nails, it casts genuinely useful filtered shade, shelters understory plantings, and anchors a native design as a long-term signature tree. Give it room and almost no supplemental water once established.",
-  "coldF": 20,
-  "bloom": "Late Spring",
-  "growth": "Slow",
-  "lifespan": "Very long-lived (100+ yrs)",
-  "made": "scanned",
-  "card": {
-   "src": "assets/catalog/card/desert-ironwood.webp",
-   "w": 448,
-   "h": 800
-  }
- },
  "honey-mesquite": {
   "slug": "honey-mesquite",
   "name": "Honey Mesquite",
@@ -117,37 +86,6 @@
   "card": {
    "src": "assets/catalog/card/path-light.webp",
    "w": 305,
-   "h": 800
-  }
- },
- "desert-willow": {
-  "slug": "desert-willow",
-  "name": "Desert Willow",
-  "appName": "Desert Willow",
-  "kind": "Tree",
-  "category": "tree",
-  "photo": false,
-  "image": "assets/catalog/desert-willow.webp",
-  "botanical": "Chilopsis linearis",
-  "height": "25 ft",
-  "width": "20 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "5 gal",
-   "15 gal",
-   "24\" box"
-  ],
-  "origin": "Southwestern U.S. and northern Mexico",
-  "description": "Not a true willow but a member of the trumpet-creeper family, prized across the Southwest for its long, willowy leaves and orchid-like trumpet flowers in pink, burgundy, and white. It blooms heavily from late spring through fall, drawing hummingbirds all season, then drops its leaves for a sculptural winter silhouette of twisting trunks. Fast-growing, deeply drought tolerant, and happy in reflected heat, it works as a patio shade tree, a screening multi-trunk, or a flowering accent near seating. Prune to shape while young to build good structure.",
-  "coldF": 10,
-  "bloom": "Late Spring – Fall",
-  "growth": "Fast",
-  "lifespan": "Long-lived (25+ yrs)",
-  "made": "scanned",
-  "card": {
-   "src": "assets/catalog/card/desert-willow.webp",
-   "w": 511,
    "h": 800
   }
  },
@@ -277,36 +215,6 @@
    "h": 800
   }
  },
- "leatherleaf-acacia": {
-  "slug": "leatherleaf-acacia",
-  "name": "Leatherleaf Acacia",
-  "appName": "Leatherleaf Acacia",
-  "kind": "Shrub",
-  "category": "shrub",
-  "photo": false,
-  "image": "assets/catalog/leatherleaf-acacia.webp",
-  "botanical": "Acacia craspedocarpa",
-  "height": "12 ft",
-  "width": "10 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "5 gal",
-   "15 gal"
-  ],
-  "origin": "Western Australia",
-  "description": "A tough, upright evergreen with thick, round grey-green phyllodes that feel genuinely leathery — an unusual, coin-like texture among desert plants. It carries small yellow puffball flowers after rain and forms a dense screen with almost no care, tolerating heat, reflected sun, alkaline soil, and long dry spells. Trained up it becomes a handsome small patio tree; left alone it makes one of the most reliable privacy hedges available for low-water designs. Very low litter and no thorns.",
-  "coldF": 15,
-  "bloom": "Spring (after rains)",
-  "growth": "Moderate",
-  "lifespan": "Long-lived (25+ yrs)",
-  "made": "scanned",
-  "card": {
-   "src": "assets/catalog/card/leatherleaf-acacia.webp",
-   "w": 720,
-   "h": 800
-  }
- },
  "arizona-boulder": {
   "slug": "arizona-boulder",
   "name": "Arizona Boulder",
@@ -336,68 +244,6 @@
    "src": "assets/catalog/card/arizona-boulder.webp",
    "w": 800,
    "h": 250
-  }
- },
- "mexican-fan-palm": {
-  "slug": "mexican-fan-palm",
-  "name": "Mexican Fan Palm",
-  "appName": "Mexican Fan Palm",
-  "kind": "Palm",
-  "category": "tree",
-  "photo": false,
-  "image": "assets/catalog/mexican-fan-palm.webp",
-  "botanical": "Washingtonia robusta",
-  "height": "70 ft",
-  "width": "10 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "24\" box",
-   "36\" box",
-   "48\" box"
-  ],
-  "origin": "Northwestern Mexico",
-  "description": "The most widely planted palm in the American Southwest, the Mexican Fan Palm is prized for its dramatic height and slender silhouette. Its long fronds fan out at the crown, creating an unmistakably tropical skyline presence. Fast growing and extremely drought tolerant once established, it thrives in full sun and poor soils. Commonly used in rows along driveways, property borders, and commercial streetscapes for bold vertical impact.",
-  "coldF": 20,
-  "bloom": "Spring – Summer",
-  "growth": "Fast",
-  "lifespan": "Long-lived (25+ yrs)",
-  "made": "modelled",
-  "card": {
-   "src": "assets/catalog/card/mexican-fan-palm.webp",
-   "w": 355,
-   "h": 800
-  }
- },
- "madagascar-palm": {
-  "slug": "madagascar-palm",
-  "name": "Madagascar Palm",
-  "appName": "Madagascar Palm",
-  "kind": "Palm",
-  "category": "succulent",
-  "photo": false,
-  "image": "assets/catalog/madagascar-palm.webp",
-  "botanical": "Pachypodium lamerei",
-  "height": "15 ft",
-  "width": "6 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "5 gal",
-   "15 gal",
-   "24\" box"
-  ],
-  "origin": "Southern Madagascar",
-  "description": "Not a true palm at all but a succulent, the Madagascar Palm carries a thick silver-gray trunk armored in spines, topped by a rosette of long strap-shaped leaves that gives it an unmistakable palm-like silhouette. It reads as a living sculpture — a strong vertical accent beside entries, courtyards, and pool decks, or in a container where its form can be seen in the round. Extremely drought tolerant and slow growing, it wants full sun and sharp drainage. Fragrant white flowers appear at the crown on older plants. Frost sensitive below about 30°F and heavily spined — site it out of walkways.",
-  "coldF": 30,
-  "bloom": "Summer",
-  "growth": "Slow",
-  "lifespan": "Long-lived (25+ yrs)",
-  "made": "scanned",
-  "card": {
-   "src": "assets/catalog/card/madagascar-palm.webp",
-   "w": 602,
-   "h": 800
   }
  },
  "texas-sage": {
@@ -528,7 +374,7 @@
   "category": "shrub",
   "photo": false,
   "image": "assets/catalog/yellow-bells.webp",
-  "botanical": "Tecoma stans",
+  "botanical": "Tecoma stans 'Sundance'",
   "height": "15 ft",
   "width": "10 ft",
   "sun": "Full sun",
@@ -546,68 +392,38 @@
   "made": "scanned",
   "card": {
    "src": "assets/catalog/card/yellow-bells.webp",
-   "w": 733,
+   "w": 616,
    "h": 800
   }
  },
- "yellow-lantana": {
-  "slug": "yellow-lantana",
-  "name": "Yellow Lantana",
-  "appName": "Yellow Lantana",
-  "kind": "Groundcover",
-  "category": "groundcover",
+ "madagascar-palm": {
+  "slug": "madagascar-palm",
+  "name": "Madagascar Palm",
+  "appName": "Madagascar Palm",
+  "kind": "Palm",
+  "category": "succulent",
   "photo": false,
-  "image": "assets/catalog/yellow-lantana.webp",
-  "botanical": "Lantana camara 'New Gold'",
-  "height": "2 ft",
+  "image": "assets/catalog/madagascar-palm.webp",
+  "botanical": "Pachypodium lamerei",
+  "height": "15 ft",
   "width": "6 ft",
   "sun": "Full sun",
   "water": "Low",
   "sizes": [
-   "1 gal",
-   "5 gal"
+   "5 gal",
+   "15 gal",
+   "24\" box"
   ],
-  "origin": "Tropical Americas (cultivated selection)",
-  "description": "The gold standard for Arizona colour, and the lantana most likely to still be blooming in August. 'New Gold' mounds rather than trails, building a dense rounded cushion smothered in clear golden-yellow clusters from spring until frost — no deadheading, no fading to orange, no seed set to slow it down. It takes full reflected heat off pavement and block walls, wants poor soil and little water, and holds its shape better than the trailing types, which makes it the safer choice along walks and driveway edges. Butterflies work it constantly. Shear it hard in late winter to clear frost damage and keep the centre from going woody; it rebounds fast. Evergreen in mild winters and root-hardy well below that.",
-  "coldF": 25,
-  "bloom": "Spring – Frost",
-  "growth": "Fast",
-  "lifespan": "Perennial",
+  "origin": "Southern Madagascar",
+  "description": "Not a true palm at all but a succulent, the Madagascar Palm carries a thick silver-gray trunk armored in spines, topped by a rosette of long strap-shaped leaves that gives it an unmistakable palm-like silhouette. It reads as a living sculpture — a strong vertical accent beside entries, courtyards, and pool decks, or in a container where its form can be seen in the round. Extremely drought tolerant and slow growing, it wants full sun and sharp drainage. Fragrant white flowers appear at the crown on older plants. Frost sensitive below about 30°F and heavily spined — site it out of walkways.",
+  "coldF": 30,
+  "bloom": "Summer",
+  "growth": "Slow",
+  "lifespan": "Long-lived (25+ yrs)",
   "made": "scanned",
   "card": {
-   "src": "assets/catalog/card/yellow-lantana.webp",
-   "w": 800,
-   "h": 372
-  }
- },
- "saguaro": {
-  "slug": "saguaro",
-  "name": "Saguaro",
-  "appName": "Saguaro",
-  "kind": "Cactus",
-  "category": "succulent",
-  "photo": false,
-  "image": "assets/catalog/saguaro.webp",
-  "botanical": "Carnegiea gigantea",
-  "height": "40 ft",
-  "width": "3 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "Small",
-   "Medium",
-   "Large"
-  ],
-  "origin": "Sonoran Desert, Arizona and Mexico",
-  "description": "The undisputed icon of the Sonoran Desert, the Saguaro is the largest cactus in the United States and one of the most recognizable plants on earth. Its tall columnar trunk and upward-reaching arms define the Arizona landscape. Incredibly slow growing — a 6-foot specimen may be 50–75 years old — and federally protected in Arizona. Adding a mature Saguaro to a landscape is a rare and premium statement piece. White flowers bloom at the crown in late spring, followed by edible red fruit prized by wildlife and indigenous peoples for centuries.",
-  "coldF": 20,
-  "bloom": "Late Spring",
-  "growth": "Slow",
-  "lifespan": "Very long-lived (100+ yrs)",
-  "made": "modelled",
-  "card": {
-   "src": "assets/catalog/card/saguaro.webp",
-   "w": 130,
+   "src": "assets/catalog/card/madagascar-palm.webp",
+   "w": 602,
    "h": 800
   }
  },
@@ -909,37 +725,6 @@
    "h": 562
   }
  },
- "flat-boulder": {
-  "slug": "flat-boulder",
-  "name": "Flat Boulder",
-  "appName": "Flat Boulder",
-  "kind": "Boulder",
-  "category": "hardscape",
-  "photo": false,
-  "image": "assets/catalog/flat-boulder.webp",
-  "botanical": null,
-  "height": "1 ft",
-  "width": "4 ft",
-  "sun": null,
-  "water": null,
-  "sizes": [
-   "Small",
-   "Medium",
-   "Large"
-  ],
-  "origin": "Sonoran Desert, Arizona",
-  "description": "A low-profile desert boulder with a broad, flat surface that blends naturally into the landscape. Ideal for stepping stone paths, dry riverbed accents, or anchoring plant groupings at ground level. Its horizontal form contrasts beautifully with the vertical lines of cacti and agave. Zero maintenance and extremely long lasting — a timeless hardscape element in any Southwest design.",
-  "coldF": null,
-  "bloom": null,
-  "growth": null,
-  "lifespan": null,
-  "made": null,
-  "card": {
-   "src": "assets/catalog/card/flat-boulder.webp",
-   "w": 800,
-   "h": 379
-  }
- },
  "blue-glow-agave": {
   "slug": "blue-glow-agave",
   "name": "Blue Glow Agave",
@@ -998,36 +783,6 @@
    "src": "assets/catalog/card/black-tip-agave.webp",
    "w": 800,
    "h": 408
-  }
- },
- "twin-flowered-agave": {
-  "slug": "twin-flowered-agave",
-  "name": "Twin-flowered Agave",
-  "appName": "Agave Geminiflora",
-  "kind": "Agave",
-  "category": "succulent",
-  "photo": false,
-  "image": "assets/catalog/agave-geminiflora.webp",
-  "botanical": null,
-  "height": "2 ft",
-  "width": "3 ft",
-  "sun": "Full sun",
-  "water": "Low",
-  "sizes": [
-   "5 gal",
-   "15 gal"
-  ],
-  "origin": "Nayarit and Jalisco, Mexico",
-  "description": "The Twin-Flowered Agave forms a strikingly dense, symmetrical fountain of hundreds of slender, deep green leaves, each edged with fine curling white filaments that catch the light. Unlike most agaves, its narrow, flexible leaves carry no harsh terminal spine, giving it a soft, almost grass-like texture that reads beautifully in modern and naturalistic desert designs. Compact and slow growing, it makes an elegant container or focal specimen. Exceptionally drought and heat tolerant, it thrives in full sun and well-drained soil with virtually no maintenance.",
-  "coldF": 25,
-  "bloom": "Once in lifetime (summer)",
-  "growth": "Slow",
-  "lifespan": "Long-lived (25+ yrs)",
-  "made": "modelled",
-  "card": {
-   "src": "assets/catalog/card/twin-flowered-agave.webp",
-   "w": 800,
-   "h": 548
   }
  },
  "desert-spoon": {
@@ -1271,35 +1026,34 @@
    "h": 755
   }
  },
- "gray-boulder": {
-  "slug": "gray-boulder",
-  "name": "Gray Boulder",
-  "appName": "Gray Boulder",
-  "kind": "Boulder",
-  "category": "hardscape",
+ "yellow-lantana": {
+  "slug": "yellow-lantana",
+  "name": "Yellow Lantana",
+  "appName": "Yellow Lantana",
+  "kind": "Groundcover",
+  "category": "groundcover",
   "photo": false,
-  "image": "assets/catalog/gray-boulder.webp",
-  "botanical": null,
-  "height": "3 ft",
-  "width": "3 ft",
-  "sun": null,
-  "water": null,
+  "image": "assets/catalog/yellow-lantana.webp",
+  "botanical": "Lantana camara 'New Gold'",
+  "height": "2 ft",
+  "width": "6 ft",
+  "sun": "Full sun",
+  "water": "Low",
   "sizes": [
-   "Small",
-   "Medium",
-   "Large"
+   "1 gal",
+   "5 gal"
   ],
-  "origin": "Sonoran Desert, Arizona",
-  "description": "A weathered gray granite boulder that adds natural texture and grounding weight to desert landscapes. Used as a focal point, border accent, or dry riverbed element. Boulders pair well with ornamental grasses, agave, and low-water perennials to create authentic Sonoran compositions. Zero maintenance once placed.",
-  "coldF": null,
-  "bloom": null,
-  "growth": null,
-  "lifespan": null,
-  "made": null,
+  "origin": "Tropical Americas (cultivated selection)",
+  "description": "The gold standard for Arizona colour, and the lantana most likely to still be blooming in August. 'New Gold' mounds rather than trails, building a dense rounded cushion smothered in clear golden-yellow clusters from spring until frost — no deadheading, no fading to orange, no seed set to slow it down. It takes full reflected heat off pavement and block walls, wants poor soil and little water, and holds its shape better than the trailing types, which makes it the safer choice along walks and driveway edges. Butterflies work it constantly. Shear it hard in late winter to clear frost damage and keep the centre from going woody; it rebounds fast. Evergreen in mild winters and root-hardy well below that.",
+  "coldF": 25,
+  "bloom": "Spring – Frost",
+  "growth": "Fast",
+  "lifespan": "Perennial",
+  "made": "scanned",
   "card": {
-   "src": "assets/catalog/card/gray-boulder.webp",
+   "src": "assets/catalog/card/yellow-lantana.webp",
    "w": 800,
-   "h": 448
+   "h": 372
   }
  },
  "moroccan-mound": {
