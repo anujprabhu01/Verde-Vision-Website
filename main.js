@@ -294,7 +294,7 @@ if (reduceMotion) {
 // through — see styles.css. No IntersectionObserver needed.
 
 
-// ── Demo video: mute / restart / timecode / scrubber ──
+// ── Demo video: sound-on playback, mute / restart / timecode / scrubber ──
 const muteBtn = document.getElementById('demo-video-mute');
 const demoVideo = document.getElementById('demo-video');
 const restartBtn = document.getElementById('demo-video-restart');
@@ -310,19 +310,73 @@ const fmtMMSS = (s) => {
   return `${pad2(s / 60)}:${pad2(s % 60)}`;
 };
 
+// The clip runs with its sound up. Every browser gates audible playback
+// behind a user gesture, so the play path is: ask for sound, fall back to
+// silent if that is refused, and raise the sound on the visitor's first
+// click, tap or keypress. The button stays — it just starts as "Mute".
+let silencedByVisitor = false;   // true only once the visitor hits the button
+
+const syncMuteBtn = () => {
+  if (!muteBtn || !demoVideo) return;
+  muteBtn.classList.toggle('is-unmuted', !demoVideo.muted);
+  muteBtn.setAttribute('aria-label', demoVideo.muted ? 'Unmute video' : 'Mute video');
+};
+
+const dropGestureWatch = () => {
+  document.removeEventListener('pointerdown', liftMute, true);
+  document.removeEventListener('keydown', liftMute, true);
+  document.removeEventListener('touchend', liftMute, true);
+};
+
+function liftMute(e) {
+  // The mute button speaks for itself — don't pre-empt its own click, or a
+  // visitor reaching for "unmute" would land on "mute" instead.
+  if (e && e.target && e.target.closest && e.target.closest('#demo-video-mute')) return;
+  dropGestureWatch();
+  if (silencedByVisitor || !demoVideo) return;
+  demoVideo.muted = false;
+}
+
+const watchForGesture = () => {
+  // Capture phase: the sound comes up on the way down to whatever was clicked.
+  document.addEventListener('pointerdown', liftMute, true);
+  document.addEventListener('keydown', liftMute, true);
+  document.addEventListener('touchend', liftMute, true);
+};
+
+const playWithSound = () => {
+  if (!demoVideo) return;
+  if (!silencedByVisitor) demoVideo.muted = false;
+  const p = demoVideo.play();
+  if (p && typeof p.catch === 'function') {
+    p.catch(() => {
+      // Autoplay policy said no sound yet. Run it silent and wait for the
+      // first gesture anywhere on the page to turn the sound up.
+      demoVideo.muted = true;
+      watchForGesture();
+      const q = demoVideo.play();
+      if (q && typeof q.catch === 'function') q.catch(() => {});
+    });
+  }
+};
+
 if (muteBtn && demoVideo) {
   muteBtn.addEventListener('click', () => {
     demoVideo.muted = !demoVideo.muted;
-    muteBtn.classList.toggle('is-unmuted', !demoVideo.muted);
-    muteBtn.setAttribute('aria-label', demoVideo.muted ? 'Unmute video' : 'Mute video');
+    silencedByVisitor = demoVideo.muted;   // a deliberate silence stays silent
+    if (!demoVideo.muted) dropGestureWatch();
+    syncMuteBtn();
   });
+  // Keeps the icon honest however the mute state got there — button, gesture,
+  // or the autoplay fallback.
+  demoVideo.addEventListener('volumechange', syncMuteBtn);
+  syncMuteBtn();
 }
 
 if (restartBtn && demoVideo) {
   restartBtn.addEventListener('click', () => {
     demoVideo.currentTime = 0;
-    const p = demoVideo.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
+    playWithSound();
   });
 }
 
@@ -336,8 +390,7 @@ if (demoVideo) {
   const videoObserver = new IntersectionObserver((entries) => {
     videoInView = entries[entries.length - 1].isIntersecting;
     if (videoInView) {
-      const p = demoVideo.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+      playWithSound();
     } else {
       demoVideo.pause();
     }

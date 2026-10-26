@@ -415,10 +415,13 @@
     <div class="ia-stage reveal reveal-4">
       <div class="ia-window">
 <div class="ia-video-frame">
-          <!-- No autoplay/preload: the 34MB file starts downloading only when
-               main.js sees the section scroll into view and calls play(). -->
-          <video class="ia-video" id="demo-video" muted loop playsinline preload="none" poster="assets/img/demo-poster.jpg">
-            <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_v2.mp4" type="video/mp4" />
+          <!-- No autoplay/preload: the 38MB file starts downloading only when
+               main.js sees the section scroll into view and calls play().
+               No `muted` here on purpose - the clip runs with its sound up,
+               so main.js asks for audible playback first and only drops to
+               silent if the browser refuses it. -->
+          <video class="ia-video" id="demo-video" loop playsinline preload="none" poster="assets/img/demo-poster.jpg">
+            <source src="https://pub-cc7a1d5c152b4c65b070cb253d4e7fb8.r2.dev/DemoRecording_v3.mp4" type="video/mp4" />
             Your browser doesn't support embedded video.
           </video>
         </div>
@@ -446,7 +449,7 @@
                 <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
               </svg>
             </button>
-            <button class="action-ctl demo-video-mute" id="demo-video-mute" aria-label="Unmute video" type="button">
+            <button class="action-ctl demo-video-mute is-unmuted" id="demo-video-mute" aria-label="Mute video" type="button">
               <svg class="icon-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
                 <line x1="23" y1="9" x2="17" y2="15"/>
