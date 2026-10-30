@@ -507,6 +507,17 @@ nav.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-6.5px) rotate(
   margin-bottom: 1.6rem;
 }
 
+.hero-mobile-break { display: none; }
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: clamp(2.8rem, 12vw, 3.8rem);
+    margin-bottom: 1.9rem;
+  }
+  .hero-mobile-break { display: block; }
+  .hero-content > p:not(.hero-trust) { display: none; }
+}
+
 .hero-line { display: inline-block; }
 /* each hero line is typeset out of a clipped box — same stagger as before,
    but the line arrives whole instead of fading */
